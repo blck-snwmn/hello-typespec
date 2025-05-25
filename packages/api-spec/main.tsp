@@ -4,11 +4,14 @@ import "@typespec/openapi3";
 
 using TypeSpec.Http;
 using TypeSpec.Rest;
-using TypeSpec.OpenAPI;
 
-@service({
+/**
+ * EC Site API
+ * 
+ * Sample e-commerce API built with TypeSpec
+ */
+@service(#{
   title: "EC Site API",
-  version: "1.0.0",
 })
 @server("http://localhost:3000", "Development server")
 namespace ECSite;

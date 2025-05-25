@@ -3,6 +3,6 @@ emit:
 
 options:
   "@typespec/openapi3":
-    output-dir: "../../generated"
+    emitter-output-dir: "{project-root}/../../generated"
     output-file: "openapi.yaml"
     omit-unreachable-types: true

@@ -1,0 +1,15 @@
+openapi: 3.0.0
+info:
+  title: EC Site API
+  description: |-
+    EC Site API
+
+    Sample e-commerce API built with TypeSpec
+  version: 0.0.0
+tags: []
+paths: {}
+components: {}
+servers:
+  - url: http://localhost:3000
+    description: Development server
+    variables: {}
