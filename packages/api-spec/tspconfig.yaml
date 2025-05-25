@@ -1,0 +1,8 @@
+emit:
+  - "@typespec/openapi3"
+
+options:
+  "@typespec/openapi3":
+    output-dir: "../../generated"
+    output-file: "openapi.yaml"
+    omit-unreachable-types: true
