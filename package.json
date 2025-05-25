@@ -1,0 +1,16 @@
+{
+  "name": "hello-typespec",
+  "version": "1.0.0",
+  "description": "TypeSpec sample project for EC site API",
+  "private": true,
+  "scripts": {
+    "build": "pnpm -r build",
+    "compile:spec": "pnpm --filter @hello-typespec/api-spec compile",
+    "generate:all": "pnpm run compile:spec && pnpm run generate:go",
+    "generate:go": "oapi-codegen -package api -generate types,server,spec -o go/generated/api.gen.go generated/openapi.yaml"
+  },
+  "keywords": ["typespec", "openapi", "api"],
+  "author": "",
+  "license": "MIT",
+  "packageManager": "pnpm@10.8.1"
+}
