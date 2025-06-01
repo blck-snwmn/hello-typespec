@@ -1,8 +1,7 @@
 import { Hono } from 'hono'
-import type { components, operations } from '../types/api'
+import type { operations } from '../types/api'
 import { store } from '../stores'
 
-type Cart = components['schemas']['Cart']
 type CartAddItemRequest = operations['CartsService_addItem']['requestBody']['content']['application/json']
 type CartUpdateItemRequest = operations['CartsService_updateItem']['requestBody']['content']['application/json']
 
@@ -42,7 +41,6 @@ carts.post('/users/:userId/items', async (c) => {
     cart.items.push({
       productId: body.productId,
       quantity: body.quantity,
-      price: product.price,
     })
   }
 

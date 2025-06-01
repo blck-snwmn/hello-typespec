@@ -31,7 +31,7 @@ orders.get('/', (c) => {
   const paginatedOrders = allOrders.slice(offset, offset + limit)
 
   const response: OrderListResponse = {
-    orders: paginatedOrders,
+    items: paginatedOrders,
     total: allOrders.length,
     limit,
     offset,
@@ -52,18 +52,19 @@ orders.get('/:orderId', (c) => {
   return c.json(order)
 })
 
-// POST /orders
-orders.post('/', async (c) => {
+// POST /orders/users/{userId}
+orders.post('/users/:userId', async (c) => {
+  const userId = c.req.param('userId')
   const body = await c.req.json<OrderCreateRequest>()
   
   // Validate user exists
-  const user = store.getUser(body.userId)
+  const user = store.getUser(userId)
   if (!user) {
     return c.json({ error: { code: 'NOT_FOUND', message: 'User not found' } }, 404)
   }
 
   // Get user's cart
-  const cart = store.getCartByUserId(body.userId)
+  const cart = store.getCartByUserId(userId)
   if (cart.items.length === 0) {
     return c.json({ error: { code: 'EMPTY_CART', message: 'Cart is empty' } }, 400)
   }
@@ -81,11 +82,13 @@ orders.post('/', async (c) => {
       return c.json({ error: { code: 'INSUFFICIENT_STOCK', message: `Insufficient stock for product ${product.name}` } }, 400)
     }
 
-    totalAmount += cartItem.price * cartItem.quantity
+    const itemPrice = product.price
+    totalAmount += itemPrice * cartItem.quantity
     orderItems.push({
       productId: cartItem.productId,
       quantity: cartItem.quantity,
-      price: cartItem.price,
+      price: itemPrice,
+      productName: product.name,
     })
 
     // Update product stock
@@ -98,11 +101,11 @@ orders.post('/', async (c) => {
 
   const newOrder: Order = {
     id: Date.now().toString(),
-    userId: body.userId,
+    userId: userId,
     items: orderItems,
     totalAmount,
     status: 'pending',
-    shippingAddress: body.shippingAddress || user.address,
+    shippingAddress: body.shippingAddress,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }
@@ -110,11 +113,10 @@ orders.post('/', async (c) => {
   const created = store.createOrder(newOrder)
 
   // Clear cart
-  store.updateCart(body.userId, {
-    userId: body.userId,
-    items: [],
-    updatedAt: new Date().toISOString(),
-  })
+  const clearedCart = store.getCartByUserId(userId)
+  clearedCart.items = []
+  clearedCart.updatedAt = new Date().toISOString()
+  store.updateCart(userId, clearedCart)
 
   return c.json(created, 201)
 })

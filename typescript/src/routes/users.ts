@@ -41,8 +41,10 @@ users.post('/', async (c) => {
   
   // Initialize empty cart for new user
   store.updateCart(created.id, {
+    id: `cart-${created.id}`,
     userId: created.id,
     items: [],
+    createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   })
 

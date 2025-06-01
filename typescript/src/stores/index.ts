@@ -5,7 +5,6 @@ type Category = components['schemas']['Category']
 type User = components['schemas']['User']
 type Cart = components['schemas']['Cart']
 type Order = components['schemas']['Order']
-type CartItem = components['schemas']['CartItem']
 
 class DataStore {
   private products: Map<string, Product> = new Map()
@@ -23,22 +22,30 @@ class DataStore {
     this.categories.set('1', {
       id: '1',
       name: 'Electronics',
-      parentId: null,
+      parentId: undefined,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     })
     this.categories.set('2', {
       id: '2',
       name: 'Laptops',
       parentId: '1',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     })
     this.categories.set('3', {
       id: '3',
       name: 'Smartphones',
       parentId: '1',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     })
     this.categories.set('4', {
       id: '4',
       name: 'Clothing',
-      parentId: null,
+      parentId: undefined,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     })
 
     // Products
@@ -81,7 +88,13 @@ class DataStore {
       id: '1',
       email: 'user1@example.com',
       name: 'Test User 1',
-      address: '123 Test St, Test City, TC 12345',
+      address: {
+        street: '123 Test St',
+        city: 'Test City',
+        state: 'TC',
+        postalCode: '12345',
+        country: 'USA',
+      },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     })
@@ -89,20 +102,30 @@ class DataStore {
       id: '2',
       email: 'user2@example.com',
       name: 'Test User 2',
-      address: '456 Demo Ave, Demo City, DC 67890',
+      address: {
+        street: '456 Demo Ave',
+        city: 'Demo City',
+        state: 'DC',
+        postalCode: '67890',
+        country: 'USA',
+      },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     })
 
     // Initialize empty carts for users
     this.carts.set('1', {
+      id: 'cart-1',
       userId: '1',
       items: [],
+      createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     })
     this.carts.set('2', {
+      id: 'cart-2',
       userId: '2',
       items: [],
+      createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     })
   }
@@ -161,8 +184,10 @@ class DataStore {
   // Carts
   getCartByUserId(userId: string) {
     return this.carts.get(userId) || {
+      id: `cart-${userId}`,
       userId,
       items: [],
+      createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     }
   }

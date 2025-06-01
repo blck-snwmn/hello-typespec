@@ -3,7 +3,7 @@ import type { components, operations } from '../types/api'
 import { store } from '../stores'
 
 type Category = components['schemas']['Category']
-type CategoryWithChildren = components['schemas']['CategoryWithChildren']
+type CategoryWithChildren = Category & { children: CategoryWithChildren[] }
 type CategoryCreateRequest = operations['CategoriesService_create']['requestBody']['content']['application/json']
 type CategoryUpdateRequest = operations['CategoriesService_update']['requestBody']['content']['application/json']
 
@@ -30,7 +30,7 @@ categories.get('/tree', (c) => {
 
   // Second pass: build tree
   categoryMap.forEach(cat => {
-    if (cat.parentId === null) {
+    if (!cat.parentId) {
       rootCategories.push(cat)
     } else {
       const parent = categoryMap.get(cat.parentId)
@@ -62,6 +62,8 @@ categories.post('/', async (c) => {
   const newCategory: Category = {
     id: Date.now().toString(),
     ...body,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   }
 
   const created = store.createCategory(newCategory)

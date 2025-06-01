@@ -41,7 +41,7 @@ products.get('/', (c) => {
   const paginatedProducts = allProducts.slice(offset, offset + limit)
 
   const response: ProductListResponse = {
-    products: paginatedProducts,
+    items: paginatedProducts,
     total: allProducts.length,
     limit,
     offset,
@@ -69,6 +69,7 @@ products.post('/', async (c) => {
   const newProduct: Product = {
     id: Date.now().toString(),
     ...body,
+    imageUrls: body.imageUrls || [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }
