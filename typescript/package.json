@@ -1,0 +1,28 @@
+{
+  "name": "typescript",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "generate:types": "openapi-typescript ../openapi/openapi.yaml -o ./src/types/api.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.8.1",
+  "devDependencies": {
+    "@hono/vite-dev-server": "^0.19.1",
+    "@types/node": "^22.15.29",
+    "openapi-typescript": "^7.8.0",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.14.3",
+    "hono": "^4.7.11"
+  }
+}
