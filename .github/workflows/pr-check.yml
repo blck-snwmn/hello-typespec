@@ -1,0 +1,117 @@
+name: PR Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  typespec-check:
+    name: TypeSpec Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Compile TypeSpec
+        run: pnpm compile:spec
+
+      - name: Generate TypeScript types
+        run: pnpm generate:typescript
+
+      - name: Generate Go code
+        run: pnpm generate:go
+
+      - name: Check for uncommitted changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Error: Generated code is not up to date. Please run 'pnpm generate:all' and commit the changes."
+            git status --porcelain
+            git diff
+            exit 1
+          fi
+
+  typescript-check:
+    name: TypeScript Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build TypeScript
+        run: pnpm -F typescript build
+
+      - name: Run TypeScript tests
+        run: pnpm -F typescript test
+
+      - name: Type check
+        run: pnpm -F typescript exec tsc --noEmit
+
+  go-check:
+    name: Go Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache-dependency-path: go/go.sum
+
+      - name: Install dependencies
+        working-directory: ./go
+        run: go mod download
+
+      - name: Build Go code
+        working-directory: ./go
+        run: go build ./...
+
+      - name: Run Go tests
+        working-directory: ./go
+        run: go test -v ./...
+
+      - name: Check Go formatting
+        working-directory: ./go
+        run: |
+          if [ -n "$(gofmt -l .)" ]; then
+            echo "Error: Go code is not formatted. Please run 'gofmt -w .' and commit the changes."
+            gofmt -d .
+            exit 1
+          fi
+
+      - name: Run go vet
+        working-directory: ./go
+        run: go vet ./...
+
+      - name: Run tests with race detector
+        working-directory: ./go
+        run: go test -race ./...
