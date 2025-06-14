@@ -118,7 +118,7 @@ func (s *Server) ProductsServiceList(w http.ResponseWriter, r *http.Request, par
 func (s *Server) ProductsServiceGet(w http.ResponseWriter, r *http.Request, productId generated.Uuid) {
 	product, ok := s.store.GetProduct(productId)
 	if !ok {
-		errorResponse(w, http.StatusNotFound, "NOT_FOUND", "Product not found")
+		errorResponse(w, http.StatusNotFound, ErrorCodeNotFound, "Product not found")
 		return
 	}
 
@@ -130,7 +130,7 @@ func (s *Server) ProductsServiceGet(w http.ResponseWriter, r *http.Request, prod
 func (s *Server) ProductsServiceCreate(w http.ResponseWriter, r *http.Request) {
 	var req generated.CreateProductRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		errorResponse(w, http.StatusBadRequest, "INVALID_REQUEST", "Invalid request body")
+		errorResponse(w, http.StatusBadRequest, ErrorCodeBadRequest, "Invalid request body")
 		return
 	}
 
@@ -163,13 +163,13 @@ func (s *Server) ProductsServiceCreate(w http.ResponseWriter, r *http.Request) {
 func (s *Server) ProductsServiceUpdate(w http.ResponseWriter, r *http.Request, productId generated.Uuid) {
 	existing, ok := s.store.GetProduct(productId)
 	if !ok {
-		errorResponse(w, http.StatusNotFound, "NOT_FOUND", "Product not found")
+		errorResponse(w, http.StatusNotFound, ErrorCodeNotFound, "Product not found")
 		return
 	}
 
 	var req generated.UpdateProductRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		errorResponse(w, http.StatusBadRequest, "INVALID_REQUEST", "Invalid request body")
+		errorResponse(w, http.StatusBadRequest, ErrorCodeBadRequest, "Invalid request body")
 		return
 	}
 
@@ -205,24 +205,9 @@ func (s *Server) ProductsServiceUpdate(w http.ResponseWriter, r *http.Request, p
 func (s *Server) ProductsServiceDelete(w http.ResponseWriter, r *http.Request, productId generated.Uuid) {
 	_, ok := s.store.DeleteProduct(productId)
 	if !ok {
-		errorResponse(w, http.StatusNotFound, "NOT_FOUND", "Product not found")
+		errorResponse(w, http.StatusNotFound, ErrorCodeNotFound, "Product not found")
 		return
 	}
 
 	w.WriteHeader(http.StatusNoContent)
-}
-
-// Helper function for error responses
-func errorResponse(w http.ResponseWriter, statusCode int, code string, message string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-	json.NewEncoder(w).Encode(generated.ErrorResponse{
-		Error: struct {
-			Code    string `json:"code"`
-			Message string `json:"message"`
-		}{
-			Code:    code,
-			Message: message,
-		},
-	})
 }
