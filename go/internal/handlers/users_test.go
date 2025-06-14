@@ -267,4 +267,3 @@ func TestUsersService_Integration(t *testing.T) {
 		assertStatus(t, getDeletedRR, http.StatusNotFound)
 	})
 }
-

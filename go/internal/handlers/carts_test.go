@@ -240,7 +240,7 @@ func TestCartsService_Integration(t *testing.T) {
 
 	t.Run("should handle complete cart workflow", func(t *testing.T) {
 		userID := "integration-user"
-		
+
 		// Create products
 		productID1 := createTestProduct(t, server, "Integration Product 1", 50.00, 20)
 		productID2 := createTestProduct(t, server, "Integration Product 2", 75.00, 15)
