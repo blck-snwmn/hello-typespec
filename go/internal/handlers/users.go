@@ -15,7 +15,7 @@ func (s *Server) UsersServiceList(w http.ResponseWriter, r *http.Request, params
 	allUsers := s.store.GetUsers()
 
 	// Apply pagination
-	limit := int32(10)
+	limit := int32(20) // Default from TypeSpec definition
 	if params.Limit != nil {
 		limit = *params.Limit
 	}
