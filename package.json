@@ -7,7 +7,7 @@
     "build": "pnpm -r build",
     "compile:spec": "pnpm --filter @hello-typespec/api-spec compile",
     "generate:all": "pnpm run compile:spec && pnpm run generate:typescript && pnpm run generate:go",
-    "generate:typescript": "pnpm --filter @hello-typespec/typescript generate",
+    "generate:typescript": "pnpm --filter typescript generate:types",
     "generate:go": "cd go && oapi-codegen -config oapi-codegen.yaml ../openapi/openapi.yaml",
     "dev:typescript": "pnpm --filter @hello-typespec/typescript dev",
     "dev:go": "cd go && go run ./cmd/server",
