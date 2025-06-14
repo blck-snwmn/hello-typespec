@@ -6,7 +6,7 @@
 
 - **目的**: TypeSpecを使用したAPI定義からTypeScriptとGoの実装を生成するサンプルプロジェクト
 - **ドメイン**: ECサイト（Eコマース）
-- **認証**: なし（サンプルのため）
+- **認証**: JWT認証を実装予定
 - **デプロイ**: なし（ローカル開発のみ）
 
 ## 技術的決定事項
@@ -111,73 +111,61 @@
 - ✅ メモリベースのデータストア
 - ✅ ページネーション（Products, Orders, Users）
 - ✅ 検索・フィルタリング機能
-- ✅ エラーハンドリング
-- ✅ TypeScript: 注文作成時のshippingAddress処理修正
-- ✅ TypeScript: UsersのページネーションをAPI定義に合わせて修正
-- ✅ TypeSpec: 成功レスポンスからErrorResponseを除外
-- ✅ Go: テストコードのモダナイゼーション（interface{} → any）
 - ✅ CI/CDパイプライン（GitHub Actions）
   - PR時のチェック（ビルド、テスト、コード生成検証）
   - Push時のチェック（カバレッジ測定含む）
   - 依存関係のセキュリティチェック（週次）
 - ✅ TypeScript: Viteのライブラリビルド設定
 - ✅ テストカバレッジ測定環境（@vitest/coverage-v8）
+- ✅ **エラーハンドリングの統一化**（2025/06/14）
+  - TypeSpec: ErrorCode enumの定義
+  - TypeScript: 集約型エラーハンドリング実装
+  - TypeScript: グローバルエラーハンドラー追加
+  - Go: エラーヘルパー関数の作成（部分的）
 
 ### 未実装・課題
 - ❌ TypeSpec高度機能（バリデーション、@example等）
 - ❌ 認証・認可
+- ❌ 入力バリデーション
 
-## 改善提案と作業方針
+## 今後の改善計画
 
 ### 重要な作業方針
 **各改善作業を開始する前に、必ずユーザーに実施の判断を仰ぐこと。**
 
-### 改善案のフェーズ管理
+### 高優先度の改善項目
 
-#### フェーズ1: コード品質の基礎改善（完了）
-- ✅ 未使用関数の削除（assertJSONEqual）
-- ✅ 共通ヘルパー関数の集約（decodeJSON）
-- ✅ モダンなGo記法への移行（interface{} → any）
+#### 1. 入力バリデーション（未着手）
+- TypeSpec: バリデーションデコレータ（`@minLength`, `@maxLength`, `@minValue`, `@format`等）
+- TypeScript: Zodスキーマによる検証
+- Go: カスタムバリデーション関数
 
-#### フェーズ2: テストの品質向上
-- **バリデーションテスト**: 入力値検証のテスト追加
-- **エッジケーステスト**: 境界値や異常系のテスト強化
+#### 2. 認証・認可（未着手）
+- TypeSpec: 認証定義の追加（`@useAuth`, `BearerAuth`）
+- TypeScript: JWT認証ミドルウェアの実装
+- Go: JWT認証ミドルウェアの実装
+- 保護が必要なエンドポイントの特定と実装
 
-#### フェーズ3: 高度なテストとCI/CD（一部完了）
-- **パフォーマンステスト**: 大量データでの性能測定
-- **セキュリティテスト**: 不正な入力への対処確認
-- ✅ **CI/CD統合**: GitHub Actionsでの自動テスト実行（完了）
+### 中優先度の改善項目
 
-### 高優先度の改善案
+#### 3. Goエラーハンドリングの完全統一
+- products.goの重複errorResponse関数の削除
+- 全ハンドラーでhelpers.goの関数を使用
 
-#### 1. ~~CI/CD整備~~ ✅ 完了（2025/06/14）
+#### 4. テストの充実
+- エンドツーエンドテストの追加
+- パフォーマンステストの実施
+- セキュリティテストの追加
 
-### 中優先度の改善案
+### 低優先度の改善項目
 
-#### 4. TypeSpec機能の活用
-- **PATCH警告解消**: `@patch(#{implicitOptionality: true})`の追加
-- **バリデーション**: `@minLength`, `@maxValue`, `@format`等の追加
-- **認証定義**: `@useAuth`によるBearerトークン認証
-- **作業前の確認事項**: TypeSpecの高度な機能をどこまで含めるか
-
-#### 5. 実装の一貫性
-- **Usersページネーション**: TypeScriptでの実装追加
-- **作業前の確認事項**: API定義との一貫性を優先するか
+#### 5. 開発体験向上
+- TypeSpec watchモードの設定
+- Pre-commitフックの追加
 
 #### 6. ドキュメント充実
-- **API利用ガイド**: 各エンドポイントの詳細な使用例
-- **作業前の確認事項**: どの程度詳細なドキュメントが必要か
-
-### 低優先度の改善案
-
-#### 7. 開発体験向上
-- **Watchモード**: TypeSpecの自動再生成
-- **Pre-commitフック**: 生成忘れ防止
-- **作業前の確認事項**: 開発ツールをサンプルに含めるか
-
-#### 8. TypeSpec例示機能
-- **@example**: 各モデルにサンプルデータ定義
-- **作業前の確認事項**: OpenAPIドキュメントの充実は必要か
+- API利用ガイドの作成
+- `@example`デコレータによるサンプルデータ定義
 
 ## TypeSpecで使用可能な高度な機能（未使用）
 
@@ -294,3 +282,35 @@
 - **oapi-codegen**はCIで自動インストールされる
 - **@vitest/coverage-v8**はテストカバレッジ測定に必要
 - **typescript/dist/**は.gitignoreに追加してコミットしない
+- **typescript/coverage/**は.gitignoreに追加してコミットしない
+
+## エラーハンドリング実装の詳細
+
+### TypeSpec定義 (`typespec/models/common.tsp`)
+- ErrorCode enumでエラーコードを標準化
+- クライアントエラー: BAD_REQUEST, NOT_FOUND, VALIDATION_ERROR等
+- サーバーエラー: INTERNAL_ERROR, SERVICE_UNAVAILABLE
+
+### TypeScript実装 (`typescript/src/types/errors.ts`)
+- `sendError`関数: 統一的なエラーレスポンス送信
+- `globalErrorHandler`: Honoのグローバルエラーハンドラー
+- エラーコードとHTTPステータスのマッピング
+
+### Go実装 (`go/internal/handlers/helpers.go`)
+- `errorResponse`関数: 標準エラーレスポンス
+- `errorResponseWithDetails`関数: 詳細付きエラーレスポンス
+- ※注意: products.goに古いerrorResponse関数が残存（要リファクタリング）
+
+## 次のセッションでの作業候補
+
+1. **入力バリデーションの実装**（高優先度）
+   - TypeSpecにバリデーションデコレータを追加
+   - TypeScript/Goでバリデーションロジックを実装
+
+2. **Goエラーハンドリングの完全統一**（中優先度）
+   - products.goの重複関数削除
+   - 全ハンドラーでhelpers.goの関数を使用
+
+3. **認証・認可の実装**（高優先度）
+   - JWT認証の基本実装
+   - エンドポイントの保護
