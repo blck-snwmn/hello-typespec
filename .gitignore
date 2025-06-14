@@ -2,4 +2,4 @@ node_modules
 server.log
 go/server
 go/coverage.out
-go/coverage.html
+go/coverage.htmltypescript/dist/
