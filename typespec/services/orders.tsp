@@ -39,7 +39,7 @@ interface OrdersService {
    * Update order status
    */
   @patch
-  @route("/{orderId}/status")
+  @route("/status/{orderId}")
   updateStatus(
     @path orderId: uuid,
     @body status: UpdateOrderStatusRequest
@@ -49,7 +49,7 @@ interface OrdersService {
    * Cancel an order
    */
   @post
-  @route("/{orderId}/cancel")
+  @route("/cancel/{orderId}")
   cancel(@path orderId: uuid): Order | ErrorResponse;
 
   /**

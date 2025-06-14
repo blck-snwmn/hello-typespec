@@ -304,6 +304,54 @@ paths:
                   - $ref: '#/components/schemas/ErrorResponse'
       tags:
         - Orders
+  /orders/cancel/{orderId}:
+    post:
+      operationId: OrdersService_cancel
+      description: Cancel an order
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Order'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Orders
+  /orders/status/{orderId}:
+    patch:
+      operationId: OrdersService_updateStatus
+      description: Update order status
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Order'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Orders
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrderStatusRequest'
   /orders/users/{userId}:
     post:
       operationId: OrdersService_create
@@ -394,54 +442,6 @@ paths:
                   - $ref: '#/components/schemas/ErrorResponse'
       tags:
         - Orders
-  /orders/{orderId}/cancel:
-    post:
-      operationId: OrdersService_cancel
-      description: Cancel an order
-      parameters:
-        - name: orderId
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/uuid'
-      responses:
-        '200':
-          description: The request has succeeded.
-          content:
-            application/json:
-              schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Order'
-                  - $ref: '#/components/schemas/ErrorResponse'
-      tags:
-        - Orders
-  /orders/{orderId}/status:
-    patch:
-      operationId: OrdersService_updateStatus
-      description: Update order status
-      parameters:
-        - name: orderId
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/uuid'
-      responses:
-        '200':
-          description: The request has succeeded.
-          content:
-            application/json:
-              schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Order'
-                  - $ref: '#/components/schemas/ErrorResponse'
-      tags:
-        - Orders
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateOrderStatusRequest'
   /products:
     get:
       operationId: ProductsService_list
