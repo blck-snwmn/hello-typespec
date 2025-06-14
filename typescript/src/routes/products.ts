@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import type { components, operations } from '../types/api'
 import { store } from '../stores'
+import { sendError, ErrorCode } from '../types/errors'
 
 type Product = components['schemas']['Product']
 type ProductListResponse = operations['ProductsService_list']['responses']['200']['content']['application/json']
@@ -56,7 +57,7 @@ products.get('/:productId', (c) => {
   const product = store.getProduct(productId)
 
   if (!product) {
-    return c.json({ error: { code: 'NOT_FOUND', message: 'Product not found' } }, 404)
+    return sendError(c, ErrorCode.NOT_FOUND, 'Product not found')
   }
 
   return c.json(product)
@@ -85,7 +86,7 @@ products.put('/:productId', async (c) => {
   
   const existing = store.getProduct(productId)
   if (!existing) {
-    return c.json({ error: { code: 'NOT_FOUND', message: 'Product not found' } }, 404)
+    return sendError(c, ErrorCode.NOT_FOUND, 'Product not found')
   }
 
   const updatedProduct: Product = {
@@ -105,7 +106,7 @@ products.delete('/:productId', (c) => {
   const deleted = store.deleteProduct(productId)
 
   if (!deleted) {
-    return c.json({ error: { code: 'NOT_FOUND', message: 'Product not found' } }, 404)
+    return sendError(c, ErrorCode.NOT_FOUND, 'Product not found')
   }
 
   return c.body(null, 204)

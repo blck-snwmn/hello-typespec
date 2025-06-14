@@ -6,8 +6,12 @@ import categories from './routes/categories'
 import users from './routes/users'
 import carts from './routes/carts'
 import orders from './routes/orders'
+import { globalErrorHandler } from './types/errors'
 
 const app = new Hono()
+
+// Global error handler
+app.onError(globalErrorHandler)
 
 app.use('*', logger())
 app.use('*', cors())

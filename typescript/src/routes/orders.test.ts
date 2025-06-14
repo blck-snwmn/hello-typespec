@@ -218,7 +218,7 @@ describe('Orders API', () => {
       const json = await res.json() as ErrorResponse
 
       expect(res.status).toBe(400)
-      expect(json.error.code).toBe('EMPTY_CART')
+      expect(json.error.code).toBe('BAD_REQUEST')
     })
 
     it('should return 400 for insufficient stock', async () => {
@@ -250,7 +250,7 @@ describe('Orders API', () => {
 
       expect(res.status).toBe(400)
       // Cart API rejects items with insufficient stock, so cart remains empty
-      expect(json.error.code).toBe('EMPTY_CART')
+      expect(json.error.code).toBe('BAD_REQUEST')
     })
   })
 
@@ -308,7 +308,7 @@ describe('Orders API', () => {
       const json = await res.json() as ErrorResponse
 
       expect(res.status).toBe(400)
-      expect(json.error.code).toBe('INVALID_STATUS_TRANSITION')
+      expect(json.error.code).toBe('INVALID_STATE_TRANSITION')
     })
 
     it('should return 404 for non-existent order', async () => {

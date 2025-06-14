@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import type { components, operations } from '../types/api'
 import { store } from '../stores'
+import { sendError, ErrorCode } from '../types/errors'
 
 type Order = components['schemas']['Order']
 type OrderStatus = components['schemas']['OrderStatus']
@@ -45,7 +46,7 @@ orders.get('/:orderId', (c) => {
   const order = store.getOrder(orderId)
 
   if (!order) {
-    return c.json({ error: { code: 'NOT_FOUND', message: 'Order not found' } }, 404)
+    return sendError(c, ErrorCode.NOT_FOUND, 'Order not found')
   }
 
   return c.json(order)
@@ -61,7 +62,7 @@ orders.get('/users/:userId', (c) => {
   // Validate user exists
   const user = store.getUser(userId)
   if (!user) {
-    return c.json({ error: { code: 'NOT_FOUND', message: 'User not found' } }, 404)
+    return sendError(c, ErrorCode.NOT_FOUND, 'User not found')
   }
 
   // Get all orders for the user
@@ -93,13 +94,13 @@ orders.post('/users/:userId', async (c) => {
   // Validate user exists
   const user = store.getUser(userId)
   if (!user) {
-    return c.json({ error: { code: 'NOT_FOUND', message: 'User not found' } }, 404)
+    return sendError(c, ErrorCode.NOT_FOUND, 'User not found')
   }
 
   // Get user's cart
   const cart = store.getCartByUserId(userId)
   if (cart.items.length === 0) {
-    return c.json({ error: { code: 'EMPTY_CART', message: 'Cart is empty' } }, 400)
+    return sendError(c, ErrorCode.BAD_REQUEST, 'Cart is empty')
   }
 
   // Validate stock and calculate total
@@ -109,10 +110,10 @@ orders.post('/users/:userId', async (c) => {
   for (const cartItem of cart.items) {
     const product = store.getProduct(cartItem.productId)
     if (!product) {
-      return c.json({ error: { code: 'NOT_FOUND', message: `Product ${cartItem.productId} not found` } }, 404)
+      return sendError(c, ErrorCode.NOT_FOUND, `Product ${cartItem.productId} not found`)
     }
     if (product.stock < cartItem.quantity) {
-      return c.json({ error: { code: 'INSUFFICIENT_STOCK', message: `Insufficient stock for product ${product.name}` } }, 400)
+      return sendError(c, ErrorCode.INSUFFICIENT_STOCK, `Insufficient stock for product ${product.name}`)
     }
 
     const itemPrice = product.price
@@ -161,7 +162,7 @@ orders.patch('/status/:orderId', async (c) => {
   
   const order = store.getOrder(orderId)
   if (!order) {
-    return c.json({ error: { code: 'NOT_FOUND', message: 'Order not found' } }, 404)
+    return sendError(c, ErrorCode.NOT_FOUND, 'Order not found')
   }
 
   // Validate status transition
@@ -174,12 +175,7 @@ orders.patch('/status/:orderId', async (c) => {
   }
 
   if (!validTransitions[order.status].includes(body.status)) {
-    return c.json({ 
-      error: { 
-        code: 'INVALID_STATUS_TRANSITION', 
-        message: `Cannot transition from ${order.status} to ${body.status}` 
-      } 
-    }, 400)
+    return sendError(c, ErrorCode.INVALID_STATE_TRANSITION, `Cannot transition from ${order.status} to ${body.status}`)
   }
 
   const updatedOrder: Order = {

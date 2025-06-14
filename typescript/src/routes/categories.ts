@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import type { components, operations } from '../types/api'
 import { store } from '../stores'
+import { sendError, ErrorCode } from '../types/errors'
 
 type Category = components['schemas']['Category']
 type CategoryWithChildren = Category & { children: CategoryWithChildren[] }
@@ -49,7 +50,7 @@ categories.get('/:categoryId', (c) => {
   const category = store.getCategory(categoryId)
 
   if (!category) {
-    return c.json({ error: { code: 'NOT_FOUND', message: 'Category not found' } }, 404)
+    return sendError(c, ErrorCode.NOT_FOUND, 'Category not found')
   }
 
   return c.json(category)
@@ -77,7 +78,7 @@ categories.put('/:categoryId', async (c) => {
   
   const existing = store.getCategory(categoryId)
   if (!existing) {
-    return c.json({ error: { code: 'NOT_FOUND', message: 'Category not found' } }, 404)
+    return sendError(c, ErrorCode.NOT_FOUND, 'Category not found')
   }
 
   const updatedCategory: Category = {
@@ -96,7 +97,7 @@ categories.delete('/:categoryId', (c) => {
   const deleted = store.deleteCategory(categoryId)
 
   if (!deleted) {
-    return c.json({ error: { code: 'NOT_FOUND', message: 'Category not found' } }, 404)
+    return sendError(c, ErrorCode.NOT_FOUND, 'Category not found')
   }
 
   return c.body(null, 204)

@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import type { operations } from '../types/api'
 import { store } from '../stores'
+import { sendError, ErrorCode } from '../types/errors'
 
 type CartAddItemRequest = operations['CartsService_addItem']['requestBody']['content']['application/json']
 type CartUpdateItemRequest = operations['CartsService_updateItem']['requestBody']['content']['application/json']
@@ -23,11 +24,11 @@ carts.post('/users/:userId/items', async (c) => {
   const product = store.getProduct(body.productId)
 
   if (!product) {
-    return c.json({ error: { code: 'NOT_FOUND', message: 'Product not found' } }, 404)
+    return sendError(c, ErrorCode.NOT_FOUND, 'Product not found')
   }
 
   if (product.stock < body.quantity) {
-    return c.json({ error: { code: 'INSUFFICIENT_STOCK', message: 'Insufficient stock' } }, 400)
+    return sendError(c, ErrorCode.INSUFFICIENT_STOCK, 'Insufficient stock')
   }
 
   // Check if item already exists in cart
@@ -59,16 +60,16 @@ carts.patch('/users/:userId/items/:productId', async (c) => {
   const product = store.getProduct(productId)
 
   if (!product) {
-    return c.json({ error: { code: 'NOT_FOUND', message: 'Product not found' } }, 404)
+    return sendError(c, ErrorCode.NOT_FOUND, 'Product not found')
   }
 
   const itemIndex = cart.items.findIndex(item => item.productId === productId)
   if (itemIndex < 0) {
-    return c.json({ error: { code: 'NOT_FOUND', message: 'Item not found in cart' } }, 404)
+    return sendError(c, ErrorCode.NOT_FOUND, 'Item not found in cart')
   }
 
   if (product.stock < body.quantity) {
-    return c.json({ error: { code: 'INSUFFICIENT_STOCK', message: 'Insufficient stock' } }, 400)
+    return sendError(c, ErrorCode.INSUFFICIENT_STOCK, 'Insufficient stock')
   }
 
   cart.items[itemIndex].quantity = body.quantity
@@ -87,7 +88,7 @@ carts.delete('/users/:userId/items/:productId', (c) => {
   const itemIndex = cart.items.findIndex(item => item.productId === productId)
   
   if (itemIndex < 0) {
-    return c.json({ error: { code: 'NOT_FOUND', message: 'Item not found in cart' } }, 404)
+    return sendError(c, ErrorCode.NOT_FOUND, 'Item not found in cart')
   }
 
   cart.items.splice(itemIndex, 1)

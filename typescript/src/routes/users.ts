@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import type { components, operations } from '../types/api'
 import { store } from '../stores'
+import { sendError, ErrorCode } from '../types/errors'
 
 type User = components['schemas']['User']
 type UserListResponse = operations['UsersService_list']['responses']['200']['content']['application/json']
@@ -35,7 +36,7 @@ users.get('/:userId', (c) => {
   const user = store.getUser(userId)
 
   if (!user) {
-    return c.json({ error: { code: 'NOT_FOUND', message: 'User not found' } }, 404)
+    return sendError(c, ErrorCode.NOT_FOUND, 'User not found')
   }
 
   return c.json(user)
@@ -73,7 +74,7 @@ users.put('/:userId', async (c) => {
   
   const existing = store.getUser(userId)
   if (!existing) {
-    return c.json({ error: { code: 'NOT_FOUND', message: 'User not found' } }, 404)
+    return sendError(c, ErrorCode.NOT_FOUND, 'User not found')
   }
 
   const updatedUser: User = {
@@ -93,7 +94,7 @@ users.delete('/:userId', (c) => {
   const deleted = store.deleteUser(userId)
 
   if (!deleted) {
-    return c.json({ error: { code: 'NOT_FOUND', message: 'User not found' } }, 404)
+    return sendError(c, ErrorCode.NOT_FOUND, 'User not found')
   }
 
   return c.body(null, 204)
