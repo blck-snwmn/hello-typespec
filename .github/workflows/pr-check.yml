@@ -24,6 +24,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Setup Go for oapi-codegen
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Install oapi-codegen
+        run: go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
+
       - name: Compile TypeSpec
         run: pnpm compile:spec
 
