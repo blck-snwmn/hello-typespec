@@ -202,7 +202,26 @@ func addToCart(t *testing.T, server *TestServer, userID, productID string, quant
 func createOrder(t *testing.T, server *TestServer, userID string) string {
 	t.Helper()
 
+	// Get cart items first
+	cartRR := makeRequest(t, server, "GET", "/carts/users/"+userID, nil)
+	require.Equal(t, http.StatusOK, cartRR.Code, "failed to get cart")
+
+	var cart map[string]interface{}
+	err := json.NewDecoder(cartRR.Body).Decode(&cart)
+	require.NoError(t, err)
+
+	cartItems := cart["items"].([]interface{})
+	orderItems := make([]map[string]interface{}, len(cartItems))
+	for i, item := range cartItems {
+		cartItem := item.(map[string]interface{})
+		orderItems[i] = map[string]interface{}{
+			"productId": cartItem["productId"],
+			"quantity":  cartItem["quantity"],
+		}
+	}
+
 	order := map[string]interface{}{
+		"items": orderItems,
 		"shippingAddress": map[string]interface{}{
 			"street":     "456 Order Ave",
 			"city":       "Order City",
@@ -216,7 +235,7 @@ func createOrder(t *testing.T, server *TestServer, userID string) string {
 	require.Equal(t, http.StatusCreated, rr.Code, "failed to create order")
 
 	var response map[string]interface{}
-	err := json.NewDecoder(rr.Body).Decode(&response)
+	err = json.NewDecoder(rr.Body).Decode(&response)
 	require.NoError(t, err)
 
 	id, ok := response["id"].(string)
