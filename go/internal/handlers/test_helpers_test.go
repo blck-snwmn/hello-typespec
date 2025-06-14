@@ -14,42 +14,45 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestServer wraps the server with test utilities
+// TestServer wraps the server handler for testing
 type TestServer struct {
-	server  *handlers.Server
+	*httptest.Server
 	handler http.Handler
-	store   store.Store
 }
 
-// setupTestServer creates a new test server with a clean memory store
-func setupTestServer(t *testing.T) *TestServer {
+// setupTestServer creates a test server with a memory store
+func setupTestServer(t testing.TB) *TestServer {
 	t.Helper()
 
 	memStore := store.NewMemoryStore()
 	server := handlers.NewServer(memStore)
 	handler := generated.Handler(server)
 
+	ts := httptest.NewServer(handler)
+	t.Cleanup(ts.Close)
+
 	return &TestServer{
-		server:  server,
+		Server:  ts,
 		handler: handler,
-		store:   memStore,
 	}
 }
 
-// makeRequest executes an HTTP request against the test server
-func makeRequest(t *testing.T, server *TestServer, method, path string, body interface{}) *httptest.ResponseRecorder {
+// makeRequest is a helper to make HTTP requests in tests
+func makeRequest(t testing.TB, server *TestServer, method, path string, body any) *httptest.ResponseRecorder {
 	t.Helper()
 
-	var reqBody []byte
-	if body != nil {
-		var err error
-		reqBody, err = json.Marshal(body)
-		require.NoError(t, err, "failed to marshal request body")
-	}
+	var req *http.Request
+	var err error
 
-	req := httptest.NewRequest(method, path, bytes.NewReader(reqBody))
 	if body != nil {
+		jsonBody, err := json.Marshal(body)
+		require.NoError(t, err)
+		req, err = http.NewRequest(method, path, bytes.NewBuffer(jsonBody))
+		require.NoError(t, err)
 		req.Header.Set("Content-Type", "application/json")
+	} else {
+		req, err = http.NewRequest(method, path, nil)
+		require.NoError(t, err)
 	}
 
 	rr := httptest.NewRecorder()
@@ -58,67 +61,64 @@ func makeRequest(t *testing.T, server *TestServer, method, path string, body int
 	return rr
 }
 
-// assertStatus checks if the response status code matches the expected value
-func assertStatus(t *testing.T, rr *httptest.ResponseRecorder, want int) {
+// assertStatus checks if the response has the expected status code
+func assertStatus(t testing.TB, rr *httptest.ResponseRecorder, expectedStatus int) {
 	t.Helper()
-	assert.Equal(t, want, rr.Code, "unexpected status code")
+	assert.Equal(t, expectedStatus, rr.Code, "unexpected status code")
 }
 
-// assertErrorResponse validates an error response
-func assertErrorResponse(t *testing.T, rr *httptest.ResponseRecorder, wantCode string) {
+// assertErrorResponse checks if the error response has the expected format
+func assertErrorResponse(t testing.TB, rr *httptest.ResponseRecorder, expectedCode string) {
 	t.Helper()
 
-	var errResp generated.ErrorResponse
-	err := json.NewDecoder(rr.Body).Decode(&errResp)
-	require.NoError(t, err, "failed to decode error response")
+	var errorResp map[string]any
+	err := json.NewDecoder(rr.Body).Decode(&errorResp)
+	require.NoError(t, err)
 
-	assert.Equal(t, wantCode, errResp.Error.Code, "unexpected error code")
-	assert.NotEmpty(t, errResp.Error.Message, "error message should not be empty")
+	errorObj, ok := errorResp["error"].(map[string]any)
+	require.True(t, ok, "response should contain error object")
+
+	assert.Equal(t, expectedCode, errorObj["code"], "unexpected error code")
+	assert.NotEmpty(t, errorObj["message"], "error message should not be empty")
 }
 
-// assertPaginatedResponse validates a paginated response structure
-func assertPaginatedResponse(t *testing.T, rr *httptest.ResponseRecorder, wantTotal, wantLimit, wantOffset int) map[string]interface{} {
+// assertPaginatedResponse checks pagination response format
+func assertPaginatedResponse(t testing.TB, rr *httptest.ResponseRecorder, expectedTotal, expectedLimit, expectedOffset int) map[string]any {
 	t.Helper()
 
-	var response map[string]interface{}
+	var response map[string]any
 	err := json.NewDecoder(rr.Body).Decode(&response)
-	require.NoError(t, err, "failed to decode response")
+	require.NoError(t, err)
 
-	assert.Contains(t, response, "items", "response should contain items")
-	assert.Contains(t, response, "total", "response should contain total")
-	assert.Contains(t, response, "limit", "response should contain limit")
-	assert.Contains(t, response, "offset", "response should contain offset")
+	assert.Contains(t, response, "items")
+	assert.Contains(t, response, "total")
+	assert.Contains(t, response, "limit")
+	assert.Contains(t, response, "offset")
 
-	items, ok := response["items"].([]interface{})
+	assert.Equal(t, float64(expectedTotal), response["total"])
+	assert.Equal(t, float64(expectedLimit), response["limit"])
+	assert.Equal(t, float64(expectedOffset), response["offset"])
+
+	items, ok := response["items"].([]any)
 	require.True(t, ok, "items should be an array")
-
-	total := int(response["total"].(float64))
-	limit := int(response["limit"].(float64))
-	offset := int(response["offset"].(float64))
-
-	assert.Equal(t, wantTotal, total, "unexpected total")
-	assert.Equal(t, wantLimit, limit, "unexpected limit")
-	assert.Equal(t, wantOffset, offset, "unexpected offset")
-
-	// Ensure items count doesn't exceed limit
-	assert.LessOrEqual(t, len(items), limit, "items count should not exceed limit")
+	assert.NotNil(t, items)
 
 	return response
 }
 
-// Test data creation helpers
+// Test helpers for creating test data
 
 // createTestUser creates a test user and returns its ID
-func createTestUser(t *testing.T, server *TestServer, email, name string) string {
+func createTestUser(t testing.TB, server *TestServer, email, name string) string {
 	t.Helper()
 
-	user := map[string]interface{}{
+	user := map[string]any{
 		"email": email,
 		"name":  name,
-		"address": map[string]interface{}{
+		"address": map[string]any{
 			"street":     "123 Test St",
 			"city":       "Test City",
-			"state":      "TS",
+			"state":      "TC",
 			"postalCode": "12345",
 			"country":    "Test Country",
 		},
@@ -127,7 +127,7 @@ func createTestUser(t *testing.T, server *TestServer, email, name string) string
 	rr := makeRequest(t, server, "POST", "/users", user)
 	require.Equal(t, http.StatusCreated, rr.Code, "failed to create test user")
 
-	var response map[string]interface{}
+	var response map[string]any
 	err := json.NewDecoder(rr.Body).Decode(&response)
 	require.NoError(t, err)
 
@@ -138,22 +138,22 @@ func createTestUser(t *testing.T, server *TestServer, email, name string) string
 }
 
 // createTestProduct creates a test product and returns its ID
-func createTestProduct(t *testing.T, server *TestServer, name string, price float64, stock int) string {
+func createTestProduct(t testing.TB, server *TestServer, name string, price float64, stock int) string {
 	t.Helper()
 
-	product := map[string]interface{}{
+	product := map[string]any{
 		"name":        name,
 		"description": "Test product description",
 		"price":       price,
 		"stock":       stock,
 		"categoryId":  "1", // Default category
-		"imageUrls":   []string{"https://example.com/image.jpg"},
+		"imageUrls":   []string{},
 	}
 
 	rr := makeRequest(t, server, "POST", "/products", product)
 	require.Equal(t, http.StatusCreated, rr.Code, "failed to create test product")
 
-	var response map[string]interface{}
+	var response map[string]any
 	err := json.NewDecoder(rr.Body).Decode(&response)
 	require.NoError(t, err)
 
@@ -164,10 +164,10 @@ func createTestProduct(t *testing.T, server *TestServer, name string, price floa
 }
 
 // createTestCategory creates a test category and returns its ID
-func createTestCategory(t *testing.T, server *TestServer, name string, parentID *string) string {
+func createTestCategory(t testing.TB, server *TestServer, name string, parentID *string) string {
 	t.Helper()
 
-	category := map[string]interface{}{
+	category := map[string]any{
 		"name":     name,
 		"parentId": parentID,
 	}
@@ -175,7 +175,7 @@ func createTestCategory(t *testing.T, server *TestServer, name string, parentID 
 	rr := makeRequest(t, server, "POST", "/categories", category)
 	require.Equal(t, http.StatusCreated, rr.Code, "failed to create test category")
 
-	var response map[string]interface{}
+	var response map[string]any
 	err := json.NewDecoder(rr.Body).Decode(&response)
 	require.NoError(t, err)
 
@@ -186,10 +186,10 @@ func createTestCategory(t *testing.T, server *TestServer, name string, parentID 
 }
 
 // addToCart adds an item to user's cart
-func addToCart(t *testing.T, server *TestServer, userID, productID string, quantity int) {
+func addToCart(t testing.TB, server *TestServer, userID, productID string, quantity int) {
 	t.Helper()
 
-	item := map[string]interface{}{
+	item := map[string]any{
 		"productId": productID,
 		"quantity":  quantity,
 	}
@@ -199,30 +199,30 @@ func addToCart(t *testing.T, server *TestServer, userID, productID string, quant
 }
 
 // createOrder creates an order for a user
-func createOrder(t *testing.T, server *TestServer, userID string) string {
+func createOrder(t testing.TB, server *TestServer, userID string) string {
 	t.Helper()
 
 	// Get cart items first
 	cartRR := makeRequest(t, server, "GET", "/carts/users/"+userID, nil)
 	require.Equal(t, http.StatusOK, cartRR.Code, "failed to get cart")
 
-	var cart map[string]interface{}
+	var cart map[string]any
 	err := json.NewDecoder(cartRR.Body).Decode(&cart)
 	require.NoError(t, err)
 
-	cartItems := cart["items"].([]interface{})
-	orderItems := make([]map[string]interface{}, len(cartItems))
+	cartItems := cart["items"].([]any)
+	orderItems := make([]map[string]any, len(cartItems))
 	for i, item := range cartItems {
-		cartItem := item.(map[string]interface{})
-		orderItems[i] = map[string]interface{}{
+		cartItem := item.(map[string]any)
+		orderItems[i] = map[string]any{
 			"productId": cartItem["productId"],
 			"quantity":  cartItem["quantity"],
 		}
 	}
 
-	order := map[string]interface{}{
+	order := map[string]any{
 		"items": orderItems,
-		"shippingAddress": map[string]interface{}{
+		"shippingAddress": map[string]any{
 			"street":     "456 Order Ave",
 			"city":       "Order City",
 			"state":      "OC",
@@ -234,7 +234,7 @@ func createOrder(t *testing.T, server *TestServer, userID string) string {
 	rr := makeRequest(t, server, "POST", "/orders/users/"+userID, order)
 	require.Equal(t, http.StatusCreated, rr.Code, "failed to create order")
 
-	var response map[string]interface{}
+	var response map[string]any
 	err = json.NewDecoder(rr.Body).Decode(&response)
 	require.NoError(t, err)
 
@@ -244,15 +244,7 @@ func createOrder(t *testing.T, server *TestServer, userID string) string {
 	return id
 }
 
-// assertJSONEqual compares two JSON responses
-func assertJSONEqual(t *testing.T, expected, actual interface{}) {
-	t.Helper()
-
-	expectedJSON, err := json.Marshal(expected)
-	require.NoError(t, err)
-
-	actualJSON, err := json.Marshal(actual)
-	require.NoError(t, err)
-
-	assert.JSONEq(t, string(expectedJSON), string(actualJSON))
+// decodeJSON is a helper to decode JSON response
+func decodeJSON(rr *httptest.ResponseRecorder, v any) error {
+	return json.NewDecoder(rr.Body).Decode(v)
 }

@@ -15,13 +15,13 @@ func TestCartsService_Get(t *testing.T) {
 		rr := makeRequest(t, server, "GET", "/carts/users/1", nil)
 		assertStatus(t, rr, http.StatusOK)
 
-		var cart map[string]interface{}
+		var cart map[string]any
 		err := decodeJSON(rr, &cart)
 		require.NoError(t, err)
 
 		assert.Equal(t, "1", cart["userId"])
 		assert.NotNil(t, cart["items"])
-		items := cart["items"].([]interface{})
+		items := cart["items"].([]any)
 		assert.Len(t, items, 0) // Initially empty
 		assert.NotEmpty(t, cart["id"])
 		assert.NotEmpty(t, cart["createdAt"])
@@ -33,12 +33,12 @@ func TestCartsService_Get(t *testing.T) {
 		rr := makeRequest(t, server, "GET", "/carts/users/999", nil)
 		assertStatus(t, rr, http.StatusOK)
 
-		var cart map[string]interface{}
+		var cart map[string]any
 		err := decodeJSON(rr, &cart)
 		require.NoError(t, err)
 
 		assert.Equal(t, "999", cart["userId"])
-		items := cart["items"].([]interface{})
+		items := cart["items"].([]any)
 		assert.Len(t, items, 0)
 	})
 }
@@ -51,7 +51,7 @@ func TestCartsService_AddItem(t *testing.T) {
 		productID := createTestProduct(t, server, "Test Product", 99.99, 10)
 
 		// Add item to cart
-		item := map[string]interface{}{
+		item := map[string]any{
 			"productId": productID,
 			"quantity":  2,
 		}
@@ -59,14 +59,14 @@ func TestCartsService_AddItem(t *testing.T) {
 		rr := makeRequest(t, server, "POST", "/carts/users/1/items", item)
 		assertStatus(t, rr, http.StatusOK)
 
-		var cart map[string]interface{}
+		var cart map[string]any
 		err := decodeJSON(rr, &cart)
 		require.NoError(t, err)
 
-		items := cart["items"].([]interface{})
+		items := cart["items"].([]any)
 		assert.Len(t, items, 1)
 
-		cartItem := items[0].(map[string]interface{})
+		cartItem := items[0].(map[string]any)
 		assert.Equal(t, productID, cartItem["productId"])
 		assert.Equal(t, float64(2), cartItem["quantity"])
 		// TODO: Go implementation doesn't include product details in cart items
@@ -77,7 +77,7 @@ func TestCartsService_AddItem(t *testing.T) {
 		productID := createTestProduct(t, server, "Test Product 2", 49.99, 20)
 
 		// Add item first time
-		item := map[string]interface{}{
+		item := map[string]any{
 			"productId": productID,
 			"quantity":  1,
 		}
@@ -88,19 +88,19 @@ func TestCartsService_AddItem(t *testing.T) {
 		rr := makeRequest(t, server, "POST", "/carts/users/2/items", item)
 		assertStatus(t, rr, http.StatusOK)
 
-		var cart map[string]interface{}
+		var cart map[string]any
 		err := decodeJSON(rr, &cart)
 		require.NoError(t, err)
 
-		items := cart["items"].([]interface{})
+		items := cart["items"].([]any)
 		assert.Len(t, items, 1)
 
-		cartItem := items[0].(map[string]interface{})
+		cartItem := items[0].(map[string]any)
 		assert.Equal(t, float64(3), cartItem["quantity"]) // 1 + 2 = 3
 	})
 
 	t.Run("should return 404 for non-existent product", func(t *testing.T) {
-		item := map[string]interface{}{
+		item := map[string]any{
 			"productId": "999999",
 			"quantity":  1,
 		}
@@ -114,7 +114,7 @@ func TestCartsService_AddItem(t *testing.T) {
 		// Create product with limited stock
 		productID := createTestProduct(t, server, "Limited Product", 19.99, 2)
 
-		item := map[string]interface{}{
+		item := map[string]any{
 			"productId": productID,
 			"quantity":  5, // More than available stock
 		}
@@ -134,24 +134,24 @@ func TestCartsService_UpdateItem(t *testing.T) {
 		addToCart(t, server, "3", productID, 2)
 
 		// Update quantity
-		update := map[string]interface{}{
+		update := map[string]any{
 			"quantity": 5,
 		}
 
 		rr := makeRequest(t, server, "PATCH", "/carts/users/3/items/"+productID, update)
 		assertStatus(t, rr, http.StatusOK)
 
-		var cart map[string]interface{}
+		var cart map[string]any
 		err := decodeJSON(rr, &cart)
 		require.NoError(t, err)
 
-		items := cart["items"].([]interface{})
-		cartItem := items[0].(map[string]interface{})
+		items := cart["items"].([]any)
+		cartItem := items[0].(map[string]any)
 		assert.Equal(t, float64(5), cartItem["quantity"])
 	})
 
 	t.Run("should return 404 for item not in cart", func(t *testing.T) {
-		update := map[string]interface{}{
+		update := map[string]any{
 			"quantity": 1,
 		}
 
@@ -166,7 +166,7 @@ func TestCartsService_UpdateItem(t *testing.T) {
 		addToCart(t, server, "4", productID, 1)
 
 		// Try to update to quantity exceeding stock
-		update := map[string]interface{}{
+		update := map[string]any{
 			"quantity": 10,
 		}
 
@@ -192,14 +192,14 @@ func TestCartsService_RemoveItem(t *testing.T) {
 
 		// Verify cart contents
 		cartRR := makeRequest(t, server, "GET", "/carts/users/5", nil)
-		var cart map[string]interface{}
+		var cart map[string]any
 		err := decodeJSON(cartRR, &cart)
 		require.NoError(t, err)
 
-		items := cart["items"].([]interface{})
+		items := cart["items"].([]any)
 		assert.Len(t, items, 1) // Only one item left
 
-		remainingItem := items[0].(map[string]interface{})
+		remainingItem := items[0].(map[string]any)
 		assert.Equal(t, productID2, remainingItem["productId"])
 	})
 
@@ -226,11 +226,11 @@ func TestCartsService_Clear(t *testing.T) {
 
 		// Verify cart is empty
 		cartRR := makeRequest(t, server, "GET", "/carts/users/6", nil)
-		var cart map[string]interface{}
+		var cart map[string]any
 		err := decodeJSON(cartRR, &cart)
 		require.NoError(t, err)
 
-		items := cart["items"].([]interface{})
+		items := cart["items"].([]any)
 		assert.Len(t, items, 0)
 	})
 }
@@ -252,7 +252,7 @@ func TestCartsService_Integration(t *testing.T) {
 		addToCart(t, server, userID, productID2, 1)
 
 		// Update first product quantity
-		update := map[string]interface{}{
+		update := map[string]any{
 			"quantity": 3,
 		}
 		updateRR := makeRequest(t, server, "PATCH", "/carts/users/"+userID+"/items/"+productID1, update)
@@ -264,14 +264,14 @@ func TestCartsService_Integration(t *testing.T) {
 
 		// Verify final cart state
 		cartRR := makeRequest(t, server, "GET", "/carts/users/"+userID, nil)
-		var cart map[string]interface{}
+		var cart map[string]any
 		err := decodeJSON(cartRR, &cart)
 		require.NoError(t, err)
 
-		items := cart["items"].([]interface{})
+		items := cart["items"].([]any)
 		assert.Len(t, items, 1)
 
-		item := items[0].(map[string]interface{})
+		item := items[0].(map[string]any)
 		assert.Equal(t, productID1, item["productId"])
 		assert.Equal(t, float64(3), item["quantity"])
 	})

@@ -15,7 +15,7 @@ func TestCategoriesService_List(t *testing.T) {
 		rr := makeRequest(t, server, "GET", "/categories", nil)
 		assertStatus(t, rr, http.StatusOK)
 
-		var categories []interface{}
+		var categories []any
 		err := decodeJSON(rr, &categories)
 		require.NoError(t, err)
 
@@ -23,7 +23,7 @@ func TestCategoriesService_List(t *testing.T) {
 		assert.GreaterOrEqual(t, len(categories), 4)
 
 		// Check first category structure
-		category := categories[0].(map[string]interface{})
+		category := categories[0].(map[string]any)
 		assert.Contains(t, category, "id")
 		assert.Contains(t, category, "name")
 		// parentId is omitted when nil due to omitempty tag
@@ -39,7 +39,7 @@ func TestCategoriesService_GetTree(t *testing.T) {
 		rr := makeRequest(t, server, "GET", "/categories/tree", nil)
 		assertStatus(t, rr, http.StatusOK)
 
-		var tree []interface{}
+		var tree []any
 		err := decodeJSON(rr, &tree)
 		require.NoError(t, err)
 
@@ -47,7 +47,7 @@ func TestCategoriesService_GetTree(t *testing.T) {
 		assert.Greater(t, len(tree), 0)
 
 		// Check tree structure
-		rootCategory := tree[0].(map[string]interface{})
+		rootCategory := tree[0].(map[string]any)
 		assert.Contains(t, rootCategory, "id")
 		assert.Contains(t, rootCategory, "name")
 		// Note: Go implementation doesn't include parentId in tree response
@@ -55,9 +55,9 @@ func TestCategoriesService_GetTree(t *testing.T) {
 		assert.Contains(t, rootCategory, "children")
 
 		// Check if children exist and are properly structured
-		children, ok := rootCategory["children"].([]interface{})
+		children, ok := rootCategory["children"].([]any)
 		if ok && len(children) > 0 {
-			childCategory := children[0].(map[string]interface{})
+			childCategory := children[0].(map[string]any)
 			assert.Equal(t, rootCategory["id"], childCategory["parentId"])
 		}
 	})
@@ -70,7 +70,7 @@ func TestCategoriesService_Get(t *testing.T) {
 		rr := makeRequest(t, server, "GET", "/categories/1", nil)
 		assertStatus(t, rr, http.StatusOK)
 
-		var category map[string]interface{}
+		var category map[string]any
 		err := decodeJSON(rr, &category)
 		require.NoError(t, err)
 
@@ -90,7 +90,7 @@ func TestCategoriesService_Create(t *testing.T) {
 	server := setupTestServer(t)
 
 	t.Run("should create a new root category", func(t *testing.T) {
-		newCategory := map[string]interface{}{
+		newCategory := map[string]any{
 			"name":     "New Root Category",
 			"parentId": nil,
 		}
@@ -98,7 +98,7 @@ func TestCategoriesService_Create(t *testing.T) {
 		rr := makeRequest(t, server, "POST", "/categories", newCategory)
 		assertStatus(t, rr, http.StatusCreated)
 
-		var category map[string]interface{}
+		var category map[string]any
 		err := decodeJSON(rr, &category)
 		require.NoError(t, err)
 
@@ -114,7 +114,7 @@ func TestCategoriesService_Create(t *testing.T) {
 		parentID := createTestCategory(t, server, "Parent Category", nil)
 
 		// Create child
-		newCategory := map[string]interface{}{
+		newCategory := map[string]any{
 			"name":     "Child Category",
 			"parentId": parentID,
 		}
@@ -122,7 +122,7 @@ func TestCategoriesService_Create(t *testing.T) {
 		rr := makeRequest(t, server, "POST", "/categories", newCategory)
 		assertStatus(t, rr, http.StatusCreated)
 
-		var category map[string]interface{}
+		var category map[string]any
 		err := decodeJSON(rr, &category)
 		require.NoError(t, err)
 
@@ -132,7 +132,7 @@ func TestCategoriesService_Create(t *testing.T) {
 	})
 
 	t.Run("should return 404 for non-existent parent", func(t *testing.T) {
-		newCategory := map[string]interface{}{
+		newCategory := map[string]any{
 			"name":     "Orphan Category",
 			"parentId": "999999",
 		}
@@ -144,7 +144,7 @@ func TestCategoriesService_Create(t *testing.T) {
 
 	// TODO: Add validation tests when implemented
 	// t.Run("should return 400 for empty name", func(t *testing.T) {
-	// 	newCategory := map[string]interface{}{
+	// 	newCategory := map[string]any{
 	// 		"name":     "",
 	// 		"parentId": nil,
 	// 	}
@@ -162,14 +162,14 @@ func TestCategoriesService_Update(t *testing.T) {
 		// Create a category to update
 		categoryID := createTestCategory(t, server, "Original Name", nil)
 
-		update := map[string]interface{}{
+		update := map[string]any{
 			"name": "Updated Name",
 		}
 
 		rr := makeRequest(t, server, "PATCH", "/categories/"+categoryID, update)
 		assertStatus(t, rr, http.StatusOK)
 
-		var category map[string]interface{}
+		var category map[string]any
 		err := decodeJSON(rr, &category)
 		require.NoError(t, err)
 
@@ -182,14 +182,14 @@ func TestCategoriesService_Update(t *testing.T) {
 		parentID := createTestCategory(t, server, "New Parent", nil)
 		childID := createTestCategory(t, server, "Child", nil)
 
-		update := map[string]interface{}{
+		update := map[string]any{
 			"parentId": parentID,
 		}
 
 		rr := makeRequest(t, server, "PATCH", "/categories/"+childID, update)
 		assertStatus(t, rr, http.StatusOK)
 
-		var category map[string]interface{}
+		var category map[string]any
 		err := decodeJSON(rr, &category)
 		require.NoError(t, err)
 
@@ -197,7 +197,7 @@ func TestCategoriesService_Update(t *testing.T) {
 	})
 
 	t.Run("should return 404 when updating non-existent category", func(t *testing.T) {
-		update := map[string]interface{}{
+		update := map[string]any{
 			"name": "Ghost Category",
 		}
 
@@ -213,7 +213,7 @@ func TestCategoriesService_Update(t *testing.T) {
 	// 	childID := createTestCategory(t, server, "Child", &parentID)
 
 	// 	// Try to make parent a child of its own child
-	// 	update := map[string]interface{}{
+	// 	update := map[string]any{
 	// 		"parentId": childID,
 	// 	}
 
@@ -272,14 +272,14 @@ func TestCategoriesService_Integration(t *testing.T) {
 		treeRR := makeRequest(t, server, "GET", "/categories/tree", nil)
 		assertStatus(t, treeRR, http.StatusOK)
 
-		var tree []interface{}
+		var tree []any
 		err := decodeJSON(treeRR, &tree)
 		require.NoError(t, err)
 
 		// Find our root category in the tree
-		var foundRoot map[string]interface{}
+		var foundRoot map[string]any
 		for _, cat := range tree {
-			category := cat.(map[string]interface{})
+			category := cat.(map[string]any)
 			if category["id"] == rootID {
 				foundRoot = category
 				break
@@ -290,19 +290,19 @@ func TestCategoriesService_Integration(t *testing.T) {
 		// Verify children
 		childrenRaw, ok := foundRoot["children"]
 		require.True(t, ok, "foundRoot should have children field")
-		children := childrenRaw.([]interface{})
+		children := childrenRaw.([]any)
 		assert.Len(t, children, 2) // Should have 2 children
 
 		// Find child1 and verify it has grandchild
 		var foundChild1 bool
 		for _, child := range children {
-			childCat := child.(map[string]interface{})
+			childCat := child.(map[string]any)
 			if childCat["id"] == child1ID {
 				foundChild1 = true
-				grandchildren := childCat["children"].([]interface{})
+				grandchildren := childCat["children"].([]any)
 				assert.Len(t, grandchildren, 1)
 				if len(grandchildren) > 0 {
-					grandchild := grandchildren[0].(map[string]interface{})
+					grandchild := grandchildren[0].(map[string]any)
 					assert.Equal(t, grandchildID, grandchild["id"])
 				}
 				break

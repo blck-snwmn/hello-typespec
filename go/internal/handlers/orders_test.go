@@ -22,11 +22,11 @@ func TestOrdersService_List(t *testing.T) {
 		assertStatus(t, rr, http.StatusOK)
 		response := assertPaginatedResponse(t, rr, 1, 20, 0)
 
-		items := response["items"].([]interface{})
+		items := response["items"].([]any)
 		assert.Len(t, items, 1)
 
 		// Check order structure
-		order := items[0].(map[string]interface{})
+		order := items[0].(map[string]any)
 		assert.Contains(t, order, "id")
 		assert.Contains(t, order, "userId")
 		assert.Contains(t, order, "items")
@@ -52,13 +52,13 @@ func TestOrdersService_List(t *testing.T) {
 		rr := makeRequest(t, server, "GET", "/orders?userId="+userID1, nil)
 		assertStatus(t, rr, http.StatusOK)
 
-		var response map[string]interface{}
+		var response map[string]any
 		err := decodeJSON(rr, &response)
 		require.NoError(t, err)
 
-		items := response["items"].([]interface{})
+		items := response["items"].([]any)
 		for _, item := range items {
-			order := item.(map[string]interface{})
+			order := item.(map[string]any)
 			assert.Equal(t, userID1, order["userId"])
 		}
 	})
@@ -79,13 +79,13 @@ func TestOrdersService_List(t *testing.T) {
 		rr := makeRequest(t, server, "GET", "/orders?status=cancelled", nil)
 		assertStatus(t, rr, http.StatusOK)
 
-		var response map[string]interface{}
+		var response map[string]any
 		err := decodeJSON(rr, &response)
 		require.NoError(t, err)
 
-		items := response["items"].([]interface{})
+		items := response["items"].([]any)
 		for _, item := range items {
-			order := item.(map[string]interface{})
+			order := item.(map[string]any)
 			assert.Equal(t, "cancelled", order["status"])
 		}
 	})
@@ -111,12 +111,12 @@ func TestOrdersService_ListByUser(t *testing.T) {
 		assertStatus(t, rr, http.StatusOK)
 		response := assertPaginatedResponse(t, rr, 3, 20, 0)
 
-		items := response["items"].([]interface{})
+		items := response["items"].([]any)
 		assert.Len(t, items, 3)
 
 		// Verify all orders belong to the user
 		for _, item := range items {
-			order := item.(map[string]interface{})
+			order := item.(map[string]any)
 			assert.Equal(t, userID, order["userId"])
 		}
 	})
@@ -128,7 +128,7 @@ func TestOrdersService_ListByUser(t *testing.T) {
 		assertStatus(t, rr, http.StatusOK)
 		response := assertPaginatedResponse(t, rr, 0, 20, 0)
 
-		items := response["items"].([]interface{})
+		items := response["items"].([]any)
 		assert.Len(t, items, 0)
 	})
 }
@@ -145,7 +145,7 @@ func TestOrdersService_Get(t *testing.T) {
 		rr := makeRequest(t, server, "GET", "/orders/"+orderID, nil)
 		assertStatus(t, rr, http.StatusOK)
 
-		var order map[string]interface{}
+		var order map[string]any
 		err := decodeJSON(rr, &order)
 		require.NoError(t, err)
 
@@ -154,9 +154,9 @@ func TestOrdersService_Get(t *testing.T) {
 		assert.Equal(t, "pending", order["status"])
 		assert.Equal(t, float64(150), order["totalAmount"]) // 75 * 2
 
-		items := order["items"].([]interface{})
+		items := order["items"].([]any)
 		assert.Len(t, items, 1)
-		item := items[0].(map[string]interface{})
+		item := items[0].(map[string]any)
 		assert.Equal(t, productID, item["productId"])
 		assert.Equal(t, float64(2), item["quantity"])
 		assert.Equal(t, float64(75), item["price"])
@@ -182,12 +182,12 @@ func TestOrdersService_Create(t *testing.T) {
 		addToCart(t, server, userID, product2ID, 3)
 
 		// Create order
-		orderReq := map[string]interface{}{
-			"items": []map[string]interface{}{
+		orderReq := map[string]any{
+			"items": []map[string]any{
 				{"productId": product1ID, "quantity": 2},
 				{"productId": product2ID, "quantity": 3},
 			},
-			"shippingAddress": map[string]interface{}{
+			"shippingAddress": map[string]any{
 				"street":     "123 Order St",
 				"city":       "Order City",
 				"state":      "OC",
@@ -199,7 +199,7 @@ func TestOrdersService_Create(t *testing.T) {
 		rr := makeRequest(t, server, "POST", "/orders/users/"+userID, orderReq)
 		assertStatus(t, rr, http.StatusCreated)
 
-		var order map[string]interface{}
+		var order map[string]any
 		err := decodeJSON(rr, &order)
 		require.NoError(t, err)
 
@@ -208,25 +208,25 @@ func TestOrdersService_Create(t *testing.T) {
 		assert.Equal(t, "pending", order["status"])
 		assert.Equal(t, float64(350), order["totalAmount"]) // (100*2) + (50*3)
 
-		items := order["items"].([]interface{})
+		items := order["items"].([]any)
 		assert.Len(t, items, 2)
 
 		// Verify inventory was reduced
 		product1RR := makeRequest(t, server, "GET", "/products/"+product1ID, nil)
-		var product1 map[string]interface{}
+		var product1 map[string]any
 		decodeJSON(product1RR, &product1)
 		assert.Equal(t, float64(18), product1["stock"]) // 20 - 2
 
 		product2RR := makeRequest(t, server, "GET", "/products/"+product2ID, nil)
-		var product2 map[string]interface{}
+		var product2 map[string]any
 		decodeJSON(product2RR, &product2)
 		assert.Equal(t, float64(12), product2["stock"]) // 15 - 3
 
 		// Verify cart was cleared
 		cartRR := makeRequest(t, server, "GET", "/carts/users/"+userID, nil)
-		var cart map[string]interface{}
+		var cart map[string]any
 		decodeJSON(cartRR, &cart)
-		cartItems := cart["items"].([]interface{})
+		cartItems := cart["items"].([]any)
 		assert.Len(t, cartItems, 0)
 	})
 
@@ -234,11 +234,11 @@ func TestOrdersService_Create(t *testing.T) {
 		userID := createTestUser(t, server, "nostock@example.com", "No Stock")
 		productID := createTestProduct(t, server, "Limited Product", 20.00, 2)
 
-		orderReq := map[string]interface{}{
-			"items": []map[string]interface{}{
+		orderReq := map[string]any{
+			"items": []map[string]any{
 				{"productId": productID, "quantity": 5}, // More than available
 			},
-			"shippingAddress": map[string]interface{}{
+			"shippingAddress": map[string]any{
 				"street":     "456 No Stock Ave",
 				"city":       "Stock City",
 				"state":      "SC",
@@ -255,11 +255,11 @@ func TestOrdersService_Create(t *testing.T) {
 	t.Run("should fail if product not found", func(t *testing.T) {
 		userID := createTestUser(t, server, "notfound@example.com", "Not Found")
 
-		orderReq := map[string]interface{}{
-			"items": []map[string]interface{}{
+		orderReq := map[string]any{
+			"items": []map[string]any{
 				{"productId": "999999", "quantity": 1},
 			},
-			"shippingAddress": map[string]interface{}{
+			"shippingAddress": map[string]any{
 				"street":     "789 Not Found Blvd",
 				"city":       "Missing City",
 				"state":      "MC",
@@ -284,14 +284,14 @@ func TestOrdersService_UpdateStatus(t *testing.T) {
 		orderID := createOrder(t, server, userID)
 
 		// Update to processing
-		updateReq := map[string]interface{}{
+		updateReq := map[string]any{
 			"status": "processing",
 		}
 
 		rr := makeRequest(t, server, "PATCH", "/orders/status/"+orderID, updateReq)
 		assertStatus(t, rr, http.StatusOK)
 
-		var order map[string]interface{}
+		var order map[string]any
 		err := decodeJSON(rr, &order)
 		require.NoError(t, err)
 
@@ -299,7 +299,7 @@ func TestOrdersService_UpdateStatus(t *testing.T) {
 	})
 
 	t.Run("should return 404 for non-existent order", func(t *testing.T) {
-		updateReq := map[string]interface{}{
+		updateReq := map[string]any{
 			"status": "shipped",
 		}
 
@@ -322,7 +322,7 @@ func TestOrdersService_Cancel(t *testing.T) {
 
 		// Verify initial stock
 		productRR := makeRequest(t, server, "GET", "/products/"+productID, nil)
-		var product map[string]interface{}
+		var product map[string]any
 		decodeJSON(productRR, &product)
 		assert.Equal(t, float64(7), product["stock"]) // 10 - 3
 
@@ -330,7 +330,7 @@ func TestOrdersService_Cancel(t *testing.T) {
 		rr := makeRequest(t, server, "POST", "/orders/cancel/"+orderID, nil)
 		assertStatus(t, rr, http.StatusOK)
 
-		var order map[string]interface{}
+		var order map[string]any
 		err := decodeJSON(rr, &order)
 		require.NoError(t, err)
 
@@ -338,7 +338,7 @@ func TestOrdersService_Cancel(t *testing.T) {
 
 		// Verify stock was restored
 		productRR2 := makeRequest(t, server, "GET", "/products/"+productID, nil)
-		var productAfter map[string]interface{}
+		var productAfter map[string]any
 		decodeJSON(productRR2, &productAfter)
 		assert.Equal(t, float64(10), productAfter["stock"]) // Restored to 10
 	})
@@ -350,7 +350,7 @@ func TestOrdersService_Cancel(t *testing.T) {
 		orderID := createOrder(t, server, userID)
 
 		// Update to shipped status first
-		updateReq := map[string]interface{}{
+		updateReq := map[string]any{
 			"status": "processing",
 		}
 		updateRR := makeRequest(t, server, "PATCH", "/orders/status/"+orderID, updateReq)
@@ -388,12 +388,12 @@ func TestOrdersService_Integration(t *testing.T) {
 		addToCart(t, server, userID, product2ID, 2)
 
 		// Create order
-		orderReq := map[string]interface{}{
-			"items": []map[string]interface{}{
+		orderReq := map[string]any{
+			"items": []map[string]any{
 				{"productId": product1ID, "quantity": 5},
 				{"productId": product2ID, "quantity": 2},
 			},
-			"shippingAddress": map[string]interface{}{
+			"shippingAddress": map[string]any{
 				"street":     "999 Lifecycle Lane",
 				"city":       "Complete City",
 				"state":      "CC",
@@ -405,7 +405,7 @@ func TestOrdersService_Integration(t *testing.T) {
 		createRR := makeRequest(t, server, "POST", "/orders/users/"+userID, orderReq)
 		assertStatus(t, createRR, http.StatusCreated)
 
-		var order map[string]interface{}
+		var order map[string]any
 		decodeJSON(createRR, &order)
 		orderID := order["id"].(string)
 
@@ -414,7 +414,7 @@ func TestOrdersService_Integration(t *testing.T) {
 		assert.Equal(t, "pending", order["status"])
 
 		// Update status to processing
-		updateReq := map[string]interface{}{"status": "processing"}
+		updateReq := map[string]any{"status": "processing"}
 		updateRR := makeRequest(t, server, "PATCH", "/orders/status/"+orderID, updateReq)
 		assertStatus(t, updateRR, http.StatusOK)
 
@@ -430,18 +430,18 @@ func TestOrdersService_Integration(t *testing.T) {
 
 		// Verify final state
 		getRR := makeRequest(t, server, "GET", "/orders/"+orderID, nil)
-		var finalOrder map[string]interface{}
+		var finalOrder map[string]any
 		decodeJSON(getRR, &finalOrder)
 		assert.Equal(t, "delivered", finalOrder["status"])
 
 		// Verify inventory was properly reduced
 		product1RR := makeRequest(t, server, "GET", "/products/"+product1ID, nil)
-		var product1 map[string]interface{}
+		var product1 map[string]any
 		decodeJSON(product1RR, &product1)
 		assert.Equal(t, float64(45), product1["stock"]) // 50 - 5
 
 		product2RR := makeRequest(t, server, "GET", "/products/"+product2ID, nil)
-		var product2 map[string]interface{}
+		var product2 map[string]any
 		decodeJSON(product2RR, &product2)
 		assert.Equal(t, float64(28), product2["stock"]) // 30 - 2
 	})

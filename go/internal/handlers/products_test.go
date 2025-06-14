@@ -17,11 +17,11 @@ func TestProductsService_List(t *testing.T) {
 		assertStatus(t, rr, http.StatusOK)
 		response := assertPaginatedResponse(t, rr, 3, 20, 0) // 3 default products
 
-		items := response["items"].([]interface{})
+		items := response["items"].([]any)
 		assert.Len(t, items, 3)
 
 		// Check first product structure
-		product := items[0].(map[string]interface{})
+		product := items[0].(map[string]any)
 		assert.Contains(t, product, "id")
 		assert.Contains(t, product, "name")
 		assert.Contains(t, product, "description")
@@ -43,7 +43,7 @@ func TestProductsService_List(t *testing.T) {
 		rr := makeRequest(t, server, "GET", "/products?limit=5&offset=2", nil)
 		assertStatus(t, rr, http.StatusOK)
 		response := assertPaginatedResponse(t, rr, 8, 5, 2)
-		items := response["items"].([]interface{})
+		items := response["items"].([]any)
 		assert.Len(t, items, 5)
 	})
 
@@ -54,13 +54,13 @@ func TestProductsService_List(t *testing.T) {
 		rr := makeRequest(t, server, "GET", "/products?name=Unique+Search", nil)
 		assertStatus(t, rr, http.StatusOK)
 
-		var response map[string]interface{}
+		var response map[string]any
 		err := decodeJSON(rr, &response)
 		require.NoError(t, err)
 
-		items := response["items"].([]interface{})
+		items := response["items"].([]any)
 		assert.Len(t, items, 1)
-		product := items[0].(map[string]interface{})
+		product := items[0].(map[string]any)
 		assert.Contains(t, product["name"], "Unique Search")
 	})
 
@@ -68,14 +68,14 @@ func TestProductsService_List(t *testing.T) {
 		rr := makeRequest(t, server, "GET", "/products?categoryId=2", nil)
 		assertStatus(t, rr, http.StatusOK)
 
-		var response map[string]interface{}
+		var response map[string]any
 		err := decodeJSON(rr, &response)
 		require.NoError(t, err)
 
-		items := response["items"].([]interface{})
+		items := response["items"].([]any)
 		// Should return products in category 2 (Computers)
 		for _, item := range items {
-			product := item.(map[string]interface{})
+			product := item.(map[string]any)
 			assert.Equal(t, "2", product["categoryId"])
 		}
 	})
@@ -84,13 +84,13 @@ func TestProductsService_List(t *testing.T) {
 		rr := makeRequest(t, server, "GET", "/products?minPrice=100&maxPrice=1000", nil)
 		assertStatus(t, rr, http.StatusOK)
 
-		var response map[string]interface{}
+		var response map[string]any
 		err := decodeJSON(rr, &response)
 		require.NoError(t, err)
 
-		items := response["items"].([]interface{})
+		items := response["items"].([]any)
 		for _, item := range items {
-			product := item.(map[string]interface{})
+			product := item.(map[string]any)
 			price := product["price"].(float64)
 			assert.GreaterOrEqual(t, price, float64(100))
 			assert.LessOrEqual(t, price, float64(1000))
@@ -101,17 +101,17 @@ func TestProductsService_List(t *testing.T) {
 		rr := makeRequest(t, server, "GET", "/products?sortBy=price&order=asc", nil)
 		assertStatus(t, rr, http.StatusOK)
 
-		var response map[string]interface{}
+		var response map[string]any
 		err := decodeJSON(rr, &response)
 		require.NoError(t, err)
 
-		items := response["items"].([]interface{})
+		items := response["items"].([]any)
 		assert.Greater(t, len(items), 1)
 
 		// Verify ascending order
 		for i := 1; i < len(items); i++ {
-			prevPrice := items[i-1].(map[string]interface{})["price"].(float64)
-			currPrice := items[i].(map[string]interface{})["price"].(float64)
+			prevPrice := items[i-1].(map[string]any)["price"].(float64)
+			currPrice := items[i].(map[string]any)["price"].(float64)
 			assert.LessOrEqual(t, prevPrice, currPrice)
 		}
 	})
@@ -120,17 +120,17 @@ func TestProductsService_List(t *testing.T) {
 		rr := makeRequest(t, server, "GET", "/products?sortBy=name&order=desc", nil)
 		assertStatus(t, rr, http.StatusOK)
 
-		var response map[string]interface{}
+		var response map[string]any
 		err := decodeJSON(rr, &response)
 		require.NoError(t, err)
 
-		items := response["items"].([]interface{})
+		items := response["items"].([]any)
 		assert.Greater(t, len(items), 1)
 
 		// Verify descending order
 		for i := 1; i < len(items); i++ {
-			prevName := items[i-1].(map[string]interface{})["name"].(string)
-			currName := items[i].(map[string]interface{})["name"].(string)
+			prevName := items[i-1].(map[string]any)["name"].(string)
+			currName := items[i].(map[string]any)["name"].(string)
 			assert.GreaterOrEqual(t, prevName, currName)
 		}
 	})
@@ -143,7 +143,7 @@ func TestProductsService_Get(t *testing.T) {
 		rr := makeRequest(t, server, "GET", "/products/1", nil)
 		assertStatus(t, rr, http.StatusOK)
 
-		var product map[string]interface{}
+		var product map[string]any
 		err := decodeJSON(rr, &product)
 		require.NoError(t, err)
 
@@ -164,7 +164,7 @@ func TestProductsService_Create(t *testing.T) {
 	server := setupTestServer(t)
 
 	t.Run("should create a new product", func(t *testing.T) {
-		newProduct := map[string]interface{}{
+		newProduct := map[string]any{
 			"name":        "New Test Product",
 			"description": "A test product description",
 			"price":       199.99,
@@ -176,7 +176,7 @@ func TestProductsService_Create(t *testing.T) {
 		rr := makeRequest(t, server, "POST", "/products", newProduct)
 		assertStatus(t, rr, http.StatusCreated)
 
-		var product map[string]interface{}
+		var product map[string]any
 		err := decodeJSON(rr, &product)
 		require.NoError(t, err)
 
@@ -186,7 +186,7 @@ func TestProductsService_Create(t *testing.T) {
 		assert.Equal(t, newProduct["price"], product["price"])
 		assert.Equal(t, float64(newProduct["stock"].(int)), product["stock"])
 		assert.Equal(t, newProduct["categoryId"], product["categoryId"])
-		imageUrls := product["imageUrls"].([]interface{})
+		imageUrls := product["imageUrls"].([]any)
 		assert.Len(t, imageUrls, 2)
 		assert.Equal(t, "https://example.com/product1.jpg", imageUrls[0])
 		assert.Equal(t, "https://example.com/product2.jpg", imageUrls[1])
@@ -195,7 +195,7 @@ func TestProductsService_Create(t *testing.T) {
 	})
 
 	t.Run("should create product without optional imageUrls", func(t *testing.T) {
-		newProduct := map[string]interface{}{
+		newProduct := map[string]any{
 			"name":        "Product Without Images",
 			"description": "No images",
 			"price":       99.99,
@@ -206,17 +206,17 @@ func TestProductsService_Create(t *testing.T) {
 		rr := makeRequest(t, server, "POST", "/products", newProduct)
 		assertStatus(t, rr, http.StatusCreated)
 
-		var product map[string]interface{}
+		var product map[string]any
 		err := decodeJSON(rr, &product)
 		require.NoError(t, err)
 
-		imageUrls := product["imageUrls"].([]interface{})
+		imageUrls := product["imageUrls"].([]any)
 		assert.Empty(t, imageUrls)
 	})
 
 	// TODO: Add validation tests when implemented
 	// t.Run("should return 400 for invalid product data", func(t *testing.T) {
-	// 	invalidProduct := map[string]interface{}{
+	// 	invalidProduct := map[string]any{
 	// 		"name":       "", // Empty name
 	// 		"price":      -10.00, // Negative price
 	// 		"stock":      -5, // Negative stock
@@ -236,7 +236,7 @@ func TestProductsService_Update(t *testing.T) {
 		// Create a product to update
 		productID := createTestProduct(t, server, "Original Product", 100.00, 20)
 
-		update := map[string]interface{}{
+		update := map[string]any{
 			"name":  "Updated Product",
 			"price": 150.00,
 			"stock": 30,
@@ -245,7 +245,7 @@ func TestProductsService_Update(t *testing.T) {
 		rr := makeRequest(t, server, "PATCH", "/products/"+productID, update)
 		assertStatus(t, rr, http.StatusOK)
 
-		var product map[string]interface{}
+		var product map[string]any
 		err := decodeJSON(rr, &product)
 		require.NoError(t, err)
 
@@ -260,18 +260,18 @@ func TestProductsService_Update(t *testing.T) {
 
 		// Get original product
 		getRR := makeRequest(t, server, "GET", "/products/"+productID, nil)
-		var original map[string]interface{}
+		var original map[string]any
 		decodeJSON(getRR, &original)
 
 		// Update only name
-		update := map[string]interface{}{
+		update := map[string]any{
 			"name": "Name Only Updated",
 		}
 
 		rr := makeRequest(t, server, "PATCH", "/products/"+productID, update)
 		assertStatus(t, rr, http.StatusOK)
 
-		var product map[string]interface{}
+		var product map[string]any
 		err := decodeJSON(rr, &product)
 		require.NoError(t, err)
 
@@ -281,7 +281,7 @@ func TestProductsService_Update(t *testing.T) {
 	})
 
 	t.Run("should return 404 when updating non-existent product", func(t *testing.T) {
-		update := map[string]interface{}{
+		update := map[string]any{
 			"name": "Ghost Product",
 		}
 
@@ -331,26 +331,26 @@ func TestProductsService_Integration(t *testing.T) {
 		rr := makeRequest(t, server, "GET", "/products?categoryId="+cat1+"&minPrice=200&maxPrice=500&sortBy=price&order=asc", nil)
 		assertStatus(t, rr, http.StatusOK)
 
-		var response map[string]interface{}
+		var response map[string]any
 		err := decodeJSON(rr, &response)
 		require.NoError(t, err)
 
-		items := response["items"].([]interface{})
+		items := response["items"].([]any)
 		assert.Len(t, items, 1)
-		product := items[0].(map[string]interface{})
+		product := items[0].(map[string]any)
 		assert.Equal(t, "Budget Phone", product["name"])
 
 		// Search for clothing sorted by price descending
 		rr2 := makeRequest(t, server, "GET", "/products?categoryId="+cat2+"&sortBy=price&order=desc", nil)
 		assertStatus(t, rr2, http.StatusOK)
 
-		var response2 map[string]interface{}
+		var response2 map[string]any
 		err = decodeJSON(rr2, &response2)
 		require.NoError(t, err)
 
-		items2 := response2["items"].([]interface{})
+		items2 := response2["items"].([]any)
 		assert.GreaterOrEqual(t, len(items2), 2)
-		firstProduct := items2[0].(map[string]interface{})
+		firstProduct := items2[0].(map[string]any)
 		assert.Equal(t, "Designer T-Shirt", firstProduct["name"])
 	})
 }
@@ -359,7 +359,7 @@ func TestProductsService_Integration(t *testing.T) {
 func createTestProductWithCategory(t *testing.T, server *TestServer, name string, price float64, stock int, categoryID string) string {
 	t.Helper()
 
-	product := map[string]interface{}{
+	product := map[string]any{
 		"name":        name,
 		"description": "Test product",
 		"price":       price,
@@ -371,7 +371,7 @@ func createTestProductWithCategory(t *testing.T, server *TestServer, name string
 	rr := makeRequest(t, server, "POST", "/products", product)
 	require.Equal(t, http.StatusCreated, rr.Code, "failed to create test product")
 
-	var response map[string]interface{}
+	var response map[string]any
 	err := json.NewDecoder(rr.Body).Decode(&response)
 	require.NoError(t, err)
 

@@ -1,9 +1,7 @@
 package handlers_test
 
 import (
-	"encoding/json"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -19,11 +17,11 @@ func TestUsersService_List(t *testing.T) {
 		assertStatus(t, rr, http.StatusOK)
 		response := assertPaginatedResponse(t, rr, 2, 20, 0) // 2 default users
 
-		items := response["items"].([]interface{})
+		items := response["items"].([]any)
 		assert.Len(t, items, 2)
 
 		// Check first user structure
-		user := items[0].(map[string]interface{})
+		user := items[0].(map[string]any)
 		assert.Contains(t, user, "id")
 		assert.Contains(t, user, "email")
 		assert.Contains(t, user, "name")
@@ -37,19 +35,19 @@ func TestUsersService_List(t *testing.T) {
 		rr1 := makeRequest(t, server, "GET", "/users?limit=1&offset=0", nil)
 		assertStatus(t, rr1, http.StatusOK)
 		response1 := assertPaginatedResponse(t, rr1, 2, 1, 0)
-		items1 := response1["items"].([]interface{})
+		items1 := response1["items"].([]any)
 		assert.Len(t, items1, 1)
 
 		// Second page
 		rr2 := makeRequest(t, server, "GET", "/users?limit=1&offset=1", nil)
 		assertStatus(t, rr2, http.StatusOK)
 		response2 := assertPaginatedResponse(t, rr2, 2, 1, 1)
-		items2 := response2["items"].([]interface{})
+		items2 := response2["items"].([]any)
 		assert.Len(t, items2, 1)
 
 		// Ensure different users
-		user1 := items1[0].(map[string]interface{})
-		user2 := items2[0].(map[string]interface{})
+		user1 := items1[0].(map[string]any)
+		user2 := items2[0].(map[string]any)
 		assert.NotEqual(t, user1["id"], user2["id"])
 	})
 
@@ -57,7 +55,7 @@ func TestUsersService_List(t *testing.T) {
 		rr := makeRequest(t, server, "GET", "/users?limit=10&offset=100", nil)
 		assertStatus(t, rr, http.StatusOK)
 		response := assertPaginatedResponse(t, rr, 2, 10, 100)
-		items := response["items"].([]interface{})
+		items := response["items"].([]any)
 		assert.Len(t, items, 0)
 	})
 }
@@ -69,7 +67,7 @@ func TestUsersService_Get(t *testing.T) {
 		rr := makeRequest(t, server, "GET", "/users/1", nil)
 		assertStatus(t, rr, http.StatusOK)
 
-		var user map[string]interface{}
+		var user map[string]any
 		err := decodeJSON(rr, &user)
 		require.NoError(t, err)
 
@@ -90,10 +88,10 @@ func TestUsersService_Create(t *testing.T) {
 	server := setupTestServer(t)
 
 	t.Run("should create a new user with address", func(t *testing.T) {
-		newUser := map[string]interface{}{
+		newUser := map[string]any{
 			"email": "newuser@example.com",
 			"name":  "New User",
-			"address": map[string]interface{}{
+			"address": map[string]any{
 				"street":     "789 New St",
 				"city":       "New City",
 				"state":      "NC",
@@ -105,7 +103,7 @@ func TestUsersService_Create(t *testing.T) {
 		rr := makeRequest(t, server, "POST", "/users", newUser)
 		assertStatus(t, rr, http.StatusCreated)
 
-		var user map[string]interface{}
+		var user map[string]any
 		err := decodeJSON(rr, &user)
 		require.NoError(t, err)
 
@@ -121,7 +119,7 @@ func TestUsersService_Create(t *testing.T) {
 		cartRR := makeRequest(t, server, "GET", "/carts/users/"+userID, nil)
 		assertStatus(t, cartRR, http.StatusOK)
 
-		var cart map[string]interface{}
+		var cart map[string]any
 		err = decodeJSON(cartRR, &cart)
 		require.NoError(t, err)
 		assert.Equal(t, userID, cart["userId"])
@@ -129,7 +127,7 @@ func TestUsersService_Create(t *testing.T) {
 	})
 
 	t.Run("should create a new user without address", func(t *testing.T) {
-		newUser := map[string]interface{}{
+		newUser := map[string]any{
 			"email": "minimal@example.com",
 			"name":  "Minimal User",
 		}
@@ -137,7 +135,7 @@ func TestUsersService_Create(t *testing.T) {
 		rr := makeRequest(t, server, "POST", "/users", newUser)
 		assertStatus(t, rr, http.StatusCreated)
 
-		var user map[string]interface{}
+		var user map[string]any
 		err := decodeJSON(rr, &user)
 		require.NoError(t, err)
 
@@ -149,7 +147,7 @@ func TestUsersService_Create(t *testing.T) {
 
 	// TODO: Implement validation in Go handlers
 	// t.Run("should return 400 for invalid user data", func(t *testing.T) {
-	// 	invalidUser := map[string]interface{}{
+	// 	invalidUser := map[string]any{
 	// 		"email": "", // Empty email
 	// 		"name":  "Invalid User",
 	// 	}
@@ -164,14 +162,14 @@ func TestUsersService_Update(t *testing.T) {
 	server := setupTestServer(t)
 
 	t.Run("should update user details", func(t *testing.T) {
-		update := map[string]interface{}{
+		update := map[string]any{
 			"name": "Updated Name",
 		}
 
 		rr := makeRequest(t, server, "PATCH", "/users/1", update)
 		assertStatus(t, rr, http.StatusOK)
 
-		var user map[string]interface{}
+		var user map[string]any
 		err := decodeJSON(rr, &user)
 		require.NoError(t, err)
 
@@ -181,8 +179,8 @@ func TestUsersService_Update(t *testing.T) {
 	})
 
 	t.Run("should update user address", func(t *testing.T) {
-		update := map[string]interface{}{
-			"address": map[string]interface{}{
+		update := map[string]any{
+			"address": map[string]any{
 				"street":     "999 Updated St",
 				"city":       "Updated City",
 				"state":      "UC",
@@ -194,17 +192,17 @@ func TestUsersService_Update(t *testing.T) {
 		rr := makeRequest(t, server, "PATCH", "/users/1", update)
 		assertStatus(t, rr, http.StatusOK)
 
-		var user map[string]interface{}
+		var user map[string]any
 		err := decodeJSON(rr, &user)
 		require.NoError(t, err)
 
-		address := user["address"].(map[string]interface{})
+		address := user["address"].(map[string]any)
 		assert.Equal(t, "999 Updated St", address["street"])
 		assert.Equal(t, "Updated City", address["city"])
 	})
 
 	t.Run("should return 404 when updating non-existent user", func(t *testing.T) {
-		update := map[string]interface{}{
+		update := map[string]any{
 			"name": "Ghost User",
 		}
 
@@ -245,7 +243,7 @@ func TestUsersService_Integration(t *testing.T) {
 		userID := createTestUser(t, server, "lifecycle@example.com", "Lifecycle User")
 
 		// Update user
-		update := map[string]interface{}{
+		update := map[string]any{
 			"name": "Updated Lifecycle User",
 		}
 		updateRR := makeRequest(t, server, "PATCH", "/users/"+userID, update)
@@ -255,7 +253,7 @@ func TestUsersService_Integration(t *testing.T) {
 		getRR := makeRequest(t, server, "GET", "/users/"+userID, nil)
 		assertStatus(t, getRR, http.StatusOK)
 
-		var user map[string]interface{}
+		var user map[string]any
 		err := decodeJSON(getRR, &user)
 		require.NoError(t, err)
 		assert.Equal(t, "Updated Lifecycle User", user["name"])
@@ -270,7 +268,3 @@ func TestUsersService_Integration(t *testing.T) {
 	})
 }
 
-// decodeJSON is a helper to decode JSON response
-func decodeJSON(rr *httptest.ResponseRecorder, v interface{}) error {
-	return json.NewDecoder(rr.Body).Decode(v)
-}
