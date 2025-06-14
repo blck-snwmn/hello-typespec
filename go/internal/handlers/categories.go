@@ -12,7 +12,7 @@ import (
 // CategoryWithChildren represents a category with its child categories
 type CategoryWithChildren struct {
 	generated.Category
-	Children []CategoryWithChildren `json:"children"`
+	Children []*CategoryWithChildren `json:"children"`
 }
 
 // CategoriesServiceList implements GET /categories
@@ -29,24 +29,24 @@ func (s *Server) CategoriesServiceTree(w http.ResponseWriter, r *http.Request) {
 
 	// Build tree structure
 	categoryMap := make(map[string]*CategoryWithChildren)
-	var rootCategories []CategoryWithChildren
+	var rootCategories []*CategoryWithChildren
 
 	// First pass: create CategoryWithChildren objects
 	for _, cat := range allCategories {
 		categoryMap[cat.Id] = &CategoryWithChildren{
 			Category: cat,
-			Children: []CategoryWithChildren{},
+			Children: []*CategoryWithChildren{},
 		}
 	}
 
-	// Second pass: build tree
+	// Second pass: build tree and collect roots
 	for _, catWithChildren := range categoryMap {
 		if catWithChildren.ParentId == nil {
-			rootCategories = append(rootCategories, *catWithChildren)
+			rootCategories = append(rootCategories, catWithChildren)
 		} else {
 			parent, exists := categoryMap[*catWithChildren.ParentId]
 			if exists {
-				parent.Children = append(parent.Children, *catWithChildren)
+				parent.Children = append(parent.Children, catWithChildren)
 			}
 		}
 	}
@@ -73,6 +73,15 @@ func (s *Server) CategoriesServiceCreate(w http.ResponseWriter, r *http.Request)
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		errorResponse(w, http.StatusBadRequest, "INVALID_REQUEST", "Invalid request body")
 		return
+	}
+
+	// Validate parent category exists if provided
+	if req.ParentId != nil {
+		_, exists := s.store.GetCategory(*req.ParentId)
+		if !exists {
+			errorResponse(w, http.StatusNotFound, "NOT_FOUND", "Parent category not found")
+			return
+		}
 	}
 
 	// Create new category

@@ -45,7 +45,7 @@ func (s *Server) OrdersServiceList(w http.ResponseWriter, r *http.Request, param
 	})
 
 	// Apply pagination
-	limit := int32(10)
+	limit := int32(20)
 	if params.Limit != nil {
 		limit = *params.Limit
 	}
@@ -95,7 +95,7 @@ func (s *Server) OrdersServiceListByUser(w http.ResponseWriter, r *http.Request,
 	})
 
 	// Apply pagination
-	limit := int32(10)
+	limit := int32(20)
 	if params.Limit != nil {
 		limit = *params.Limit
 	}
@@ -162,10 +162,9 @@ func (s *Server) OrdersServiceCreate(w http.ResponseWriter, r *http.Request, use
 		return
 	}
 
-	// Get user's cart
-	cart := s.store.GetCartByUserId(userId)
-	if len(cart.Items) == 0 {
-		errorResponse(w, http.StatusBadRequest, "EMPTY_CART", "Cart is empty")
+	// Validate items from request
+	if len(req.Items) == 0 {
+		errorResponse(w, http.StatusBadRequest, "EMPTY_CART", "No items in order")
 		return
 	}
 
@@ -173,28 +172,28 @@ func (s *Server) OrdersServiceCreate(w http.ResponseWriter, r *http.Request, use
 	var totalAmount float32
 	orderItems := []generated.OrderItem{}
 
-	for _, cartItem := range cart.Items {
-		product, ok := s.store.GetProduct(cartItem.ProductId)
+	for _, item := range req.Items {
+		product, ok := s.store.GetProduct(item.ProductId)
 		if !ok {
-			errorResponse(w, http.StatusNotFound, "NOT_FOUND", fmt.Sprintf("Product %s not found", cartItem.ProductId))
+			errorResponse(w, http.StatusNotFound, "NOT_FOUND", fmt.Sprintf("Product %s not found", item.ProductId))
 			return
 		}
-		if product.Stock < cartItem.Quantity {
+		if product.Stock < item.Quantity {
 			errorResponse(w, http.StatusBadRequest, "INSUFFICIENT_STOCK", fmt.Sprintf("Insufficient stock for product %s", product.Name))
 			return
 		}
 
 		itemPrice := product.Price
-		totalAmount += itemPrice * float32(cartItem.Quantity)
+		totalAmount += itemPrice * float32(item.Quantity)
 		orderItems = append(orderItems, generated.OrderItem{
-			ProductId:   cartItem.ProductId,
-			Quantity:    cartItem.Quantity,
+			ProductId:   item.ProductId,
+			Quantity:    item.Quantity,
 			Price:       itemPrice,
 			ProductName: product.Name,
 		})
 
 		// Update product stock
-		product.Stock -= cartItem.Quantity
+		product.Stock -= item.Quantity
 		product.UpdatedAt = time.Now()
 		s.store.UpdateProduct(product.Id, *product)
 	}
@@ -243,7 +242,7 @@ func (s *Server) OrdersServiceUpdateStatus(w http.ResponseWriter, r *http.Reques
 	validTransitions := map[generated.OrderStatus][]generated.OrderStatus{
 		generated.Pending:    {generated.Processing, generated.Cancelled},
 		generated.Processing: {generated.Shipped, generated.Cancelled},
-		generated.Shipped:    {generated.Delivered, generated.Cancelled},
+		generated.Shipped:    {generated.Delivered},
 		generated.Delivered:  {},
 		generated.Cancelled:  {},
 	}
@@ -281,11 +280,21 @@ func (s *Server) OrdersServiceCancel(w http.ResponseWriter, r *http.Request, ord
 		return
 	}
 
-	// Check if order can be cancelled
-	if order.Status == generated.Delivered || order.Status == generated.Cancelled {
-		errorResponse(w, http.StatusBadRequest, "INVALID_STATUS_TRANSITION",
+	// Check if order can be cancelled (only pending and processing can be cancelled)
+	if order.Status != generated.Pending && order.Status != generated.Processing {
+		errorResponse(w, http.StatusBadRequest, "INVALID_STATUS",
 			fmt.Sprintf("Cannot cancel order with status %s", order.Status))
 		return
+	}
+
+	// Restore inventory
+	for _, item := range order.Items {
+		product, ok := s.store.GetProduct(item.ProductId)
+		if ok {
+			product.Stock += item.Quantity
+			product.UpdatedAt = time.Now()
+			s.store.UpdateProduct(product.Id, *product)
+		}
 	}
 
 	updatedOrder := *order

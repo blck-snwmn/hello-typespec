@@ -74,7 +74,7 @@ func (s *Server) ProductsServiceList(w http.ResponseWriter, r *http.Request, par
 	}
 
 	// Apply pagination
-	limit := int32(10)
+	limit := int32(20)
 	if params.Limit != nil {
 		limit = *params.Limit
 	}
