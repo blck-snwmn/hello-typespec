@@ -354,11 +354,17 @@ export interface components {
             name: string;
             address?: components["schemas"]["Address"];
         };
+        /**
+         * @description Standard error codes used throughout the API
+         * @enum {string}
+         */
+        ErrorCode: "BAD_REQUEST" | "UNAUTHORIZED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "VALIDATION_ERROR" | "INSUFFICIENT_STOCK" | "INVALID_STATE_TRANSITION" | "INTERNAL_ERROR" | "SERVICE_UNAVAILABLE";
         /** @description Common error response */
         ErrorResponse: {
             error: {
-                code: string;
+                code: components["schemas"]["ErrorCode"];
                 message: string;
+                details?: unknown;
             };
         };
         /** @description Order model */

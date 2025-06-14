@@ -994,6 +994,20 @@ components:
         address:
           $ref: '#/components/schemas/Address'
       description: User creation request
+    ErrorCode:
+      type: string
+      enum:
+        - BAD_REQUEST
+        - UNAUTHORIZED
+        - FORBIDDEN
+        - NOT_FOUND
+        - CONFLICT
+        - VALIDATION_ERROR
+        - INSUFFICIENT_STOCK
+        - INVALID_STATE_TRANSITION
+        - INTERNAL_ERROR
+        - SERVICE_UNAVAILABLE
+      description: Standard error codes used throughout the API
     ErrorResponse:
       type: object
       required:
@@ -1003,9 +1017,10 @@ components:
           type: object
           properties:
             code:
-              type: string
+              $ref: '#/components/schemas/ErrorCode'
             message:
               type: string
+            details: {}
           required:
             - code
             - message

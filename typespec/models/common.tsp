@@ -5,12 +5,32 @@ using TypeSpec.Http;
 namespace ECSite;
 
 /**
+ * Standard error codes used throughout the API
+ */
+enum ErrorCode {
+  // Client errors (4xx)
+  BAD_REQUEST: "BAD_REQUEST",
+  UNAUTHORIZED: "UNAUTHORIZED",
+  FORBIDDEN: "FORBIDDEN",
+  NOT_FOUND: "NOT_FOUND",
+  CONFLICT: "CONFLICT",
+  VALIDATION_ERROR: "VALIDATION_ERROR",
+  INSUFFICIENT_STOCK: "INSUFFICIENT_STOCK",
+  INVALID_STATE_TRANSITION: "INVALID_STATE_TRANSITION",
+  
+  // Server errors (5xx)
+  INTERNAL_ERROR: "INTERNAL_ERROR",
+  SERVICE_UNAVAILABLE: "SERVICE_UNAVAILABLE",
+}
+
+/**
  * Common error response
  */
 model ErrorResponse {
   error: {
-    code: string;
+    code: ErrorCode;
     message: string;
+    details?: unknown;
   };
 }
 
