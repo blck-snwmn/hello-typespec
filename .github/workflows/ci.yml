@@ -1,6 +1,9 @@
-name: PR Check
+name: CI Check
 
 on:
+  push:
+    branches:
+      - '**'
   pull_request:
     types: [opened, synchronize, reopened]
 
@@ -35,23 +38,20 @@ jobs:
       - name: Compile TypeSpec
         run: pnpm compile:spec
 
-      - name: Generate TypeScript types
-        run: pnpm generate:typescript
-
-      - name: Generate Go code
-        run: pnpm generate:go
+      - name: Generate all code
+        run: pnpm generate:all
 
       - name: Check for uncommitted changes
         run: |
           if [ -n "$(git status --porcelain)" ]; then
-            echo "Error: Generated code is not up to date. Please run 'pnpm generate:all' and commit the changes."
+            echo "Error: Generated code is not up to date."
             git status --porcelain
             git diff
             exit 1
           fi
 
   typescript-check:
-    name: TypeScript Build & Test
+    name: TypeScript Build & Test with Coverage
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -72,14 +72,20 @@ jobs:
       - name: Build TypeScript
         run: pnpm -F typescript build
 
-      - name: Run TypeScript tests
-        run: pnpm -F typescript test
+      - name: Run TypeScript tests with coverage
+        run: pnpm -F typescript test --coverage
 
       - name: Type check
         run: pnpm -F typescript exec tsc --noEmit
 
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: typescript-coverage
+          path: typescript/coverage/
+
   go-check:
-    name: Go Build & Test
+    name: Go Build & Test with Coverage
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -101,15 +107,25 @@ jobs:
         working-directory: ./go
         run: go build ./...
 
-      - name: Run Go tests
+      - name: Run Go tests with coverage
         working-directory: ./go
-        run: go test -v ./...
+        run: |
+          go test -v -coverprofile=coverage.out ./...
+          go tool cover -html=coverage.out -o coverage.html
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: go-coverage
+          path: |
+            go/coverage.out
+            go/coverage.html
 
       - name: Check Go formatting
         working-directory: ./go
         run: |
           if [ -n "$(gofmt -l .)" ]; then
-            echo "Error: Go code is not formatted. Please run 'gofmt -w .' and commit the changes."
+            echo "Error: Go code is not formatted."
             gofmt -d .
             exit 1
           fi
