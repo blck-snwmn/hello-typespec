@@ -587,29 +587,27 @@ paths:
           content:
             application/json:
               schema:
-                anyOf:
-                  - type: object
-                    required:
-                      - items
-                      - total
-                      - limit
-                      - offset
-                    properties:
-                      items:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/User'
-                      total:
-                        type: integer
-                        format: int32
-                      limit:
-                        type: integer
-                        format: int32
-                      offset:
-                        type: integer
-                        format: int32
-                    description: Paginated response wrapper
-                  - $ref: '#/components/schemas/ErrorResponse'
+                type: object
+                required:
+                  - items
+                  - total
+                  - limit
+                  - offset
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  total:
+                    type: integer
+                    format: int32
+                  limit:
+                    type: integer
+                    format: int32
+                  offset:
+                    type: integer
+                    format: int32
+                description: Paginated response wrapper
       tags:
         - Users
     post:

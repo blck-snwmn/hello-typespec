@@ -1097,7 +1097,7 @@ export interface operations {
                         limit: number;
                         /** Format: int32 */
                         offset: number;
-                    } | components["schemas"]["ErrorResponse"];
+                    };
                 };
             };
         };

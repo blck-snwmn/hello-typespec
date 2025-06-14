@@ -16,7 +16,7 @@ interface UsersService {
    * List all users
    */
   @get
-  list(...PaginationParams): PaginatedResponse<User> | ErrorResponse;
+  list(...PaginationParams): PaginatedResponse<User>;
 
   /**
    * Get a user by ID
