@@ -3,8 +3,9 @@ import app from '../index'
 import { store } from '../stores'
 import type { operations, components } from '../types/api'
 
-type UserListResponse = components['schemas']['User'][]
+type UserListResponse = operations['UsersService_list']['responses']['200']['content']['application/json']
 type User = components['schemas']['User']
+type Cart = components['schemas']['Cart']
 type ErrorResponse = { error: { code: string; message: string } }
 
 describe('Users API', () => {
@@ -21,12 +22,42 @@ describe('Users API', () => {
       const json = await res.json() as UserListResponse
 
       expect(res.status).toBe(200)
-      expect(Array.isArray(json)).toBe(true)
-      expect(json).toHaveLength(2)
-      expect(json[0]).toHaveProperty('id')
-      expect(json[0]).toHaveProperty('email')
-      expect(json[0]).toHaveProperty('name')
-      expect(json[0]).toHaveProperty('address')
+      expect(json).toHaveProperty('items')
+      expect(json).toHaveProperty('total')
+      expect(json).toHaveProperty('limit')
+      expect(json).toHaveProperty('offset')
+      expect(Array.isArray(json.items)).toBe(true)
+      expect(json.items).toHaveLength(2)
+      expect(json.total).toBe(2)
+      expect(json.limit).toBe(20)
+      expect(json.offset).toBe(0)
+      expect(json.items[0]).toHaveProperty('id')
+      expect(json.items[0]).toHaveProperty('email')
+      expect(json.items[0]).toHaveProperty('name')
+      expect(json.items[0]).toHaveProperty('address')
+    })
+
+    it('should support pagination', async () => {
+      const res1 = await app.request('/users?limit=1&offset=0')
+      const json1 = await res1.json() as UserListResponse
+
+      expect(res1.status).toBe(200)
+      expect(json1.items).toHaveLength(1)
+      expect(json1.total).toBe(2)
+      expect(json1.limit).toBe(1)
+      expect(json1.offset).toBe(0)
+
+      const res2 = await app.request('/users?limit=1&offset=1')
+      const json2 = await res2.json() as UserListResponse
+
+      expect(res2.status).toBe(200)
+      expect(json2.items).toHaveLength(1)
+      expect(json2.total).toBe(2)
+      expect(json2.limit).toBe(1)
+      expect(json2.offset).toBe(1)
+
+      // Ensure different users
+      expect(json1.items[0].id).not.toBe(json2.items[0].id)
     })
   })
 
@@ -91,7 +122,7 @@ describe('Users API', () => {
 
       // Verify cart was created for new user
       const cartRes = await app.request(`/carts/users/${json.id}`)
-      const cart = await cartRes.json()
+      const cart = await cartRes.json() as Cart
       expect(cart).toHaveProperty('userId', json.id)
       expect(cart.items).toHaveLength(0)
     })

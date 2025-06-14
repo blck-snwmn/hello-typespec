@@ -88,6 +88,7 @@ orders.get('/users/:userId', (c) => {
 // POST /orders/users/{userId}
 orders.post('/users/:userId', async (c) => {
   const userId = c.req.param('userId')
+  const body = await c.req.json<operations['OrdersService_create']['requestBody']['content']['application/json']>()
   
   // Validate user exists
   const user = store.getUser(userId)
@@ -137,7 +138,7 @@ orders.post('/users/:userId', async (c) => {
     items: orderItems,
     totalAmount,
     status: 'pending',
-    shippingAddress: user.address,
+    shippingAddress: body.shippingAddress,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }

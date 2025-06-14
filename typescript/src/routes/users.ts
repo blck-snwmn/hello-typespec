@@ -3,6 +3,7 @@ import type { components, operations } from '../types/api'
 import { store } from '../stores'
 
 type User = components['schemas']['User']
+type UserListResponse = operations['UsersService_list']['responses']['200']['content']['application/json']
 type UserCreateRequest = operations['UsersService_create']['requestBody']['content']['application/json']
 type UserUpdateRequest = operations['UsersService_update']['requestBody']['content']['application/json']
 
@@ -10,8 +11,22 @@ const users = new Hono()
 
 // GET /users
 users.get('/', (c) => {
+  const limit = parseInt(c.req.query('limit') || '20')
+  const offset = parseInt(c.req.query('offset') || '0')
+  
   const allUsers = store.getUsers()
-  return c.json(allUsers)
+  
+  // Apply pagination
+  const paginatedUsers = allUsers.slice(offset, offset + limit)
+  
+  const response: UserListResponse = {
+    items: paginatedUsers,
+    total: allUsers.length,
+    limit,
+    offset,
+  }
+  
+  return c.json(response)
 })
 
 // GET /users/{userId}
