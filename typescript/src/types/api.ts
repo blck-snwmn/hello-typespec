@@ -128,6 +128,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/orders/cancel/{orderId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Cancel an order */
+        post: operations["OrdersService_cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/status/{orderId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description Update order status */
+        patch: operations["OrdersService_updateStatus"];
+        trace?: never;
+    };
     "/orders/users/{userId}": {
         parameters: {
             query?: never;
@@ -161,40 +195,6 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
-        trace?: never;
-    };
-    "/orders/{orderId}/cancel": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description Cancel an order */
-        post: operations["OrdersService_cancel"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/orders/{orderId}/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** @description Update order status */
-        patch: operations["OrdersService_updateStatus"];
         trace?: never;
     };
     "/products": {
@@ -792,6 +792,54 @@ export interface operations {
             };
         };
     };
+    OrdersService_cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: components["schemas"]["uuid"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The request has succeeded. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Order"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    OrdersService_updateStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: components["schemas"]["uuid"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateOrderStatusRequest"];
+            };
+        };
+        responses: {
+            /** @description The request has succeeded. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Order"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     OrdersService_listByUser: {
         parameters: {
             query?: {
@@ -863,54 +911,6 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: {
-            /** @description The request has succeeded. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Order"] | components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    OrdersService_cancel: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                orderId: components["schemas"]["uuid"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description The request has succeeded. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Order"] | components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    OrdersService_updateStatus: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                orderId: components["schemas"]["uuid"];
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateOrderStatusRequest"];
-            };
-        };
         responses: {
             /** @description The request has succeeded. */
             200: {

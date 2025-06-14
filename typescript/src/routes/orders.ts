@@ -4,7 +4,6 @@ import { store } from '../stores'
 
 type Order = components['schemas']['Order']
 type OrderStatus = components['schemas']['OrderStatus']
-type OrderCreateRequest = operations['OrdersService_create']['requestBody']['content']['application/json']
 type OrderListResponse = operations['OrdersService_list']['responses']['200']['content']['application/json']
 type OrderUpdateStatusRequest = operations['OrdersService_updateStatus']['requestBody']['content']['application/json']
 
@@ -52,10 +51,43 @@ orders.get('/:orderId', (c) => {
   return c.json(order)
 })
 
+// GET /orders/users/{userId}
+orders.get('/users/:userId', (c) => {
+  const userId = c.req.param('userId')
+  const limit = parseInt(c.req.query('limit') || '10')
+  const offset = parseInt(c.req.query('offset') || '0')
+  const status = c.req.query('status')
+
+  // Validate user exists
+  const user = store.getUser(userId)
+  if (!user) {
+    return c.json({ error: { code: 'NOT_FOUND', message: 'User not found' } }, 404)
+  }
+
+  // Get all orders for the user
+  let userOrders = store.getOrders().filter(order => order.userId === userId)
+
+  // Apply status filter if provided
+  if (status) {
+    userOrders = userOrders.filter(order => order.status === status)
+  }
+
+  // Apply pagination
+  const paginatedOrders = userOrders.slice(offset, offset + limit)
+
+  const response: OrderListResponse = {
+    items: paginatedOrders,
+    total: userOrders.length,
+    limit,
+    offset,
+  }
+
+  return c.json(response)
+})
+
 // POST /orders/users/{userId}
 orders.post('/users/:userId', async (c) => {
   const userId = c.req.param('userId')
-  const body = await c.req.json<OrderCreateRequest>()
   
   // Validate user exists
   const user = store.getUser(userId)
@@ -105,7 +137,7 @@ orders.post('/users/:userId', async (c) => {
     items: orderItems,
     totalAmount,
     status: 'pending',
-    shippingAddress: body.shippingAddress,
+    shippingAddress: user.address,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }
@@ -121,8 +153,8 @@ orders.post('/users/:userId', async (c) => {
   return c.json(created, 201)
 })
 
-// PATCH /orders/{orderId}/status
-orders.patch('/:orderId/status', async (c) => {
+// PATCH /orders/status/{orderId}
+orders.patch('/status/:orderId', async (c) => {
   const orderId = c.req.param('orderId')
   const body = await c.req.json<OrderUpdateStatusRequest>()
   

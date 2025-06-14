@@ -254,7 +254,7 @@ describe('Orders API', () => {
     })
   })
 
-  describe('PATCH /orders/:orderId/status', () => {
+  describe('PATCH /orders/status/:orderId', () => {
     let orderId: string
 
     beforeEach(async () => {
@@ -284,7 +284,7 @@ describe('Orders API', () => {
     })
 
     it('should update order status', async () => {
-      const res = await app.request(`/orders/${orderId}/status`, {
+      const res = await app.request(`/orders/status/${orderId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'processing' }),
@@ -300,7 +300,7 @@ describe('Orders API', () => {
 
     it('should validate status transitions', async () => {
       // Try invalid transition from pending to delivered
-      const res = await app.request(`/orders/${orderId}/status`, {
+      const res = await app.request(`/orders/status/${orderId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'delivered' }),
@@ -312,7 +312,7 @@ describe('Orders API', () => {
     })
 
     it('should return 404 for non-existent order', async () => {
-      const res = await app.request('/orders/999/status', {
+      const res = await app.request('/orders/status/999', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'processing' }),
