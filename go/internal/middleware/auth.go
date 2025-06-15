@@ -1,12 +1,12 @@
 package middleware
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 	"strings"
 
 	"github.com/blck-snwmn/hello-typespec/go/generated"
+	"github.com/blck-snwmn/hello-typespec/go/internal/auth"
 	"github.com/blck-snwmn/hello-typespec/go/internal/storage"
 )
 
@@ -37,7 +37,7 @@ func AuthMiddleware(authStore *storage.AuthStore) func(http.Handler) http.Handle
 			}
 
 			// Add user to request context
-			ctx := context.WithValue(r.Context(), "user", user)
+			ctx := auth.WithUser(r.Context(), user)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

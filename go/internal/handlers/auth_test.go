@@ -2,13 +2,13 @@ package handlers
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/blck-snwmn/hello-typespec/go/generated"
+	authctx "github.com/blck-snwmn/hello-typespec/go/internal/auth"
 	"github.com/blck-snwmn/hello-typespec/go/internal/storage"
 	"github.com/blck-snwmn/hello-typespec/go/internal/store"
 )
@@ -142,7 +142,7 @@ func TestAuthHandlers_GetCurrentUser(t *testing.T) {
 	authStore := storage.NewAuthStore()
 	server := NewServer(memoryStore, authStore)
 
-	// Login to create a token  
+	// Login to create a token
 	session, err := authStore.Login("alice@example.com", "password123")
 	if err != nil {
 		t.Fatalf("Failed to create test session: %v", err)
@@ -153,16 +153,16 @@ func TestAuthHandlers_GetCurrentUser(t *testing.T) {
 	t.Run("successful get current user", func(t *testing.T) {
 		req := httptest.NewRequest("GET", "/auth/me", nil)
 		req.Header.Set("Authorization", "Bearer "+token)
-		
+
 		// Since GetCurrentUser expects user in context, we need to add it
 		user := &storage.AuthUser{
 			ID:    session.User.ID,
 			Email: session.User.Email,
 			Name:  session.User.Name,
 		}
-		ctx := context.WithValue(req.Context(), "user", user)
+		ctx := authctx.WithUser(req.Context(), user)
 		req = req.WithContext(ctx)
-		
+
 		w := httptest.NewRecorder()
 
 		server.AuthServiceGetCurrentUser(w, req, generated.AuthServiceGetCurrentUserParams{})

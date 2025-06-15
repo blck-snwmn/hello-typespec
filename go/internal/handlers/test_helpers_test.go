@@ -2,13 +2,13 @@ package handlers_test
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/blck-snwmn/hello-typespec/go/generated"
+	authctx "github.com/blck-snwmn/hello-typespec/go/internal/auth"
 	"github.com/blck-snwmn/hello-typespec/go/internal/handlers"
 	"github.com/blck-snwmn/hello-typespec/go/internal/middleware"
 	"github.com/blck-snwmn/hello-typespec/go/internal/storage"
@@ -32,7 +32,7 @@ func setupTestServer(t testing.TB) *TestServer {
 	memStore := store.NewMemoryStore()
 	authStorage := storage.NewAuthStore()
 	server := handlers.NewServer(memStore, authStorage)
-	
+
 	// Create handler with auth middleware applied to protected routes
 	authMiddleware := middleware.AuthMiddleware(authStorage)
 	handler := handlers.CreateHandlerWithMiddleware(server, authMiddleware)
@@ -47,7 +47,6 @@ func setupTestServer(t testing.TB) *TestServer {
 		store:       memStore,
 	}
 }
-
 
 // makeRequest is a helper to make HTTP requests in tests
 func makeRequest(t testing.TB, server *TestServer, method, path string, body any) *httptest.ResponseRecorder {
@@ -145,7 +144,7 @@ func makeAuthenticatedRequest(t testing.TB, server *TestServer, method, path str
 	if path == "/auth/me" && token != "" {
 		user, err := server.authStorage.ValidateToken(token)
 		if err == nil && user != nil {
-			ctx := context.WithValue(req.Context(), "user", user)
+			ctx := authctx.WithUser(req.Context(), user)
 			req = req.WithContext(ctx)
 		}
 	}
@@ -178,10 +177,10 @@ func loginTestUser(t testing.TB, server *TestServer, email, password string) str
 // setupTestServerWithAuth creates a test server and logs in a default user
 func setupTestServerWithAuth(t testing.TB) (*TestServer, string, string) {
 	t.Helper()
-	
+
 	server := setupTestServer(t)
 	token := loginTestUser(t, server, "alice@example.com", "password123")
-	
+
 	return server, "550e8400-e29b-41d4-a716-446655440001", token
 }
 
@@ -277,4 +276,3 @@ func createTestCategory(t testing.TB, server *TestServer, name string, parentID 
 func decodeJSON(rr *httptest.ResponseRecorder, v any) error {
 	return json.NewDecoder(rr.Body).Decode(v)
 }
-

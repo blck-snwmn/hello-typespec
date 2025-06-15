@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/blck-snwmn/hello-typespec/go/generated"
+	authctx "github.com/blck-snwmn/hello-typespec/go/internal/auth"
 	"github.com/blck-snwmn/hello-typespec/go/internal/storage"
 )
 
@@ -80,7 +81,11 @@ func (h *AuthHandlers) Logout(w http.ResponseWriter, r *http.Request) {
 // GetCurrentUser handles GET /auth/me
 func (h *AuthHandlers) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 	// User is already validated by middleware
-	user := r.Context().Value("user").(*storage.AuthUser)
+	user, ok := authctx.GetUser(r.Context())
+	if !ok {
+		errorResponse(w, http.StatusUnauthorized, generated.UNAUTHORIZED, "User not found in context")
+		return
+	}
 
 	response := generated.AuthUser{
 		Id:    user.ID,
