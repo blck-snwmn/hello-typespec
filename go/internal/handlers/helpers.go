@@ -37,21 +37,3 @@ func errorResponse(w http.ResponseWriter, statusCode int, code generated.ErrorCo
 	}
 	json.NewEncoder(w).Encode(response)
 }
-
-// errorResponseWithDetails sends a standardized error response with additional details
-func errorResponseWithDetails(w http.ResponseWriter, statusCode int, code generated.ErrorCode, message string, details interface{}) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-	response := generated.ErrorResponse{
-		Error: struct {
-			Code    generated.ErrorCode `json:"code"`
-			Details *interface{}        `json:"details,omitempty"`
-			Message string              `json:"message"`
-		}{
-			Code:    code,
-			Message: message,
-			Details: &details,
-		},
-	}
-	json.NewEncoder(w).Encode(response)
-}
