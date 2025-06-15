@@ -26,25 +26,28 @@ interface ProductsService {
   get(@path productId: uuid): Product | ErrorResponse;
 
   /**
-   * Create a new product
+   * Create a new product (Admin only)
    */
   @post
+  @useAuth(TypeSpec.Http.BearerAuth)
   create(@body product: CreateProductRequest): Product | ErrorResponse;
 
   /**
-   * Update a product
+   * Update a product (Admin only)
    */
   @patch
   @route("/{productId}")
+  @useAuth(TypeSpec.Http.BearerAuth)
   update(
     @path productId: uuid,
     @body product: UpdateProductRequest
   ): Product | ErrorResponse;
 
   /**
-   * Delete a product
+   * Delete a product (Admin only)
    */
   @delete
   @route("/{productId}")
+  @useAuth(TypeSpec.Http.BearerAuth)
   delete(@path productId: uuid): void | ErrorResponse;
 }

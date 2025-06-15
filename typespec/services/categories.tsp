@@ -33,25 +33,28 @@ interface CategoriesService {
   get(@path categoryId: uuid): Category | ErrorResponse;
 
   /**
-   * Create a new category
+   * Create a new category (Admin only)
    */
   @post
+  @useAuth(TypeSpec.Http.BearerAuth)
   create(@body category: CreateCategoryRequest): Category | ErrorResponse;
 
   /**
-   * Update a category
+   * Update a category (Admin only)
    */
   @patch
   @route("/{categoryId}")
+  @useAuth(TypeSpec.Http.BearerAuth)
   update(
     @path categoryId: uuid,
     @body category: UpdateCategoryRequest
   ): Category | ErrorResponse;
 
   /**
-   * Delete a category
+   * Delete a category (Admin only)
    */
   @delete
   @route("/{categoryId}")
+  @useAuth(TypeSpec.Http.BearerAuth)
   delete(@path categoryId: uuid): void | ErrorResponse;
 }

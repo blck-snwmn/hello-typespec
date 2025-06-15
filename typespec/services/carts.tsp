@@ -17,6 +17,7 @@ interface CartsService {
    */
   @get
   @route("/users/{userId}")
+  @useAuth(TypeSpec.Http.BearerAuth)
   getByUser(@path userId: uuid): CartSummary | ErrorResponse;
 
   /**
@@ -24,6 +25,7 @@ interface CartsService {
    */
   @post
   @route("/users/{userId}/items")
+  @useAuth(TypeSpec.Http.BearerAuth)
   addItem(
     @path userId: uuid,
     @body item: AddCartItemRequest
@@ -34,6 +36,7 @@ interface CartsService {
    */
   @patch
   @route("/users/{userId}/items/{productId}")
+  @useAuth(TypeSpec.Http.BearerAuth)
   updateItem(
     @path userId: uuid,
     @path productId: uuid,
@@ -45,6 +48,7 @@ interface CartsService {
    */
   @delete
   @route("/users/{userId}/items/{productId}")
+  @useAuth(TypeSpec.Http.BearerAuth)
   removeItem(
     @path userId: uuid,
     @path productId: uuid
@@ -55,5 +59,6 @@ interface CartsService {
    */
   @delete
   @route("/users/{userId}/items")
+  @useAuth(TypeSpec.Http.BearerAuth)
   clear(@path userId: uuid): void | ErrorResponse;
 }

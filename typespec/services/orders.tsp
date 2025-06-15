@@ -13,9 +13,10 @@ namespace ECSite;
 @tag("Orders")
 interface OrdersService {
   /**
-   * List all orders with optional filtering
+   * List all orders with optional filtering (Admin only)
    */
   @get
+  @useAuth(TypeSpec.Http.BearerAuth)
   list(...OrderSearchParams): PaginatedResponse<Order> | ErrorResponse;
 
   /**
@@ -23,6 +24,7 @@ interface OrdersService {
    */
   @get
   @route("/{orderId}")
+  @useAuth(TypeSpec.Http.BearerAuth)
   get(@path orderId: uuid): Order | ErrorResponse;
 
   /**
@@ -30,16 +32,18 @@ interface OrdersService {
    */
   @post
   @route("/users/{userId}")
+  @useAuth(TypeSpec.Http.BearerAuth)
   create(
     @path userId: uuid,
     @body order: CreateOrderRequest
   ): Order | ErrorResponse;
 
   /**
-   * Update order status
+   * Update order status (Admin only)
    */
   @patch
   @route("/status/{orderId}")
+  @useAuth(TypeSpec.Http.BearerAuth)
   updateStatus(
     @path orderId: uuid,
     @body status: UpdateOrderStatusRequest
@@ -50,6 +54,7 @@ interface OrdersService {
    */
   @post
   @route("/cancel/{orderId}")
+  @useAuth(TypeSpec.Http.BearerAuth)
   cancel(@path orderId: uuid): Order | ErrorResponse;
 
   /**
@@ -57,6 +62,7 @@ interface OrdersService {
    */
   @get
   @route("/users/{userId}")
+  @useAuth(TypeSpec.Http.BearerAuth)
   listByUser(
     @path userId: uuid,
     ...PaginationParams

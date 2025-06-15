@@ -13,16 +13,18 @@ namespace ECSite;
 @tag("Users")
 interface UsersService {
   /**
-   * List all users
+   * List all users (Admin only)
    */
   @get
-  list(...PaginationParams): PaginatedResponse<User>;
+  @useAuth(TypeSpec.Http.BearerAuth)
+  list(...PaginationParams): PaginatedResponse<User> | ErrorResponse;
 
   /**
    * Get a user by ID
    */
   @get
   @route("/{userId}")
+  @useAuth(TypeSpec.Http.BearerAuth)
   get(@path userId: uuid): User | ErrorResponse;
 
   /**
@@ -36,6 +38,7 @@ interface UsersService {
    */
   @patch
   @route("/{userId}")
+  @useAuth(TypeSpec.Http.BearerAuth)
   update(
     @path userId: uuid,
     @body user: UpdateUserRequest
@@ -46,5 +49,6 @@ interface UsersService {
    */
   @delete
   @route("/{userId}")
+  @useAuth(TypeSpec.Http.BearerAuth)
   delete(@path userId: uuid): void | ErrorResponse;
 }
