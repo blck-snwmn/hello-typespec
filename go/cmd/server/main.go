@@ -9,8 +9,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/blck-snwmn/hello-typespec/go/generated"
 	"github.com/blck-snwmn/hello-typespec/go/internal/handlers"
+	"github.com/blck-snwmn/hello-typespec/go/internal/middleware"
+	"github.com/blck-snwmn/hello-typespec/go/internal/storage"
 	"github.com/blck-snwmn/hello-typespec/go/internal/store"
 )
 
@@ -18,11 +19,17 @@ func main() {
 	// Initialize store
 	memoryStore := store.NewMemoryStore()
 
-	// Create server with handlers
-	server := handlers.NewServer(memoryStore)
+	// Initialize auth storage
+	authStore := storage.NewAuthStore()
 
-	// Create HTTP handler with generated server
-	handler := generated.Handler(server)
+	// Create server with handlers
+	server := handlers.NewServer(memoryStore, authStore)
+
+	// Create auth middleware
+	authMiddleware := middleware.AuthMiddleware(authStore)
+
+	// Create HTTP handler with generated server and wrap with custom middleware
+	handler := handlers.CreateHandlerWithMiddleware(server, authMiddleware)
 
 	// Setup CORS middleware
 	corsHandler := corsMiddleware(handler)
@@ -62,6 +69,7 @@ func main() {
 
 	log.Println("Server exiting")
 }
+
 
 // corsMiddleware adds CORS headers to responses
 func corsMiddleware(next http.Handler) http.Handler {

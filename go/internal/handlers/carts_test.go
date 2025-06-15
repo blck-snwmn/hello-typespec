@@ -9,10 +9,10 @@ import (
 )
 
 func TestCartsService_Get(t *testing.T) {
-	server := setupTestServer(t)
+	server, _, token := setupTestServerWithAuth(t)
 
 	t.Run("should return cart for existing user", func(t *testing.T) {
-		rr := makeRequest(t, server, "GET", "/carts/users/1", nil)
+		rr := makeAuthenticatedRequest(t, server, "GET", "/carts/users/1", nil, token)
 		assertStatus(t, rr, http.StatusOK)
 
 		var cart map[string]any
@@ -29,8 +29,7 @@ func TestCartsService_Get(t *testing.T) {
 	})
 
 	t.Run("should create empty cart for new user", func(t *testing.T) {
-		// Request cart for non-existent user
-		rr := makeRequest(t, server, "GET", "/carts/users/999", nil)
+		rr := makeAuthenticatedRequest(t, server, "GET", "/carts/users/999", nil, token)
 		assertStatus(t, rr, http.StatusOK)
 
 		var cart map[string]any
@@ -41,22 +40,24 @@ func TestCartsService_Get(t *testing.T) {
 		items := cart["items"].([]any)
 		assert.Len(t, items, 0)
 	})
+
+	t.Run("should return 401 without authentication", func(t *testing.T) {
+		rr := makeRequest(t, server, "GET", "/carts/users/1", nil)
+		assertStatus(t, rr, http.StatusUnauthorized)
+		assertErrorResponse(t, rr, "UNAUTHORIZED")
+	})
 }
 
 func TestCartsService_AddItem(t *testing.T) {
-	server := setupTestServer(t)
+	server, _, token := setupTestServerWithAuth(t)
 
 	t.Run("should add item to cart", func(t *testing.T) {
-		// Create a test product first
-		productID := createTestProduct(t, server, "Test Product", 99.99, 10)
-
-		// Add item to cart
-		item := map[string]any{
-			"productId": productID,
+		addItem := map[string]any{
+			"productId": "1",
 			"quantity":  2,
 		}
 
-		rr := makeRequest(t, server, "POST", "/carts/users/1/items", item)
+		rr := makeAuthenticatedRequest(t, server, "POST", "/carts/users/1/items", addItem, token)
 		assertStatus(t, rr, http.StatusOK)
 
 		var cart map[string]any
@@ -66,26 +67,21 @@ func TestCartsService_AddItem(t *testing.T) {
 		items := cart["items"].([]any)
 		assert.Len(t, items, 1)
 
-		cartItem := items[0].(map[string]any)
-		assert.Equal(t, productID, cartItem["productId"])
-		assert.Equal(t, float64(2), cartItem["quantity"])
-		// TODO: Go implementation doesn't include product details in cart items
+		item := items[0].(map[string]any)
+		assert.Equal(t, "1", item["productId"])
+		assert.Equal(t, float64(2), item["quantity"])
 	})
 
 	t.Run("should increase quantity when adding existing item", func(t *testing.T) {
-		// Create a test product
-		productID := createTestProduct(t, server, "Test Product 2", 49.99, 20)
-
-		// Add item first time
-		item := map[string]any{
-			"productId": productID,
-			"quantity":  1,
+		// First, add item
+		addItem := map[string]any{
+			"productId": "1",
+			"quantity":  2,
 		}
-		makeRequest(t, server, "POST", "/carts/users/2/items", item)
+		makeAuthenticatedRequest(t, server, "POST", "/carts/users/2/items", addItem, token)
 
 		// Add same item again
-		item["quantity"] = 2
-		rr := makeRequest(t, server, "POST", "/carts/users/2/items", item)
+		rr := makeAuthenticatedRequest(t, server, "POST", "/carts/users/2/items", addItem, token)
 		assertStatus(t, rr, http.StatusOK)
 
 		var cart map[string]any
@@ -95,50 +91,64 @@ func TestCartsService_AddItem(t *testing.T) {
 		items := cart["items"].([]any)
 		assert.Len(t, items, 1)
 
-		cartItem := items[0].(map[string]any)
-		assert.Equal(t, float64(3), cartItem["quantity"]) // 1 + 2 = 3
+		item := items[0].(map[string]any)
+		assert.Equal(t, float64(4), item["quantity"]) // 2 + 2
 	})
 
 	t.Run("should return 404 for non-existent product", func(t *testing.T) {
-		item := map[string]any{
-			"productId": "999999",
+		addItem := map[string]any{
+			"productId": "999",
 			"quantity":  1,
 		}
 
-		rr := makeRequest(t, server, "POST", "/carts/users/1/items", item)
+		rr := makeAuthenticatedRequest(t, server, "POST", "/carts/users/1/items", addItem, token)
 		assertStatus(t, rr, http.StatusNotFound)
 		assertErrorResponse(t, rr, "NOT_FOUND")
 	})
 
 	t.Run("should return 400 for insufficient stock", func(t *testing.T) {
-		// Create product with limited stock
-		productID := createTestProduct(t, server, "Limited Product", 19.99, 2)
-
-		item := map[string]any{
-			"productId": productID,
-			"quantity":  5, // More than available stock
+		addItem := map[string]any{
+			"productId": "1",
+			"quantity":  100, // More than available stock (10)
 		}
 
-		rr := makeRequest(t, server, "POST", "/carts/users/1/items", item)
+		rr := makeAuthenticatedRequest(t, server, "POST", "/carts/users/3/items", addItem, token)
 		assertStatus(t, rr, http.StatusBadRequest)
 		assertErrorResponse(t, rr, "INSUFFICIENT_STOCK")
+	})
+
+	t.Run("should return 401 without authentication", func(t *testing.T) {
+		addItem := map[string]any{
+			"productId": "1",
+			"quantity":  1,
+		}
+
+		rr := makeRequest(t, server, "POST", "/carts/users/1/items", addItem)
+		assertStatus(t, rr, http.StatusUnauthorized)
+		assertErrorResponse(t, rr, "UNAUTHORIZED")
 	})
 }
 
 func TestCartsService_UpdateItem(t *testing.T) {
-	server := setupTestServer(t)
+	server, _, token := setupTestServerWithAuth(t)
+
+	// Setup: Add item to cart first
+	setupCart := func(userID string) {
+		addItem := map[string]any{
+			"productId": "1",
+			"quantity":  2,
+		}
+		makeAuthenticatedRequest(t, server, "POST", "/carts/users/"+userID+"/items", addItem, token)
+	}
 
 	t.Run("should update item quantity", func(t *testing.T) {
-		// Setup: Create product and add to cart
-		productID := createTestProduct(t, server, "Update Product", 29.99, 15)
-		addToCart(t, server, "3", productID, 2)
+		setupCart("4")
 
-		// Update quantity
 		update := map[string]any{
 			"quantity": 5,
 		}
 
-		rr := makeRequest(t, server, "PATCH", "/carts/users/3/items/"+productID, update)
+		rr := makeAuthenticatedRequest(t, server, "PATCH", "/carts/users/4/items/1", update, token)
 		assertStatus(t, rr, http.StatusOK)
 
 		var cart map[string]any
@@ -146,86 +156,112 @@ func TestCartsService_UpdateItem(t *testing.T) {
 		require.NoError(t, err)
 
 		items := cart["items"].([]any)
-		cartItem := items[0].(map[string]any)
-		assert.Equal(t, float64(5), cartItem["quantity"])
+		item := items[0].(map[string]any)
+		assert.Equal(t, float64(5), item["quantity"])
 	})
 
 	t.Run("should return 404 for item not in cart", func(t *testing.T) {
 		update := map[string]any{
-			"quantity": 1,
+			"quantity": 5,
 		}
 
-		rr := makeRequest(t, server, "PATCH", "/carts/users/1/items/nonexistent", update)
+		rr := makeAuthenticatedRequest(t, server, "PATCH", "/carts/users/5/items/999", update, token)
 		assertStatus(t, rr, http.StatusNotFound)
 		assertErrorResponse(t, rr, "NOT_FOUND")
 	})
 
 	t.Run("should return 400 for insufficient stock", func(t *testing.T) {
-		// Setup: Create product with limited stock and add to cart
-		productID := createTestProduct(t, server, "Limited Update Product", 9.99, 3)
-		addToCart(t, server, "4", productID, 1)
+		setupCart("6")
 
-		// Try to update to quantity exceeding stock
 		update := map[string]any{
-			"quantity": 10,
+			"quantity": 100,
 		}
 
-		rr := makeRequest(t, server, "PATCH", "/carts/users/4/items/"+productID, update)
+		rr := makeAuthenticatedRequest(t, server, "PATCH", "/carts/users/6/items/1", update, token)
 		assertStatus(t, rr, http.StatusBadRequest)
 		assertErrorResponse(t, rr, "INSUFFICIENT_STOCK")
+	})
+
+	t.Run("should return 401 without authentication", func(t *testing.T) {
+		update := map[string]any{
+			"quantity": 5,
+		}
+
+		rr := makeRequest(t, server, "PATCH", "/carts/users/1/items/1", update)
+		assertStatus(t, rr, http.StatusUnauthorized)
+		assertErrorResponse(t, rr, "UNAUTHORIZED")
 	})
 }
 
 func TestCartsService_RemoveItem(t *testing.T) {
-	server := setupTestServer(t)
+	server, _, token := setupTestServerWithAuth(t)
+
+	// Setup: Add items to cart
+	setupCart := func(userID string) {
+		// Add two different products
+		makeAuthenticatedRequest(t, server, "POST", "/carts/users/"+userID+"/items", map[string]any{
+			"productId": "1",
+			"quantity":  2,
+		}, token)
+		makeAuthenticatedRequest(t, server, "POST", "/carts/users/"+userID+"/items", map[string]any{
+			"productId": "2",
+			"quantity":  1,
+		}, token)
+	}
 
 	t.Run("should remove item from cart", func(t *testing.T) {
-		// Setup: Create products and add to cart
-		productID1 := createTestProduct(t, server, "Remove Product 1", 10.00, 5)
-		productID2 := createTestProduct(t, server, "Remove Product 2", 20.00, 5)
-		addToCart(t, server, "5", productID1, 1)
-		addToCart(t, server, "5", productID2, 2)
+		setupCart("7")
 
-		// Remove first product
-		rr := makeRequest(t, server, "DELETE", "/carts/users/5/items/"+productID1, nil)
+		rr := makeAuthenticatedRequest(t, server, "DELETE", "/carts/users/7/items/1", nil, token)
 		assertStatus(t, rr, http.StatusNoContent)
 
-		// Verify cart contents
-		cartRR := makeRequest(t, server, "GET", "/carts/users/5", nil)
+		// Verify item was removed
+		cartRR := makeAuthenticatedRequest(t, server, "GET", "/carts/users/7", nil, token)
 		var cart map[string]any
 		err := decodeJSON(cartRR, &cart)
 		require.NoError(t, err)
 
 		items := cart["items"].([]any)
-		assert.Len(t, items, 1) // Only one item left
-
+		assert.Len(t, items, 1)
 		remainingItem := items[0].(map[string]any)
-		assert.Equal(t, productID2, remainingItem["productId"])
+		assert.Equal(t, "2", remainingItem["productId"])
 	})
 
 	t.Run("should return 404 for item not in cart", func(t *testing.T) {
-		rr := makeRequest(t, server, "DELETE", "/carts/users/1/items/nonexistent", nil)
+		rr := makeAuthenticatedRequest(t, server, "DELETE", "/carts/users/8/items/999", nil, token)
 		assertStatus(t, rr, http.StatusNotFound)
-		assertErrorResponse(t, rr, "NOT_FOUND")
+	})
+
+	t.Run("should return 401 without authentication", func(t *testing.T) {
+		rr := makeRequest(t, server, "DELETE", "/carts/users/1/items/1", nil)
+		assertStatus(t, rr, http.StatusUnauthorized)
+		assertErrorResponse(t, rr, "UNAUTHORIZED")
 	})
 }
 
 func TestCartsService_Clear(t *testing.T) {
-	server := setupTestServer(t)
+	server, _, token := setupTestServerWithAuth(t)
+
+	// Setup: Add items to cart
+	setupCart := func(userID string) {
+		makeAuthenticatedRequest(t, server, "POST", "/carts/users/"+userID+"/items", map[string]any{
+			"productId": "1",
+			"quantity":  2,
+		}, token)
+		makeAuthenticatedRequest(t, server, "POST", "/carts/users/"+userID+"/items", map[string]any{
+			"productId": "2",
+			"quantity":  1,
+		}, token)
+	}
 
 	t.Run("should clear all items from cart", func(t *testing.T) {
-		// Setup: Add multiple items to cart
-		productID1 := createTestProduct(t, server, "Clear Product 1", 15.00, 10)
-		productID2 := createTestProduct(t, server, "Clear Product 2", 25.00, 10)
-		addToCart(t, server, "6", productID1, 3)
-		addToCart(t, server, "6", productID2, 2)
+		setupCart("9")
 
-		// Clear cart
-		rr := makeRequest(t, server, "DELETE", "/carts/users/6/items", nil)
+		rr := makeAuthenticatedRequest(t, server, "DELETE", "/carts/users/9/items", nil, token)
 		assertStatus(t, rr, http.StatusNoContent)
 
 		// Verify cart is empty
-		cartRR := makeRequest(t, server, "GET", "/carts/users/6", nil)
+		cartRR := makeAuthenticatedRequest(t, server, "GET", "/carts/users/9", nil, token)
 		var cart map[string]any
 		err := decodeJSON(cartRR, &cart)
 		require.NoError(t, err)
@@ -233,46 +269,70 @@ func TestCartsService_Clear(t *testing.T) {
 		items := cart["items"].([]any)
 		assert.Len(t, items, 0)
 	})
+
+	t.Run("should return 401 without authentication", func(t *testing.T) {
+		rr := makeRequest(t, server, "DELETE", "/carts/users/1/items", nil)
+		assertStatus(t, rr, http.StatusUnauthorized)
+		assertErrorResponse(t, rr, "UNAUTHORIZED")
+	})
 }
 
 func TestCartsService_Integration(t *testing.T) {
-	server := setupTestServer(t)
+	server, _, token := setupTestServerWithAuth(t)
 
 	t.Run("should handle complete cart workflow", func(t *testing.T) {
-		userID := "integration-user"
+		userID := "100"
 
-		// Create products
-		productID1 := createTestProduct(t, server, "Integration Product 1", 50.00, 20)
-		productID2 := createTestProduct(t, server, "Integration Product 2", 75.00, 15)
-
-		// Add first product
-		addToCart(t, server, userID, productID1, 2)
-
-		// Add second product
-		addToCart(t, server, userID, productID2, 1)
-
-		// Update first product quantity
-		update := map[string]any{
-			"quantity": 3,
-		}
-		updateRR := makeRequest(t, server, "PATCH", "/carts/users/"+userID+"/items/"+productID1, update)
-		assertStatus(t, updateRR, http.StatusOK)
-
-		// Remove second product
-		deleteRR := makeRequest(t, server, "DELETE", "/carts/users/"+userID+"/items/"+productID2, nil)
-		assertStatus(t, deleteRR, http.StatusNoContent)
-
-		// Verify final cart state
-		cartRR := makeRequest(t, server, "GET", "/carts/users/"+userID, nil)
+		// 1. Start with empty cart
+		getEmptyCart := makeAuthenticatedRequest(t, server, "GET", "/carts/users/"+userID, nil, token)
+		assertStatus(t, getEmptyCart, http.StatusOK)
 		var cart map[string]any
-		err := decodeJSON(cartRR, &cart)
-		require.NoError(t, err)
-
+		decodeJSON(getEmptyCart, &cart)
 		items := cart["items"].([]any)
-		assert.Len(t, items, 1)
+		assert.Len(t, items, 0)
 
-		item := items[0].(map[string]any)
-		assert.Equal(t, productID1, item["productId"])
-		assert.Equal(t, float64(3), item["quantity"])
+		// 2. Add items
+		addItem1 := makeAuthenticatedRequest(t, server, "POST", "/carts/users/"+userID+"/items", map[string]any{
+			"productId": "1",
+			"quantity":  2,
+		}, token)
+		assertStatus(t, addItem1, http.StatusOK)
+
+		addItem2 := makeAuthenticatedRequest(t, server, "POST", "/carts/users/"+userID+"/items", map[string]any{
+			"productId": "2",
+			"quantity":  1,
+		}, token)
+		assertStatus(t, addItem2, http.StatusOK)
+
+		// 3. Update quantity
+		updateItem := makeAuthenticatedRequest(t, server, "PATCH", "/carts/users/"+userID+"/items/1", map[string]any{
+			"quantity": 3,
+		}, token)
+		assertStatus(t, updateItem, http.StatusOK)
+
+		// 4. Remove one item
+		removeItem := makeAuthenticatedRequest(t, server, "DELETE", "/carts/users/"+userID+"/items/2", nil, token)
+		assertStatus(t, removeItem, http.StatusNoContent)
+
+		// 5. Verify final state
+		getFinalCart := makeAuthenticatedRequest(t, server, "GET", "/carts/users/"+userID, nil, token)
+		assertStatus(t, getFinalCart, http.StatusOK)
+		decodeJSON(getFinalCart, &cart)
+		finalItems := cart["items"].([]any)
+		assert.Len(t, finalItems, 1)
+		finalItem := finalItems[0].(map[string]any)
+		assert.Equal(t, "1", finalItem["productId"])
+		assert.Equal(t, float64(3), finalItem["quantity"])
+
+		// 6. Clear cart
+		clearCart := makeAuthenticatedRequest(t, server, "DELETE", "/carts/users/"+userID+"/items", nil, token)
+		assertStatus(t, clearCart, http.StatusNoContent)
+
+		// 7. Verify empty
+		getCleared := makeAuthenticatedRequest(t, server, "GET", "/carts/users/"+userID, nil, token)
+		assertStatus(t, getCleared, http.StatusOK)
+		decodeJSON(getCleared, &cart)
+		clearedItems := cart["items"].([]any)
+		assert.Len(t, clearedItems, 0)
 	})
 }

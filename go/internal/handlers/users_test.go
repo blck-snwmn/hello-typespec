@@ -9,10 +9,10 @@ import (
 )
 
 func TestUsersService_List(t *testing.T) {
-	server := setupTestServer(t)
+	server, _, token := setupTestServerWithAuth(t)
 
 	t.Run("should return all users with default pagination", func(t *testing.T) {
-		rr := makeRequest(t, server, "GET", "/users", nil)
+		rr := makeAuthenticatedRequest(t, server, "GET", "/users", nil, token)
 
 		assertStatus(t, rr, http.StatusOK)
 		response := assertPaginatedResponse(t, rr, 2, 20, 0) // 2 default users
@@ -32,14 +32,14 @@ func TestUsersService_List(t *testing.T) {
 
 	t.Run("should support pagination with limit and offset", func(t *testing.T) {
 		// First page
-		rr1 := makeRequest(t, server, "GET", "/users?limit=1&offset=0", nil)
+		rr1 := makeAuthenticatedRequest(t, server, "GET", "/users?limit=1&offset=0", nil, token)
 		assertStatus(t, rr1, http.StatusOK)
 		response1 := assertPaginatedResponse(t, rr1, 2, 1, 0)
 		items1 := response1["items"].([]any)
 		assert.Len(t, items1, 1)
 
 		// Second page
-		rr2 := makeRequest(t, server, "GET", "/users?limit=1&offset=1", nil)
+		rr2 := makeAuthenticatedRequest(t, server, "GET", "/users?limit=1&offset=1", nil, token)
 		assertStatus(t, rr2, http.StatusOK)
 		response2 := assertPaginatedResponse(t, rr2, 2, 1, 1)
 		items2 := response2["items"].([]any)
@@ -52,19 +52,25 @@ func TestUsersService_List(t *testing.T) {
 	})
 
 	t.Run("should handle empty results with offset beyond total", func(t *testing.T) {
-		rr := makeRequest(t, server, "GET", "/users?limit=10&offset=100", nil)
+		rr := makeAuthenticatedRequest(t, server, "GET", "/users?limit=10&offset=100", nil, token)
 		assertStatus(t, rr, http.StatusOK)
 		response := assertPaginatedResponse(t, rr, 2, 10, 100)
 		items := response["items"].([]any)
 		assert.Len(t, items, 0)
 	})
+
+	t.Run("should return 401 without authentication", func(t *testing.T) {
+		rr := makeRequest(t, server, "GET", "/users", nil)
+		assertStatus(t, rr, http.StatusUnauthorized)
+		assertErrorResponse(t, rr, "UNAUTHORIZED")
+	})
 }
 
 func TestUsersService_Get(t *testing.T) {
-	server := setupTestServer(t)
+	server, _, token := setupTestServerWithAuth(t)
 
 	t.Run("should return a user by id", func(t *testing.T) {
-		rr := makeRequest(t, server, "GET", "/users/1", nil)
+		rr := makeAuthenticatedRequest(t, server, "GET", "/users/1", nil, token)
 		assertStatus(t, rr, http.StatusOK)
 
 		var user map[string]any
@@ -78,14 +84,20 @@ func TestUsersService_Get(t *testing.T) {
 	})
 
 	t.Run("should return 404 for non-existent user", func(t *testing.T) {
-		rr := makeRequest(t, server, "GET", "/users/999", nil)
+		rr := makeAuthenticatedRequest(t, server, "GET", "/users/999", nil, token)
 		assertStatus(t, rr, http.StatusNotFound)
 		assertErrorResponse(t, rr, "NOT_FOUND")
+	})
+
+	t.Run("should return 401 without authentication", func(t *testing.T) {
+		rr := makeRequest(t, server, "GET", "/users/1", nil)
+		assertStatus(t, rr, http.StatusUnauthorized)
+		assertErrorResponse(t, rr, "UNAUTHORIZED")
 	})
 }
 
 func TestUsersService_Create(t *testing.T) {
-	server := setupTestServer(t)
+	server, _, token := setupTestServerWithAuth(t)
 
 	t.Run("should create a new user with address", func(t *testing.T) {
 		newUser := map[string]any{
@@ -100,7 +112,7 @@ func TestUsersService_Create(t *testing.T) {
 			},
 		}
 
-		rr := makeRequest(t, server, "POST", "/users", newUser)
+		rr := makeAuthenticatedRequest(t, server, "POST", "/users", newUser, token)
 		assertStatus(t, rr, http.StatusCreated)
 
 		var user map[string]any
@@ -116,7 +128,7 @@ func TestUsersService_Create(t *testing.T) {
 
 		// Verify cart was created for new user
 		userID := user["id"].(string)
-		cartRR := makeRequest(t, server, "GET", "/carts/users/"+userID, nil)
+		cartRR := makeAuthenticatedRequest(t, server, "GET", "/carts/users/"+userID, nil, token)
 		assertStatus(t, cartRR, http.StatusOK)
 
 		var cart map[string]any
@@ -132,7 +144,7 @@ func TestUsersService_Create(t *testing.T) {
 			"name":  "Minimal User",
 		}
 
-		rr := makeRequest(t, server, "POST", "/users", newUser)
+		rr := makeAuthenticatedRequest(t, server, "POST", "/users", newUser, token)
 		assertStatus(t, rr, http.StatusCreated)
 
 		var user map[string]any
@@ -145,6 +157,17 @@ func TestUsersService_Create(t *testing.T) {
 		assert.Nil(t, user["address"])
 	})
 
+	t.Run("should return 401 without authentication", func(t *testing.T) {
+		newUser := map[string]any{
+			"email": "unauth@example.com",
+			"name":  "Unauthorized User",
+		}
+
+		rr := makeRequest(t, server, "POST", "/users", newUser)
+		assertStatus(t, rr, http.StatusUnauthorized)
+		assertErrorResponse(t, rr, "UNAUTHORIZED")
+	})
+
 	// TODO: Implement validation in Go handlers
 	// t.Run("should return 400 for invalid user data", func(t *testing.T) {
 	// 	invalidUser := map[string]any{
@@ -152,21 +175,21 @@ func TestUsersService_Create(t *testing.T) {
 	// 		"name":  "Invalid User",
 	// 	}
 
-	// 	rr := makeRequest(t, server, "POST", "/users", invalidUser)
+	// 	rr := makeAuthenticatedRequest(t, server, "POST", "/users", invalidUser, token)
 	// 	assertStatus(t, rr, http.StatusBadRequest)
 	// 	assertErrorResponse(t, rr, "VALIDATION_ERROR")
 	// })
 }
 
 func TestUsersService_Update(t *testing.T) {
-	server := setupTestServer(t)
+	server, _, token := setupTestServerWithAuth(t)
 
 	t.Run("should update user details", func(t *testing.T) {
 		update := map[string]any{
 			"name": "Updated Name",
 		}
 
-		rr := makeRequest(t, server, "PATCH", "/users/1", update)
+		rr := makeAuthenticatedRequest(t, server, "PATCH", "/users/1", update, token)
 		assertStatus(t, rr, http.StatusOK)
 
 		var user map[string]any
@@ -189,7 +212,7 @@ func TestUsersService_Update(t *testing.T) {
 			},
 		}
 
-		rr := makeRequest(t, server, "PATCH", "/users/1", update)
+		rr := makeAuthenticatedRequest(t, server, "PATCH", "/users/1", update, token)
 		assertStatus(t, rr, http.StatusOK)
 
 		var user map[string]any
@@ -206,64 +229,117 @@ func TestUsersService_Update(t *testing.T) {
 			"name": "Ghost User",
 		}
 
-		rr := makeRequest(t, server, "PATCH", "/users/999", update)
+		rr := makeAuthenticatedRequest(t, server, "PATCH", "/users/999", update, token)
 		assertStatus(t, rr, http.StatusNotFound)
 		assertErrorResponse(t, rr, "NOT_FOUND")
+	})
+
+	t.Run("should return 401 without authentication", func(t *testing.T) {
+		update := map[string]any{
+			"name": "Unauthorized Update",
+		}
+
+		rr := makeRequest(t, server, "PATCH", "/users/1", update)
+		assertStatus(t, rr, http.StatusUnauthorized)
+		assertErrorResponse(t, rr, "UNAUTHORIZED")
 	})
 }
 
 func TestUsersService_Delete(t *testing.T) {
-	server := setupTestServer(t)
+	server, _, token := setupTestServerWithAuth(t)
 
 	t.Run("should delete a user", func(t *testing.T) {
-		// Create a new user to delete
-		userID := createTestUser(t, server, "delete@example.com", "Delete Me")
+		// Create a new user to delete (note: createTestUser doesn't use auth)
+		// We'll create using authenticated request instead
+		newUser := map[string]any{
+			"email": "delete@example.com",
+			"name":  "Delete Me",
+			"address": map[string]any{
+				"street":     "123 Test St",
+				"city":       "Test City",
+				"state":      "TC",
+				"postalCode": "12345",
+				"country":    "Test Country",
+			},
+		}
+
+		createRR := makeAuthenticatedRequest(t, server, "POST", "/users", newUser, token)
+		assertStatus(t, createRR, http.StatusCreated)
+
+		var user map[string]any
+		err := decodeJSON(createRR, &user)
+		require.NoError(t, err)
+		userID := user["id"].(string)
 
 		// Delete the user
-		rr := makeRequest(t, server, "DELETE", "/users/"+userID, nil)
+		rr := makeAuthenticatedRequest(t, server, "DELETE", "/users/"+userID, nil, token)
 		assertStatus(t, rr, http.StatusNoContent)
 
 		// Verify user is deleted
-		getRR := makeRequest(t, server, "GET", "/users/"+userID, nil)
+		getRR := makeAuthenticatedRequest(t, server, "GET", "/users/"+userID, nil, token)
 		assertStatus(t, getRR, http.StatusNotFound)
 	})
 
 	t.Run("should return 404 when deleting non-existent user", func(t *testing.T) {
-		rr := makeRequest(t, server, "DELETE", "/users/999", nil)
+		rr := makeAuthenticatedRequest(t, server, "DELETE", "/users/999", nil, token)
 		assertStatus(t, rr, http.StatusNotFound)
 		assertErrorResponse(t, rr, "NOT_FOUND")
+	})
+
+	t.Run("should return 401 without authentication", func(t *testing.T) {
+		rr := makeRequest(t, server, "DELETE", "/users/1", nil)
+		assertStatus(t, rr, http.StatusUnauthorized)
+		assertErrorResponse(t, rr, "UNAUTHORIZED")
 	})
 }
 
 func TestUsersService_Integration(t *testing.T) {
-	server := setupTestServer(t)
+	server, _, token := setupTestServerWithAuth(t)
 
 	t.Run("should handle full user lifecycle", func(t *testing.T) {
 		// Create user
-		userID := createTestUser(t, server, "lifecycle@example.com", "Lifecycle User")
+		newUser := map[string]any{
+			"email": "lifecycle@example.com",
+			"name":  "Lifecycle User",
+			"address": map[string]any{
+				"street":     "123 Test St",
+				"city":       "Test City",
+				"state":      "TC",
+				"postalCode": "12345",
+				"country":    "Test Country",
+			},
+		}
+
+		createRR := makeAuthenticatedRequest(t, server, "POST", "/users", newUser, token)
+		assertStatus(t, createRR, http.StatusCreated)
+
+		var user map[string]any
+		err := decodeJSON(createRR, &user)
+		require.NoError(t, err)
+		userID := user["id"].(string)
 
 		// Update user
 		update := map[string]any{
 			"name": "Updated Lifecycle User",
 		}
-		updateRR := makeRequest(t, server, "PATCH", "/users/"+userID, update)
+		updateRR := makeAuthenticatedRequest(t, server, "PATCH", "/users/"+userID, update, token)
 		assertStatus(t, updateRR, http.StatusOK)
 
 		// Verify update
-		getRR := makeRequest(t, server, "GET", "/users/"+userID, nil)
+		getRR := makeAuthenticatedRequest(t, server, "GET", "/users/"+userID, nil, token)
 		assertStatus(t, getRR, http.StatusOK)
 
-		var user map[string]any
-		err := decodeJSON(getRR, &user)
+		var updatedUser map[string]any
+		err = decodeJSON(getRR, &updatedUser)
 		require.NoError(t, err)
-		assert.Equal(t, "Updated Lifecycle User", user["name"])
+		assert.Equal(t, "Updated Lifecycle User", updatedUser["name"])
 
 		// Delete user
-		deleteRR := makeRequest(t, server, "DELETE", "/users/"+userID, nil)
+		deleteRR := makeAuthenticatedRequest(t, server, "DELETE", "/users/"+userID, nil, token)
 		assertStatus(t, deleteRR, http.StatusNoContent)
 
 		// Verify deletion
-		getDeletedRR := makeRequest(t, server, "GET", "/users/"+userID, nil)
+		getDeletedRR := makeAuthenticatedRequest(t, server, "GET", "/users/"+userID, nil, token)
 		assertStatus(t, getDeletedRR, http.StatusNotFound)
 	})
 }
