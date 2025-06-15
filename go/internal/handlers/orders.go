@@ -139,7 +139,7 @@ func (s *Server) OrdersServiceListByUser(w http.ResponseWriter, r *http.Request,
 func (s *Server) OrdersServiceGet(w http.ResponseWriter, r *http.Request, orderId generated.Uuid) {
 	order, ok := s.store.GetOrder(orderId)
 	if !ok {
-		errorResponse(w, http.StatusNotFound, "NOT_FOUND", "Order not found")
+		errorResponse(w, http.StatusNotFound, ErrorCodeNotFound, "Order not found")
 		return
 	}
 
@@ -151,20 +151,20 @@ func (s *Server) OrdersServiceGet(w http.ResponseWriter, r *http.Request, orderI
 func (s *Server) OrdersServiceCreate(w http.ResponseWriter, r *http.Request, userId generated.Uuid) {
 	var req generated.CreateOrderRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		errorResponse(w, http.StatusBadRequest, "INVALID_REQUEST", "Invalid request body")
+		errorResponse(w, http.StatusBadRequest, ErrorCodeBadRequest, "Invalid request body")
 		return
 	}
 
 	// Validate user exists
 	_, ok := s.store.GetUser(userId)
 	if !ok {
-		errorResponse(w, http.StatusNotFound, "NOT_FOUND", "User not found")
+		errorResponse(w, http.StatusNotFound, ErrorCodeNotFound, "User not found")
 		return
 	}
 
 	// Validate items from request
 	if len(req.Items) == 0 {
-		errorResponse(w, http.StatusBadRequest, "EMPTY_CART", "No items in order")
+		errorResponse(w, http.StatusBadRequest, ErrorCodeValidationError, "No items in order")
 		return
 	}
 
@@ -175,11 +175,11 @@ func (s *Server) OrdersServiceCreate(w http.ResponseWriter, r *http.Request, use
 	for _, item := range req.Items {
 		product, ok := s.store.GetProduct(item.ProductId)
 		if !ok {
-			errorResponse(w, http.StatusNotFound, "NOT_FOUND", fmt.Sprintf("Product %s not found", item.ProductId))
+			errorResponse(w, http.StatusNotFound, ErrorCodeNotFound, fmt.Sprintf("Product %s not found", item.ProductId))
 			return
 		}
 		if product.Stock < item.Quantity {
-			errorResponse(w, http.StatusBadRequest, "INSUFFICIENT_STOCK", fmt.Sprintf("Insufficient stock for product %s", product.Name))
+			errorResponse(w, http.StatusBadRequest, ErrorCodeInsufficientStock, fmt.Sprintf("Insufficient stock for product %s", product.Name))
 			return
 		}
 
@@ -228,13 +228,13 @@ func (s *Server) OrdersServiceCreate(w http.ResponseWriter, r *http.Request, use
 func (s *Server) OrdersServiceUpdateStatus(w http.ResponseWriter, r *http.Request, orderId generated.Uuid) {
 	var req generated.UpdateOrderStatusRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		errorResponse(w, http.StatusBadRequest, "INVALID_REQUEST", "Invalid request body")
+		errorResponse(w, http.StatusBadRequest, ErrorCodeBadRequest, "Invalid request body")
 		return
 	}
 
 	order, ok := s.store.GetOrder(orderId)
 	if !ok {
-		errorResponse(w, http.StatusNotFound, "NOT_FOUND", "Order not found")
+		errorResponse(w, http.StatusNotFound, ErrorCodeNotFound, "Order not found")
 		return
 	}
 
@@ -257,7 +257,7 @@ func (s *Server) OrdersServiceUpdateStatus(w http.ResponseWriter, r *http.Reques
 	}
 
 	if !isValidTransition {
-		errorResponse(w, http.StatusBadRequest, "INVALID_STATUS_TRANSITION",
+		errorResponse(w, http.StatusBadRequest, ErrorCodeInvalidStateTransition,
 			fmt.Sprintf("Cannot transition from %s to %s", order.Status, req.Status))
 		return
 	}
@@ -276,13 +276,13 @@ func (s *Server) OrdersServiceUpdateStatus(w http.ResponseWriter, r *http.Reques
 func (s *Server) OrdersServiceCancel(w http.ResponseWriter, r *http.Request, orderId generated.Uuid) {
 	order, ok := s.store.GetOrder(orderId)
 	if !ok {
-		errorResponse(w, http.StatusNotFound, "NOT_FOUND", "Order not found")
+		errorResponse(w, http.StatusNotFound, ErrorCodeNotFound, "Order not found")
 		return
 	}
 
 	// Check if order can be cancelled (only pending and processing can be cancelled)
 	if order.Status != generated.Pending && order.Status != generated.Processing {
-		errorResponse(w, http.StatusBadRequest, "INVALID_STATUS",
+		errorResponse(w, http.StatusBadRequest, ErrorCodeValidationError,
 			fmt.Sprintf("Cannot cancel order with status %s", order.Status))
 		return
 	}

@@ -20,7 +20,7 @@ func (s *Server) CartsServiceGetByUser(w http.ResponseWriter, r *http.Request, u
 func (s *Server) CartsServiceAddItem(w http.ResponseWriter, r *http.Request, userId generated.Uuid) {
 	var req generated.AddCartItemRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		errorResponse(w, http.StatusBadRequest, "INVALID_REQUEST", "Invalid request body")
+		errorResponse(w, http.StatusBadRequest, ErrorCodeBadRequest, "Invalid request body")
 		return
 	}
 
@@ -28,12 +28,12 @@ func (s *Server) CartsServiceAddItem(w http.ResponseWriter, r *http.Request, use
 	product, ok := s.store.GetProduct(req.ProductId)
 
 	if !ok {
-		errorResponse(w, http.StatusNotFound, "NOT_FOUND", "Product not found")
+		errorResponse(w, http.StatusNotFound, ErrorCodeNotFound, "Product not found")
 		return
 	}
 
 	if product.Stock < req.Quantity {
-		errorResponse(w, http.StatusBadRequest, "INSUFFICIENT_STOCK", "Insufficient stock")
+		errorResponse(w, http.StatusBadRequest, ErrorCodeInsufficientStock, "Insufficient stock")
 		return
 	}
 
@@ -66,7 +66,7 @@ func (s *Server) CartsServiceAddItem(w http.ResponseWriter, r *http.Request, use
 func (s *Server) CartsServiceUpdateItem(w http.ResponseWriter, r *http.Request, userId generated.Uuid, productId generated.Uuid) {
 	var req generated.UpdateCartItemRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		errorResponse(w, http.StatusBadRequest, "INVALID_REQUEST", "Invalid request body")
+		errorResponse(w, http.StatusBadRequest, ErrorCodeBadRequest, "Invalid request body")
 		return
 	}
 
@@ -74,7 +74,7 @@ func (s *Server) CartsServiceUpdateItem(w http.ResponseWriter, r *http.Request, 
 	product, ok := s.store.GetProduct(productId)
 
 	if !ok {
-		errorResponse(w, http.StatusNotFound, "NOT_FOUND", "Product not found")
+		errorResponse(w, http.StatusNotFound, ErrorCodeNotFound, "Product not found")
 		return
 	}
 
@@ -87,12 +87,12 @@ func (s *Server) CartsServiceUpdateItem(w http.ResponseWriter, r *http.Request, 
 	}
 
 	if itemIndex < 0 {
-		errorResponse(w, http.StatusNotFound, "NOT_FOUND", "Item not found in cart")
+		errorResponse(w, http.StatusNotFound, ErrorCodeNotFound, "Item not found in cart")
 		return
 	}
 
 	if product.Stock < req.Quantity {
-		errorResponse(w, http.StatusBadRequest, "INSUFFICIENT_STOCK", "Insufficient stock")
+		errorResponse(w, http.StatusBadRequest, ErrorCodeInsufficientStock, "Insufficient stock")
 		return
 	}
 
@@ -118,7 +118,7 @@ func (s *Server) CartsServiceRemoveItem(w http.ResponseWriter, r *http.Request, 
 	}
 
 	if itemIndex < 0 {
-		errorResponse(w, http.StatusNotFound, "NOT_FOUND", "Item not found in cart")
+		errorResponse(w, http.StatusNotFound, ErrorCodeNotFound, "Item not found in cart")
 		return
 	}
 

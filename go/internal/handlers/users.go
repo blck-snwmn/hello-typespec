@@ -59,7 +59,7 @@ func (s *Server) UsersServiceList(w http.ResponseWriter, r *http.Request, params
 func (s *Server) UsersServiceGet(w http.ResponseWriter, r *http.Request, userId generated.Uuid) {
 	user, ok := s.store.GetUser(userId)
 	if !ok {
-		errorResponse(w, http.StatusNotFound, "NOT_FOUND", "User not found")
+		errorResponse(w, http.StatusNotFound, ErrorCodeNotFound, "User not found")
 		return
 	}
 
@@ -71,7 +71,7 @@ func (s *Server) UsersServiceGet(w http.ResponseWriter, r *http.Request, userId 
 func (s *Server) UsersServiceCreate(w http.ResponseWriter, r *http.Request) {
 	var req generated.CreateUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		errorResponse(w, http.StatusBadRequest, "INVALID_REQUEST", "Invalid request body")
+		errorResponse(w, http.StatusBadRequest, ErrorCodeBadRequest, "Invalid request body")
 		return
 	}
 
@@ -106,13 +106,13 @@ func (s *Server) UsersServiceCreate(w http.ResponseWriter, r *http.Request) {
 func (s *Server) UsersServiceUpdate(w http.ResponseWriter, r *http.Request, userId generated.Uuid) {
 	existing, ok := s.store.GetUser(userId)
 	if !ok {
-		errorResponse(w, http.StatusNotFound, "NOT_FOUND", "User not found")
+		errorResponse(w, http.StatusNotFound, ErrorCodeNotFound, "User not found")
 		return
 	}
 
 	var req generated.UpdateUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		errorResponse(w, http.StatusBadRequest, "INVALID_REQUEST", "Invalid request body")
+		errorResponse(w, http.StatusBadRequest, ErrorCodeBadRequest, "Invalid request body")
 		return
 	}
 
@@ -139,7 +139,7 @@ func (s *Server) UsersServiceUpdate(w http.ResponseWriter, r *http.Request, user
 func (s *Server) UsersServiceDelete(w http.ResponseWriter, r *http.Request, userId generated.Uuid) {
 	_, ok := s.store.DeleteUser(userId)
 	if !ok {
-		errorResponse(w, http.StatusNotFound, "NOT_FOUND", "User not found")
+		errorResponse(w, http.StatusNotFound, ErrorCodeNotFound, "User not found")
 		return
 	}
 

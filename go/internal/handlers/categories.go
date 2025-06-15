@@ -59,7 +59,7 @@ func (s *Server) CategoriesServiceTree(w http.ResponseWriter, r *http.Request) {
 func (s *Server) CategoriesServiceGet(w http.ResponseWriter, r *http.Request, categoryId generated.Uuid) {
 	category, ok := s.store.GetCategory(categoryId)
 	if !ok {
-		errorResponse(w, http.StatusNotFound, "NOT_FOUND", "Category not found")
+		errorResponse(w, http.StatusNotFound, ErrorCodeNotFound, "Category not found")
 		return
 	}
 
@@ -71,7 +71,7 @@ func (s *Server) CategoriesServiceGet(w http.ResponseWriter, r *http.Request, ca
 func (s *Server) CategoriesServiceCreate(w http.ResponseWriter, r *http.Request) {
 	var req generated.CreateCategoryRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		errorResponse(w, http.StatusBadRequest, "INVALID_REQUEST", "Invalid request body")
+		errorResponse(w, http.StatusBadRequest, ErrorCodeBadRequest, "Invalid request body")
 		return
 	}
 
@@ -79,7 +79,7 @@ func (s *Server) CategoriesServiceCreate(w http.ResponseWriter, r *http.Request)
 	if req.ParentId != nil {
 		_, exists := s.store.GetCategory(*req.ParentId)
 		if !exists {
-			errorResponse(w, http.StatusNotFound, "NOT_FOUND", "Parent category not found")
+			errorResponse(w, http.StatusNotFound, ErrorCodeNotFound, "Parent category not found")
 			return
 		}
 	}
@@ -105,13 +105,13 @@ func (s *Server) CategoriesServiceCreate(w http.ResponseWriter, r *http.Request)
 func (s *Server) CategoriesServiceUpdate(w http.ResponseWriter, r *http.Request, categoryId generated.Uuid) {
 	existing, ok := s.store.GetCategory(categoryId)
 	if !ok {
-		errorResponse(w, http.StatusNotFound, "NOT_FOUND", "Category not found")
+		errorResponse(w, http.StatusNotFound, ErrorCodeNotFound, "Category not found")
 		return
 	}
 
 	var req generated.UpdateCategoryRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		errorResponse(w, http.StatusBadRequest, "INVALID_REQUEST", "Invalid request body")
+		errorResponse(w, http.StatusBadRequest, ErrorCodeBadRequest, "Invalid request body")
 		return
 	}
 
@@ -135,7 +135,7 @@ func (s *Server) CategoriesServiceUpdate(w http.ResponseWriter, r *http.Request,
 func (s *Server) CategoriesServiceDelete(w http.ResponseWriter, r *http.Request, categoryId generated.Uuid) {
 	_, ok := s.store.DeleteCategory(categoryId)
 	if !ok {
-		errorResponse(w, http.StatusNotFound, "NOT_FOUND", "Category not found")
+		errorResponse(w, http.StatusNotFound, ErrorCodeNotFound, "Category not found")
 		return
 	}
 
