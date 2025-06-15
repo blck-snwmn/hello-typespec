@@ -57,7 +57,7 @@ products.get('/:productId', (c) => {
   const product = store.getProduct(productId)
 
   if (!product) {
-    return sendError(c, ErrorCode.NOT_FOUND, 'Product not found')
+    return sendError(c, 404, ErrorCode.NOT_FOUND, 'Product not found')
   }
 
   return c.json(product)
@@ -86,7 +86,7 @@ products.put('/:productId', async (c) => {
   
   const existing = store.getProduct(productId)
   if (!existing) {
-    return sendError(c, ErrorCode.NOT_FOUND, 'Product not found')
+    return sendError(c, 404, ErrorCode.NOT_FOUND, 'Product not found')
   }
 
   const updatedProduct: Product = {
@@ -106,7 +106,7 @@ products.delete('/:productId', (c) => {
   const deleted = store.deleteProduct(productId)
 
   if (!deleted) {
-    return sendError(c, ErrorCode.NOT_FOUND, 'Product not found')
+    return sendError(c, 404, ErrorCode.NOT_FOUND, 'Product not found')
   }
 
   return c.body(null, 204)

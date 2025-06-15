@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import app from '../index'
 import { store } from '../stores'
 import type { operations, components } from '../types/api'
+import { loginTestUser, createAuthHeaders, TEST_USERS } from '../test-helpers/auth'
 
 type UserListResponse = operations['UsersService_list']['responses']['200']['content']['application/json']
 type User = components['schemas']['User']
@@ -9,16 +10,23 @@ type Cart = components['schemas']['Cart']
 type ErrorResponse = { error: { code: string; message: string } }
 
 describe('Users API', () => {
-  beforeEach(() => {
+  let authToken: string
+
+  beforeEach(async () => {
     // Reset store to initial state before each test
     const storeInstance = new (store.constructor as any)()
     Object.setPrototypeOf(store, Object.getPrototypeOf(storeInstance))
     Object.assign(store, storeInstance)
+
+    // Login to get auth token
+    authToken = await loginTestUser(TEST_USERS.alice.email, TEST_USERS.alice.password)
   })
 
   describe('GET /users', () => {
-    it('should return all users', async () => {
-      const res = await app.request('/users')
+    it('should return all users with authentication', async () => {
+      const res = await app.request('/users', {
+        headers: createAuthHeaders(authToken),
+      })
       const json = await res.json() as UserListResponse
 
       expect(res.status).toBe(200)
@@ -37,8 +45,19 @@ describe('Users API', () => {
       expect(json.items[0]).toHaveProperty('address')
     })
 
-    it('should support pagination', async () => {
-      const res1 = await app.request('/users?limit=1&offset=0')
+    it('should return 401 without authentication', async () => {
+      const res = await app.request('/users')
+      const json = await res.json() as ErrorResponse
+
+      expect(res.status).toBe(401)
+      expect(json.error).toHaveProperty('code', 'UNAUTHORIZED')
+      expect(json.error).toHaveProperty('message')
+    })
+
+    it('should support pagination with authentication', async () => {
+      const res1 = await app.request('/users?limit=1&offset=0', {
+        headers: createAuthHeaders(authToken),
+      })
       const json1 = await res1.json() as UserListResponse
 
       expect(res1.status).toBe(200)
@@ -47,7 +66,9 @@ describe('Users API', () => {
       expect(json1.limit).toBe(1)
       expect(json1.offset).toBe(0)
 
-      const res2 = await app.request('/users?limit=1&offset=1')
+      const res2 = await app.request('/users?limit=1&offset=1', {
+        headers: createAuthHeaders(authToken),
+      })
       const json2 = await res2.json() as UserListResponse
 
       expect(res2.status).toBe(200)
@@ -62,8 +83,10 @@ describe('Users API', () => {
   })
 
   describe('GET /users/:id', () => {
-    it('should return a user by id', async () => {
-      const res = await app.request('/users/1')
+    it('should return a user by id with authentication', async () => {
+      const res = await app.request('/users/1', {
+        headers: createAuthHeaders(authToken),
+      })
       const json = await res.json() as User | ErrorResponse
 
       expect(res.status).toBe(200)
@@ -81,8 +104,18 @@ describe('Users API', () => {
       }
     })
 
-    it('should return 404 for non-existent user', async () => {
-      const res = await app.request('/users/999')
+    it('should return 401 without authentication', async () => {
+      const res = await app.request('/users/1')
+      const json = await res.json() as ErrorResponse
+
+      expect(res.status).toBe(401)
+      expect(json.error).toHaveProperty('code', 'UNAUTHORIZED')
+    })
+
+    it('should return 404 for non-existent user with authentication', async () => {
+      const res = await app.request('/users/999', {
+        headers: createAuthHeaders(authToken),
+      })
       const json = await res.json() as ErrorResponse
 
       expect(res.status).toBe(404)
@@ -92,7 +125,7 @@ describe('Users API', () => {
   })
 
   describe('POST /users', () => {
-    it('should create a new user with address', async () => {
+    it('should create a new user with address and authentication', async () => {
       const newUser = {
         email: 'newuser@example.com',
         name: 'New User',
@@ -107,7 +140,9 @@ describe('Users API', () => {
 
       const res = await app.request('/users', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          ...createAuthHeaders(authToken),
+        },
         body: JSON.stringify(newUser),
       })
       const json = await res.json() as User
@@ -121,13 +156,15 @@ describe('Users API', () => {
       expect(json).toHaveProperty('updatedAt')
 
       // Verify cart was created for new user
-      const cartRes = await app.request(`/carts/users/${json.id}`)
+      const cartRes = await app.request(`/carts/users/${json.id}`, {
+        headers: createAuthHeaders(authToken),
+      })
       const cart = await cartRes.json() as Cart
       expect(cart).toHaveProperty('userId', json.id)
       expect(cart.items).toHaveLength(0)
     })
 
-    it('should create a new user without address', async () => {
+    it('should create a new user without address with authentication', async () => {
       const newUser = {
         email: 'minimal@example.com',
         name: 'Minimal User'
@@ -135,7 +172,9 @@ describe('Users API', () => {
 
       const res = await app.request('/users', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          ...createAuthHeaders(authToken),
+        },
         body: JSON.stringify(newUser),
       })
       const json = await res.json() as User
@@ -146,10 +185,27 @@ describe('Users API', () => {
       expect(json.name).toBe(newUser.name)
       expect(json.address).toBeUndefined()
     })
+
+    it('should return 401 without authentication', async () => {
+      const newUser = {
+        email: 'unauth@example.com',
+        name: 'Unauthorized User'
+      }
+
+      const res = await app.request('/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newUser),
+      })
+      const json = await res.json() as ErrorResponse
+
+      expect(res.status).toBe(401)
+      expect(json.error).toHaveProperty('code', 'UNAUTHORIZED')
+    })
   })
 
   describe('PUT /users/:id', () => {
-    it('should update user details', async () => {
+    it('should update user details with authentication', async () => {
       const updateData = {
         name: 'Updated User Name',
         email: 'updated@example.com'
@@ -157,7 +213,9 @@ describe('Users API', () => {
 
       const res = await app.request('/users/1', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          ...createAuthHeaders(authToken),
+        },
         body: JSON.stringify(updateData),
       })
       const json = await res.json() as User | ErrorResponse
@@ -171,7 +229,7 @@ describe('Users API', () => {
       }
     })
 
-    it('should update user address', async () => {
+    it('should update user address with authentication', async () => {
       const updateData = {
         address: {
           street: '999 Updated Ave',
@@ -184,7 +242,9 @@ describe('Users API', () => {
 
       const res = await app.request('/users/1', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          ...createAuthHeaders(authToken),
+        },
         body: JSON.stringify(updateData),
       })
       const json = await res.json() as User | ErrorResponse
@@ -195,14 +255,32 @@ describe('Users API', () => {
       }
     })
 
-    it('should return 404 when updating non-existent user', async () => {
+    it('should return 401 without authentication', async () => {
+      const updateData = {
+        name: 'Unauthorized Update'
+      }
+
+      const res = await app.request('/users/1', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updateData),
+      })
+      const json = await res.json() as ErrorResponse
+
+      expect(res.status).toBe(401)
+      expect(json.error).toHaveProperty('code', 'UNAUTHORIZED')
+    })
+
+    it('should return 404 when updating non-existent user with authentication', async () => {
       const updateData = {
         name: 'Non-existent'
       }
 
       const res = await app.request('/users/999', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          ...createAuthHeaders(authToken),
+        },
         body: JSON.stringify(updateData),
       })
       const json = await res.json() as ErrorResponse
@@ -213,22 +291,36 @@ describe('Users API', () => {
   })
 
   describe('DELETE /users/:id', () => {
-    it('should delete a user', async () => {
+    it('should delete a user with authentication', async () => {
       const res = await app.request('/users/2', {
         method: 'DELETE',
+        headers: createAuthHeaders(authToken),
       })
 
       expect(res.status).toBe(204)
       expect(await res.text()).toBe('')
 
       // Verify deletion
-      const getRes = await app.request('/users/2')
+      const getRes = await app.request('/users/2', {
+        headers: createAuthHeaders(authToken),
+      })
       expect(getRes.status).toBe(404)
     })
 
-    it('should return 404 when deleting non-existent user', async () => {
+    it('should return 401 without authentication', async () => {
+      const res = await app.request('/users/2', {
+        method: 'DELETE',
+      })
+
+      expect(res.status).toBe(401)
+      const json = await res.json() as ErrorResponse
+      expect(json.error).toHaveProperty('code', 'UNAUTHORIZED')
+    })
+
+    it('should return 404 when deleting non-existent user with authentication', async () => {
       const res = await app.request('/users/999', {
         method: 'DELETE',
+        headers: createAuthHeaders(authToken),
       })
 
       expect(res.status).toBe(404)

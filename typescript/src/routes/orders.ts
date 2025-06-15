@@ -46,7 +46,7 @@ orders.get('/:orderId', (c) => {
   const order = store.getOrder(orderId)
 
   if (!order) {
-    return sendError(c, ErrorCode.NOT_FOUND, 'Order not found')
+    return sendError(c, 404, ErrorCode.NOT_FOUND, 'Order not found')
   }
 
   return c.json(order)
@@ -62,7 +62,7 @@ orders.get('/users/:userId', (c) => {
   // Validate user exists
   const user = store.getUser(userId)
   if (!user) {
-    return sendError(c, ErrorCode.NOT_FOUND, 'User not found')
+    return sendError(c, 404, ErrorCode.NOT_FOUND, 'User not found')
   }
 
   // Get all orders for the user
@@ -94,13 +94,13 @@ orders.post('/users/:userId', async (c) => {
   // Validate user exists
   const user = store.getUser(userId)
   if (!user) {
-    return sendError(c, ErrorCode.NOT_FOUND, 'User not found')
+    return sendError(c, 404, ErrorCode.NOT_FOUND, 'User not found')
   }
 
   // Get user's cart
   const cart = store.getCartByUserId(userId)
   if (cart.items.length === 0) {
-    return sendError(c, ErrorCode.BAD_REQUEST, 'Cart is empty')
+    return sendError(c, 400, ErrorCode.BAD_REQUEST, 'Cart is empty')
   }
 
   // Validate stock and calculate total
@@ -110,10 +110,10 @@ orders.post('/users/:userId', async (c) => {
   for (const cartItem of cart.items) {
     const product = store.getProduct(cartItem.productId)
     if (!product) {
-      return sendError(c, ErrorCode.NOT_FOUND, `Product ${cartItem.productId} not found`)
+      return sendError(c, 404, ErrorCode.NOT_FOUND, `Product ${cartItem.productId} not found`)
     }
     if (product.stock < cartItem.quantity) {
-      return sendError(c, ErrorCode.INSUFFICIENT_STOCK, `Insufficient stock for product ${product.name}`)
+      return sendError(c, 400, ErrorCode.INSUFFICIENT_STOCK, `Insufficient stock for product ${product.name}`)
     }
 
     const itemPrice = product.price
@@ -162,7 +162,7 @@ orders.patch('/status/:orderId', async (c) => {
   
   const order = store.getOrder(orderId)
   if (!order) {
-    return sendError(c, ErrorCode.NOT_FOUND, 'Order not found')
+    return sendError(c, 404, ErrorCode.NOT_FOUND, 'Order not found')
   }
 
   // Validate status transition
@@ -175,7 +175,7 @@ orders.patch('/status/:orderId', async (c) => {
   }
 
   if (!validTransitions[order.status].includes(body.status)) {
-    return sendError(c, ErrorCode.INVALID_STATE_TRANSITION, `Cannot transition from ${order.status} to ${body.status}`)
+    return sendError(c, 400, ErrorCode.INVALID_STATE_TRANSITION, `Cannot transition from ${order.status} to ${body.status}`)
   }
 
   const updatedOrder: Order = {

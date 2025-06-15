@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import app from '../index'
+import { loginTestUser, createAuthHeaders, TEST_USERS } from '../test-helpers/auth'
 import { store } from '../stores'
 import type { operations, components } from '../types/api'
 
@@ -8,16 +9,42 @@ type Order = components['schemas']['Order']
 type ErrorResponse = { error: { code: string; message: string } }
 
 describe('Orders API', () => {
-  beforeEach(() => {
+  let authToken: string
+  const userId = TEST_USERS.alice.id // Use the actual user ID from auth system
+
+  beforeEach(async () => {
     // Reset store to initial state before each test
     const storeInstance = new (store.constructor as any)()
     Object.setPrototypeOf(store, Object.getPrototypeOf(storeInstance))
     Object.assign(store, storeInstance)
+    
+    // Login test user
+    authToken = await loginTestUser(TEST_USERS.alice.email, TEST_USERS.alice.password)
+    
+    // Add the authenticated user to the store if not exists
+    if (!store.getUser(userId)) {
+      store.createUser({
+        id: userId,
+        email: TEST_USERS.alice.email,
+        name: 'Alice Johnson',
+        address: {
+          street: '123 Test St',
+          city: 'Test City',
+          state: 'TC',
+          postalCode: '12345',
+          country: 'USA',
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      })
+    }
   })
 
   describe('GET /orders', () => {
     it('should return empty order list initially', async () => {
-      const res = await app.request('/orders')
+      const res = await app.request('/orders', {
+        headers: createAuthHeaders(authToken),
+      })
       const json = await res.json() as OrderListResponse
 
       expect(res.status).toBe(200)
@@ -33,15 +60,15 @@ describe('Orders API', () => {
 
     it('should filter orders by userId', async () => {
       // Create an order first
-      await app.request('/carts/users/1/items', {
+      await app.request(`/carts/users/${userId}/items`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...createAuthHeaders(authToken), 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId: '1', quantity: 1 }),
       })
       
-      await app.request('/orders/users/1', {
+      await app.request(`/orders/users/${userId}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...createAuthHeaders(authToken), 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items: [],
           shippingAddress: {
@@ -54,14 +81,24 @@ describe('Orders API', () => {
         }),
       })
 
-      const res = await app.request('/orders?userId=1')
+      const res = await app.request(`/orders?userId=${userId}`, {
+        headers: createAuthHeaders(authToken),
+      })
       const json = await res.json() as OrderListResponse
 
       expect(res.status).toBe(200)
       if ('items' in json) {
         expect(json.items).toHaveLength(1)
-        expect(json.items[0].userId).toBe('1')
+        expect(json.items[0].userId).toBe(userId)
       }
+    })
+
+    it('should require authentication', async () => {
+      const res = await app.request('/orders')
+      const json = await res.json() as ErrorResponse
+
+      expect(res.status).toBe(401)
+      expect(json.error.code).toBe('UNAUTHORIZED')
     })
   })
 
@@ -70,15 +107,15 @@ describe('Orders API', () => {
 
     beforeEach(async () => {
       // Setup: Create an order
-      await app.request('/carts/users/1/items', {
+      await app.request(`/carts/users/${userId}/items`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...createAuthHeaders(authToken), 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId: '1', quantity: 2 }),
       })
 
-      const orderRes = await app.request('/orders/users/1', {
+      const orderRes = await app.request(`/orders/users/${userId}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...createAuthHeaders(authToken), 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items: [],
           shippingAddress: {
@@ -95,41 +132,53 @@ describe('Orders API', () => {
     })
 
     it('should return order by id', async () => {
-      const res = await app.request(`/orders/${orderId}`)
+      const res = await app.request(`/orders/${orderId}`, {
+        headers: createAuthHeaders(authToken),
+      })
       const json = await res.json() as Order | ErrorResponse
 
       expect(res.status).toBe(200)
       if ('id' in json && !('error' in json)) {
         expect(json.id).toBe(orderId)
-        expect(json.userId).toBe('1')
+        expect(json.userId).toBe(userId)
         expect(json.status).toBe('pending')
         expect(json.items).toHaveLength(1)
       }
     })
 
     it('should return 404 for non-existent order', async () => {
-      const res = await app.request('/orders/999')
+      const res = await app.request('/orders/999', {
+        headers: createAuthHeaders(authToken),
+      })
       const json = await res.json() as ErrorResponse
 
       expect(res.status).toBe(404)
       expect(json.error).toHaveProperty('code', 'NOT_FOUND')
+    })
+
+    it('should require authentication', async () => {
+      const res = await app.request(`/orders/${orderId}`)
+      const json = await res.json() as ErrorResponse
+
+      expect(res.status).toBe(401)
+      expect(json.error.code).toBe('UNAUTHORIZED')
     })
   })
 
   describe('POST /orders/users/:userId', () => {
     beforeEach(async () => {
       // Add items to cart
-      await app.request('/carts/users/1/items', {
+      await app.request(`/carts/users/${userId}/items`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...createAuthHeaders(authToken), 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId: '1', quantity: 2 }),
       })
     })
 
     it('should create order from cart', async () => {
-      const res = await app.request('/orders/users/1', {
+      const res = await app.request(`/orders/users/${userId}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...createAuthHeaders(authToken), 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items: [],
           shippingAddress: {
@@ -145,7 +194,7 @@ describe('Orders API', () => {
 
       expect(res.status).toBe(201)
       expect(json).toHaveProperty('id')
-      expect(json.userId).toBe('1')
+      expect(json.userId).toBe(userId)
       expect(json.status).toBe('pending')
       expect(json.items).toHaveLength(1)
       expect(json.items[0].productId).toBe('1')
@@ -161,7 +210,9 @@ describe('Orders API', () => {
       })
 
       // Verify cart was cleared
-      const cartRes = await app.request('/carts/users/1')
+      const cartRes = await app.request(`/carts/users/${userId}`, {
+        headers: createAuthHeaders(authToken),
+      })
       const cart = await cartRes.json() as components['schemas']['Cart']
       expect(cart.items).toHaveLength(0)
 
@@ -176,7 +227,7 @@ describe('Orders API', () => {
     it('should return 404 for non-existent user', async () => {
       const res = await app.request('/orders/users/999', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...createAuthHeaders(authToken), 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items: [],
           shippingAddress: {
@@ -197,13 +248,14 @@ describe('Orders API', () => {
 
     it('should return 400 for empty cart', async () => {
       // Clear cart first
-      await app.request('/carts/users/1/items', {
+      await app.request(`/carts/users/${userId}/items`, {
         method: 'DELETE',
+        headers: createAuthHeaders(authToken),
       })
 
       const res = await app.request('/orders/users/1', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...createAuthHeaders(authToken), 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items: [],
           shippingAddress: {
@@ -223,18 +275,19 @@ describe('Orders API', () => {
 
     it('should return 400 for insufficient stock', async () => {
       // First add a valid quantity
-      await app.request('/carts/users/1/items', {
+      await app.request(`/carts/users/${userId}/items`, {
         method: 'DELETE',
+        headers: createAuthHeaders(authToken),
       })
-      await app.request('/carts/users/1/items', {
+      await app.request(`/carts/users/${userId}/items`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...createAuthHeaders(authToken), 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId: '1', quantity: 15 }), // More than stock (10)
       })
 
       const res = await app.request('/orders/users/1', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...createAuthHeaders(authToken), 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items: [],
           shippingAddress: {
@@ -252,6 +305,27 @@ describe('Orders API', () => {
       // Cart API rejects items with insufficient stock, so cart remains empty
       expect(json.error.code).toBe('BAD_REQUEST')
     })
+
+    it('should require authentication', async () => {
+      const res = await app.request('/orders/users/1', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: [],
+          shippingAddress: {
+            street: '123 Test',
+            city: 'Test',
+            state: 'TS',
+            postalCode: '12345',
+            country: 'USA'
+          }
+        }),
+      })
+      const json = await res.json() as ErrorResponse
+
+      expect(res.status).toBe(401)
+      expect(json.error.code).toBe('UNAUTHORIZED')
+    })
   })
 
   describe('PATCH /orders/status/:orderId', () => {
@@ -259,15 +333,15 @@ describe('Orders API', () => {
 
     beforeEach(async () => {
       // Create an order
-      await app.request('/carts/users/1/items', {
+      await app.request(`/carts/users/${userId}/items`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...createAuthHeaders(authToken), 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId: '1', quantity: 1 }),
       })
 
-      const orderRes = await app.request('/orders/users/1', {
+      const orderRes = await app.request(`/orders/users/${userId}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...createAuthHeaders(authToken), 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items: [],
           shippingAddress: {
@@ -286,7 +360,7 @@ describe('Orders API', () => {
     it('should update order status', async () => {
       const res = await app.request(`/orders/status/${orderId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...createAuthHeaders(authToken), 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'processing' }),
       })
       const json = await res.json() as Order | ErrorResponse
@@ -302,7 +376,7 @@ describe('Orders API', () => {
       // Try invalid transition from pending to delivered
       const res = await app.request(`/orders/status/${orderId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...createAuthHeaders(authToken), 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'delivered' }),
       })
       const json = await res.json() as ErrorResponse
@@ -314,13 +388,25 @@ describe('Orders API', () => {
     it('should return 404 for non-existent order', async () => {
       const res = await app.request('/orders/status/999', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...createAuthHeaders(authToken), 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'processing' }),
       })
       const json = await res.json() as ErrorResponse
 
       expect(res.status).toBe(404)
       expect(json.error.code).toBe('NOT_FOUND')
+    })
+
+    it('should require authentication', async () => {
+      const res = await app.request(`/orders/status/${orderId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'processing' }),
+      })
+      const json = await res.json() as ErrorResponse
+
+      expect(res.status).toBe(401)
+      expect(json.error.code).toBe('UNAUTHORIZED')
     })
   })
 })

@@ -36,7 +36,7 @@ users.get('/:userId', (c) => {
   const user = store.getUser(userId)
 
   if (!user) {
-    return sendError(c, ErrorCode.NOT_FOUND, 'User not found')
+    return sendError(c, 404, ErrorCode.NOT_FOUND, 'User not found')
   }
 
   return c.json(user)
@@ -74,7 +74,7 @@ users.put('/:userId', async (c) => {
   
   const existing = store.getUser(userId)
   if (!existing) {
-    return sendError(c, ErrorCode.NOT_FOUND, 'User not found')
+    return sendError(c, 404, ErrorCode.NOT_FOUND, 'User not found')
   }
 
   const updatedUser: User = {
@@ -94,7 +94,7 @@ users.delete('/:userId', (c) => {
   const deleted = store.deleteUser(userId)
 
   if (!deleted) {
-    return sendError(c, ErrorCode.NOT_FOUND, 'User not found')
+    return sendError(c, 404, ErrorCode.NOT_FOUND, 'User not found')
   }
 
   return c.body(null, 204)

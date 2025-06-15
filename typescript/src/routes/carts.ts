@@ -24,11 +24,11 @@ carts.post('/users/:userId/items', async (c) => {
   const product = store.getProduct(body.productId)
 
   if (!product) {
-    return sendError(c, ErrorCode.NOT_FOUND, 'Product not found')
+    return sendError(c, 404, ErrorCode.NOT_FOUND, 'Product not found')
   }
 
   if (product.stock < body.quantity) {
-    return sendError(c, ErrorCode.INSUFFICIENT_STOCK, 'Insufficient stock')
+    return sendError(c, 400, ErrorCode.INSUFFICIENT_STOCK, 'Insufficient stock')
   }
 
   // Check if item already exists in cart
@@ -60,16 +60,16 @@ carts.patch('/users/:userId/items/:productId', async (c) => {
   const product = store.getProduct(productId)
 
   if (!product) {
-    return sendError(c, ErrorCode.NOT_FOUND, 'Product not found')
+    return sendError(c, 404, ErrorCode.NOT_FOUND, 'Product not found')
   }
 
   const itemIndex = cart.items.findIndex(item => item.productId === productId)
   if (itemIndex < 0) {
-    return sendError(c, ErrorCode.NOT_FOUND, 'Item not found in cart')
+    return sendError(c, 404, ErrorCode.NOT_FOUND, 'Item not found in cart')
   }
 
   if (product.stock < body.quantity) {
-    return sendError(c, ErrorCode.INSUFFICIENT_STOCK, 'Insufficient stock')
+    return sendError(c, 400, ErrorCode.INSUFFICIENT_STOCK, 'Insufficient stock')
   }
 
   cart.items[itemIndex].quantity = body.quantity
@@ -88,7 +88,7 @@ carts.delete('/users/:userId/items/:productId', (c) => {
   const itemIndex = cart.items.findIndex(item => item.productId === productId)
   
   if (itemIndex < 0) {
-    return sendError(c, ErrorCode.NOT_FOUND, 'Item not found in cart')
+    return sendError(c, 404, ErrorCode.NOT_FOUND, 'Item not found in cart')
   }
 
   cart.items.splice(itemIndex, 1)

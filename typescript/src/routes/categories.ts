@@ -50,7 +50,7 @@ categories.get('/:categoryId', (c) => {
   const category = store.getCategory(categoryId)
 
   if (!category) {
-    return sendError(c, ErrorCode.NOT_FOUND, 'Category not found')
+    return sendError(c, 404, ErrorCode.NOT_FOUND, 'Category not found')
   }
 
   return c.json(category)
@@ -78,7 +78,7 @@ categories.put('/:categoryId', async (c) => {
   
   const existing = store.getCategory(categoryId)
   if (!existing) {
-    return sendError(c, ErrorCode.NOT_FOUND, 'Category not found')
+    return sendError(c, 404, ErrorCode.NOT_FOUND, 'Category not found')
   }
 
   const updatedCategory: Category = {
@@ -97,7 +97,7 @@ categories.delete('/:categoryId', (c) => {
   const deleted = store.deleteCategory(categoryId)
 
   if (!deleted) {
-    return sendError(c, ErrorCode.NOT_FOUND, 'Category not found')
+    return sendError(c, 404, ErrorCode.NOT_FOUND, 'Category not found')
   }
 
   return c.body(null, 204)

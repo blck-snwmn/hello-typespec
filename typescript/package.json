@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "generate:types": "openapi-typescript ../openapi/openapi.yaml -o ./src/types/api.ts",
     "test": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage"
   },
   "keywords": [],
   "author": "",
@@ -27,6 +28,8 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.14.3",
-    "hono": "^4.7.11"
+    "@types/uuid": "^10.0.0",
+    "hono": "^4.7.11",
+    "uuid": "^11.1.0"
   }
 }

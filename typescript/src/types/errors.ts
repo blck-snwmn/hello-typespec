@@ -89,12 +89,12 @@ export function createErrorResponse(
  */
 export function sendError(
   c: Context,
+  statusCode: ContentfulStatusCode,
   code: ErrorCode,
   message: string,
   details?: unknown
 ) {
-  const status = errorCodeToStatus[code] || 500;
-  return c.json<ErrorResponse>(createErrorResponse(code, message, details), status as ContentfulStatusCode);
+  return c.json<ErrorResponse>(createErrorResponse(code, message, details), statusCode);
 }
 
 /**
