@@ -1,6 +1,7 @@
 package store
 
 import (
+	"sort"
 	"sync"
 	"time"
 
@@ -256,6 +257,12 @@ func (s *MemoryStore) GetUsers() []generated.User {
 	for _, user := range s.users {
 		users = append(users, user)
 	}
+	
+	// Sort by ID for consistent ordering
+	sort.Slice(users, func(i, j int) bool {
+		return users[i].Id < users[j].Id
+	})
+	
 	return users
 }
 
