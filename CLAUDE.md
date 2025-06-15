@@ -50,7 +50,8 @@
 - ESModuleを使用
 - エラーハンドリングは明示的に行う
 - ビジネスロジックは`/services`に分離
-- **注意**: TypeScriptのpackage.jsonにはlint/typecheckスクリプトがない（必要に応じてvite buildで代用）
+- **型安全性**: `as any`は使用禁止、適切な型定義を作成すること
+- **型チェック**: `pnpm typecheck`で型エラーがないことを確認すること
 
 ### Go
 - 標準的なGoプロジェクトレイアウトに従う
@@ -207,16 +208,21 @@
 ### Git操作のベストプラクティス
 
 #### コミット前の確認事項
-1. **Diagnosticsエラーの確認**
+1. **TypeScript型チェックの実行（必須）**
+   - `pnpm typecheck` または `pnpm -F typescript typecheck`を実行
+   - **型エラーが一つでもある場合はコミット禁止**
+   - CI/CDでも型チェックが実行されるため、事前に必ず確認すること
+
+2. **Diagnosticsエラーの確認**
    - VSCodeのDiagnosticsパネルでエラーや警告がないことを確認
    - 特にTypeScriptの型エラー、Goのコンパイルエラーに注意
 
-2. **テストの実行**
+3. **テストの実行**
    - TypeScript: `pnpm test` (vitestの実行)
    - Go: `go test ./...`
    - すべてのテストがパスすることを確認
 
-3. **ビルドの確認**
+4. **ビルドの確認**
    - TypeScript: `pnpm build` または `pnpm -F typescript build`
    - Go: `go build ./...`
    - ビルドエラーがないことを確認
@@ -268,7 +274,7 @@
 #### 1. CI Check (ci.yml)
 プルリクエストおよびプッシュ時に実行される検証：
 - **TypeSpec検証**: コード生成が最新かチェック
-- **TypeScriptチェック**: ビルド、テスト、型チェック、カバレッジ測定
+- **TypeScriptチェック**: **型チェック（必須）**、ビルド、テスト、カバレッジ測定
 - **Goチェック**: ビルド、テスト、フォーマット、静的解析、カバレッジ測定
 - **カバレッジレポート**: アーティファクトとして保存
 

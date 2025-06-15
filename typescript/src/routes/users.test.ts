@@ -4,10 +4,15 @@ import { store } from '../stores'
 import type { operations, components } from '../types/api'
 import { loginTestUser, createAuthHeaders, TEST_USERS } from '../test-helpers/auth'
 
-type UserListResponse = operations['UsersService_list']['responses']['200']['content']['application/json']
 type User = components['schemas']['User']
 type Cart = components['schemas']['Cart']
-type ErrorResponse = { error: { code: string; message: string } }
+type ErrorResponse = components['schemas']['ErrorResponse']
+type UserListResponse = {
+  items: User[];
+  total: number;
+  limit: number;
+  offset: number;
+}
 
 describe('Users API', () => {
   let authToken: string

@@ -6,7 +6,7 @@ import type { components } from '../types/api';
 
 type LoginRequest = components['schemas']['LoginRequest'];
 type LoginResponse = components['schemas']['LoginResponse'];
-type CurrentUserResponse = components['schemas']['CurrentUserResponse'];
+type AuthUser = components['schemas']['AuthUser'];
 
 const authRoutes = new Hono();
 
@@ -49,12 +49,7 @@ authRoutes.post('/logout', authMiddleware, async (c) => {
 // GET /auth/me
 authRoutes.get('/me', authMiddleware, async (c) => {
   const user = c.get('user');
-  
-  const response: CurrentUserResponse = {
-    user,
-  };
-
-  return c.json(response);
+  return c.json(user);
 });
 
 export default authRoutes;

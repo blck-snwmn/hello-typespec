@@ -1,6 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import app from '../index';
 import { authStore } from '../stores/auth';
+import type { components } from '../types/api';
+
+type LoginResponse = components['schemas']['LoginResponse'];
+type AuthUser = components['schemas']['AuthUser'];
+type ErrorResponse = components['schemas']['ErrorResponse'];
+type OkResponse = components['schemas']['OkResponse'];
 
 describe('Auth Routes', () => {
   beforeEach(() => {
@@ -24,7 +30,7 @@ describe('Auth Routes', () => {
       });
 
       expect(res.status).toBe(200);
-      const body = await res.json();
+      const body = await res.json() as LoginResponse;
       expect(body).toHaveProperty('accessToken');
       expect(body).toHaveProperty('tokenType', 'Bearer');
       expect(body).toHaveProperty('expiresIn', 86400);
@@ -49,7 +55,7 @@ describe('Auth Routes', () => {
       });
 
       expect(res.status).toBe(401);
-      const body = await res.json();
+      const body = await res.json() as ErrorResponse;
       expect(body.error).toMatchObject({
         code: 'UNAUTHORIZED',
         message: 'Invalid email or password',
@@ -68,7 +74,7 @@ describe('Auth Routes', () => {
       });
 
       expect(res.status).toBe(400);
-      const body = await res.json();
+      const body = await res.json() as ErrorResponse;
       expect(body.error).toMatchObject({
         code: 'BAD_REQUEST',
         message: 'Email and password are required',
@@ -89,7 +95,7 @@ describe('Auth Routes', () => {
           password: 'password123',
         }),
       });
-      const { accessToken } = await loginRes.json();
+      const { accessToken } = await loginRes.json() as LoginResponse;
 
       // Then logout
       const res = await app.request('/auth/logout', {
@@ -100,7 +106,7 @@ describe('Auth Routes', () => {
       });
 
       expect(res.status).toBe(200);
-      const body = await res.json();
+      const body = await res.json() as OkResponse;
       expect(body).toMatchObject({
         message: 'Logged out successfully',
       });
@@ -121,7 +127,7 @@ describe('Auth Routes', () => {
       });
 
       expect(res.status).toBe(401);
-      const body = await res.json();
+      const body = await res.json() as ErrorResponse;
       expect(body.error).toMatchObject({
         code: 'UNAUTHORIZED',
         message: 'Missing Authorization header',
@@ -142,7 +148,7 @@ describe('Auth Routes', () => {
           password: 'password123',
         }),
       });
-      const { accessToken } = await loginRes.json();
+      const { accessToken } = await loginRes.json() as LoginResponse;
 
       // Get current user
       const res = await app.request('/auth/me', {
@@ -153,9 +159,8 @@ describe('Auth Routes', () => {
       });
 
       expect(res.status).toBe(200);
-      const body = await res.json();
-      expect(body).toHaveProperty('user');
-      expect(body.user).toMatchObject({
+      const body = await res.json() as AuthUser;
+      expect(body).toMatchObject({
         id: '550e8400-e29b-41d4-a716-446655440001',
         email: 'alice@example.com',
         name: 'Alice Johnson',
@@ -168,7 +173,7 @@ describe('Auth Routes', () => {
       });
 
       expect(res.status).toBe(401);
-      const body = await res.json();
+      const body = await res.json() as ErrorResponse;
       expect(body.error).toMatchObject({
         code: 'UNAUTHORIZED',
         message: 'Missing Authorization header',
@@ -184,7 +189,7 @@ describe('Auth Routes', () => {
       });
 
       expect(res.status).toBe(401);
-      const body = await res.json();
+      const body = await res.json() as ErrorResponse;
       expect(body.error).toMatchObject({
         code: 'UNAUTHORIZED',
         message: 'Invalid or expired token',

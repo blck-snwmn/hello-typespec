@@ -69,14 +69,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: TypeScript type check
+        run: pnpm -F typescript typecheck
+
       - name: Build TypeScript
         run: pnpm -F typescript build
 
       - name: Run TypeScript tests with coverage
         run: pnpm -F typescript test --coverage
-
-      - name: Type check
-        run: pnpm -F typescript exec tsc --noEmit
 
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
