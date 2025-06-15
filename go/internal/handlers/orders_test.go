@@ -16,7 +16,7 @@ func TestOrdersService_List(t *testing.T) {
 		// Create some test orders first
 		userID := createTestUser(t, server, "orders@example.com", "Order User")
 		productID := createTestProduct(t, server, "Order Product", 50.00, 10)
-		
+
 		// Add to cart with auth
 		addToCartAuth(t, server, userID, productID, 2, token)
 		orderID := createOrderAuth(t, server, userID, token)
@@ -71,7 +71,7 @@ func TestOrdersService_List(t *testing.T) {
 		for i := 0; i < 3; i++ {
 			addToCartAuth(t, server, userID, productID, 1, token)
 			orderID := createOrderAuth(t, server, userID, token)
-			
+
 			// Update some to different status
 			if i > 0 {
 				updateOrderStatus(t, server, orderID, "processing", token)
@@ -81,11 +81,11 @@ func TestOrdersService_List(t *testing.T) {
 		// Filter by pending status
 		rr := makeAuthenticatedRequest(t, server, "GET", "/orders?status=pending", nil, token)
 		assertStatus(t, rr, http.StatusOK)
-		
+
 		var response map[string]any
 		err := decodeJSON(rr, &response)
 		require.NoError(t, err)
-		
+
 		items := response["items"].([]any)
 		// Should have at least 1 pending order (may have more from previous tests)
 		assert.GreaterOrEqual(t, len(items), 1)
