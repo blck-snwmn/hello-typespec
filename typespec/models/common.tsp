@@ -69,3 +69,34 @@ model Timestamps {
  * UUID type alias
  */
 scalar uuid extends string;
+
+/**
+ * Login request
+ */
+model LoginRequest {
+  email: string;
+  password: string;
+}
+
+/**
+ * Login response with access token
+ */
+model LoginResponse {
+  accessToken: string;
+  tokenType: "Bearer";
+  expiresIn: int32;
+  user: {
+    id: uuid;
+    email: string;
+    name: string;
+  };
+}
+
+/**
+ * Authenticated user context
+ */
+model AuthUser {
+  id: uuid;
+  email: string;
+  name: string;
+}

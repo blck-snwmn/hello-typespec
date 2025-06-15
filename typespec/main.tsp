@@ -8,6 +8,7 @@ import "./services/categories.tsp";
 import "./services/users.tsp";
 import "./services/carts.tsp";
 import "./services/orders.tsp";
+import "./services/auth.tsp";
 
 using TypeSpec.Http;
 using TypeSpec.Rest;
