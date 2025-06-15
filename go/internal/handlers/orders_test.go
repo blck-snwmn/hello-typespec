@@ -364,7 +364,7 @@ func TestOrdersService_Cancel(t *testing.T) {
 		// Try to cancel shipped order
 		rr := makeRequest(t, server, "POST", "/orders/cancel/"+orderID, nil)
 		assertStatus(t, rr, http.StatusBadRequest)
-		assertErrorResponse(t, rr, "INVALID_STATUS")
+		assertErrorResponse(t, rr, "VALIDATION_ERROR")
 	})
 
 	t.Run("should return 404 for non-existent order", func(t *testing.T) {
