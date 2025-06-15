@@ -4,6 +4,57 @@
  */
 
 export interface paths {
+    "/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Login with email and password */
+        post: operations["AuthService_login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Logout (invalidate token) */
+        post: operations["AuthService_logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Get current user information */
+        get: operations["AuthService_getCurrentUser"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/carts/users/{userId}": {
         parameters: {
             query?: never;
@@ -67,7 +118,7 @@ export interface paths {
         /** @description List all categories */
         get: operations["CategoriesService_list"];
         put?: never;
-        /** @description Create a new category */
+        /** @description Create a new category (Admin only) */
         post: operations["CategoriesService_create"];
         delete?: never;
         options?: never;
@@ -103,11 +154,11 @@ export interface paths {
         get: operations["CategoriesService_get"];
         put?: never;
         post?: never;
-        /** @description Delete a category */
+        /** @description Delete a category (Admin only) */
         delete: operations["CategoriesService_delete"];
         options?: never;
         head?: never;
-        /** @description Update a category */
+        /** @description Update a category (Admin only) */
         patch: operations["CategoriesService_update"];
         trace?: never;
     };
@@ -118,7 +169,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description List all orders with optional filtering */
+        /** @description List all orders with optional filtering (Admin only) */
         get: operations["OrdersService_list"];
         put?: never;
         post?: never;
@@ -158,7 +209,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** @description Update order status */
+        /** @description Update order status (Admin only) */
         patch: operations["OrdersService_updateStatus"];
         trace?: never;
     };
@@ -207,7 +258,7 @@ export interface paths {
         /** @description List all products with optional filtering */
         get: operations["ProductsService_list"];
         put?: never;
-        /** @description Create a new product */
+        /** @description Create a new product (Admin only) */
         post: operations["ProductsService_create"];
         delete?: never;
         options?: never;
@@ -226,11 +277,11 @@ export interface paths {
         get: operations["ProductsService_get"];
         put?: never;
         post?: never;
-        /** @description Delete a product */
+        /** @description Delete a product (Admin only) */
         delete: operations["ProductsService_delete"];
         options?: never;
         head?: never;
-        /** @description Update a product */
+        /** @description Update a product (Admin only) */
         patch: operations["ProductsService_update"];
         trace?: never;
     };
@@ -241,7 +292,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description List all users */
+        /** @description List all users (Admin only) */
         get: operations["UsersService_list"];
         put?: never;
         /** @description Create a new user */
@@ -288,6 +339,12 @@ export interface components {
             state: string;
             postalCode: string;
             country: string;
+        };
+        /** @description Authenticated user context */
+        AuthUser: {
+            id: components["schemas"]["uuid"];
+            email: string;
+            name: string;
         };
         /** @description Shopping cart */
         Cart: {
@@ -366,6 +423,28 @@ export interface components {
                 message: string;
                 details?: unknown;
             };
+        };
+        /** @description Login request */
+        LoginRequest: {
+            email: string;
+            password: string;
+        };
+        /** @description Login response with access token */
+        LoginResponse: {
+            accessToken: string;
+            /** @enum {string} */
+            tokenType: "Bearer";
+            /** Format: int32 */
+            expiresIn: number;
+            user: {
+                id: components["schemas"]["uuid"];
+                email: string;
+                name: string;
+            };
+        };
+        /** @description Simple OK response */
+        OkResponse: {
+            message: string;
         };
         /** @description Order model */
         Order: {
@@ -489,6 +568,74 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    AuthService_login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginRequest"];
+            };
+        };
+        responses: {
+            /** @description The request has succeeded. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoginResponse"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    AuthService_logout: {
+        parameters: {
+            query?: never;
+            header: {
+                Authorization: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The request has succeeded. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OkResponse"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    AuthService_getCurrentUser: {
+        parameters: {
+            query?: never;
+            header: {
+                Authorization: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The request has succeeded. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthUser"] | components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     CartsService_getByUser: {
         parameters: {
             query?: never;
@@ -1103,7 +1250,7 @@ export interface operations {
                         limit: number;
                         /** Format: int32 */
                         offset: number;
-                    };
+                    } | components["schemas"]["ErrorResponse"];
                 };
             };
         };

@@ -13,6 +13,68 @@ tags:
   - name: Carts
   - name: Orders
 paths:
+  /auth/login:
+    post:
+      operationId: AuthService_login
+      description: Login with email and password
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/LoginResponse'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+  /auth/logout:
+    post:
+      operationId: AuthService_logout
+      description: Logout (invalidate token)
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/OkResponse'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - BearerAuth: []
+  /auth/me:
+    get:
+      operationId: AuthService_getCurrentUser
+      description: Get current user information
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/AuthUser'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - BearerAuth: []
   /carts/users/{userId}:
     get:
       operationId: CartsService_getByUser
@@ -34,6 +96,8 @@ paths:
                   - $ref: '#/components/schemas/ErrorResponse'
       tags:
         - Carts
+      security:
+        - BearerAuth: []
   /carts/users/{userId}/items:
     post:
       operationId: CartsService_addItem
@@ -61,6 +125,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/AddCartItemRequest'
+      security:
+        - BearerAuth: []
     delete:
       operationId: CartsService_clear
       description: Clear all items from cart
@@ -81,6 +147,8 @@ paths:
           description: 'There is no content to send for this request, but the headers may be useful. '
       tags:
         - Carts
+      security:
+        - BearerAuth: []
   /carts/users/{userId}/items/{productId}:
     patch:
       operationId: CartsService_updateItem
@@ -113,6 +181,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UpdateCartItemRequest'
+      security:
+        - BearerAuth: []
     delete:
       operationId: CartsService_removeItem
       description: Remove item from cart
@@ -138,6 +208,8 @@ paths:
                   - $ref: '#/components/schemas/ErrorResponse'
       tags:
         - Carts
+      security:
+        - BearerAuth: []
   /categories:
     get:
       operationId: CategoriesService_list
@@ -158,7 +230,7 @@ paths:
         - Categories
     post:
       operationId: CategoriesService_create
-      description: Create a new category
+      description: Create a new category (Admin only)
       parameters: []
       responses:
         '200':
@@ -177,6 +249,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateCategoryRequest'
+      security:
+        - BearerAuth: []
   /categories/tree:
     get:
       operationId: CategoriesService_tree
@@ -218,7 +292,7 @@ paths:
         - Categories
     patch:
       operationId: CategoriesService_update
-      description: Update a category
+      description: Update a category (Admin only)
       parameters:
         - name: categoryId
           in: path
@@ -242,9 +316,11 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UpdateCategoryRequest'
+      security:
+        - BearerAuth: []
     delete:
       operationId: CategoriesService_delete
-      description: Delete a category
+      description: Delete a category (Admin only)
       parameters:
         - name: categoryId
           in: path
@@ -262,10 +338,12 @@ paths:
           description: 'There is no content to send for this request, but the headers may be useful. '
       tags:
         - Categories
+      security:
+        - BearerAuth: []
   /orders:
     get:
       operationId: OrdersService_list
-      description: List all orders with optional filtering
+      description: List all orders with optional filtering (Admin only)
       parameters:
         - $ref: '#/components/parameters/PaginationParams.limit'
         - $ref: '#/components/parameters/PaginationParams.offset'
@@ -304,6 +382,8 @@ paths:
                   - $ref: '#/components/schemas/ErrorResponse'
       tags:
         - Orders
+      security:
+        - BearerAuth: []
   /orders/cancel/{orderId}:
     post:
       operationId: OrdersService_cancel
@@ -325,10 +405,12 @@ paths:
                   - $ref: '#/components/schemas/ErrorResponse'
       tags:
         - Orders
+      security:
+        - BearerAuth: []
   /orders/status/{orderId}:
     patch:
       operationId: OrdersService_updateStatus
-      description: Update order status
+      description: Update order status (Admin only)
       parameters:
         - name: orderId
           in: path
@@ -352,6 +434,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UpdateOrderStatusRequest'
+      security:
+        - BearerAuth: []
   /orders/users/{userId}:
     post:
       operationId: OrdersService_create
@@ -379,6 +463,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateOrderRequest'
+      security:
+        - BearerAuth: []
     get:
       operationId: OrdersService_listByUser
       description: Get orders by user ID
@@ -421,6 +507,8 @@ paths:
                   - $ref: '#/components/schemas/ErrorResponse'
       tags:
         - Orders
+      security:
+        - BearerAuth: []
   /orders/{orderId}:
     get:
       operationId: OrdersService_get
@@ -442,6 +530,8 @@ paths:
                   - $ref: '#/components/schemas/ErrorResponse'
       tags:
         - Orders
+      security:
+        - BearerAuth: []
   /products:
     get:
       operationId: ProductsService_list
@@ -488,7 +578,7 @@ paths:
         - Products
     post:
       operationId: ProductsService_create
-      description: Create a new product
+      description: Create a new product (Admin only)
       parameters: []
       responses:
         '200':
@@ -507,6 +597,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateProductRequest'
+      security:
+        - BearerAuth: []
   /products/{productId}:
     get:
       operationId: ProductsService_get
@@ -530,7 +622,7 @@ paths:
         - Products
     patch:
       operationId: ProductsService_update
-      description: Update a product
+      description: Update a product (Admin only)
       parameters:
         - name: productId
           in: path
@@ -554,9 +646,11 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UpdateProductRequest'
+      security:
+        - BearerAuth: []
     delete:
       operationId: ProductsService_delete
-      description: Delete a product
+      description: Delete a product (Admin only)
       parameters:
         - name: productId
           in: path
@@ -574,10 +668,12 @@ paths:
           description: 'There is no content to send for this request, but the headers may be useful. '
       tags:
         - Products
+      security:
+        - BearerAuth: []
   /users:
     get:
       operationId: UsersService_list
-      description: List all users
+      description: List all users (Admin only)
       parameters:
         - $ref: '#/components/parameters/PaginationParams.limit'
         - $ref: '#/components/parameters/PaginationParams.offset'
@@ -587,29 +683,33 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - items
-                  - total
-                  - limit
-                  - offset
-                properties:
-                  items:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/User'
-                  total:
-                    type: integer
-                    format: int32
-                  limit:
-                    type: integer
-                    format: int32
-                  offset:
-                    type: integer
-                    format: int32
-                description: Paginated response wrapper
+                anyOf:
+                  - type: object
+                    required:
+                      - items
+                      - total
+                      - limit
+                      - offset
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/User'
+                      total:
+                        type: integer
+                        format: int32
+                      limit:
+                        type: integer
+                        format: int32
+                      offset:
+                        type: integer
+                        format: int32
+                    description: Paginated response wrapper
+                  - $ref: '#/components/schemas/ErrorResponse'
       tags:
         - Users
+      security:
+        - BearerAuth: []
     post:
       operationId: UsersService_create
       description: Create a new user
@@ -652,6 +752,8 @@ paths:
                   - $ref: '#/components/schemas/ErrorResponse'
       tags:
         - Users
+      security:
+        - BearerAuth: []
     patch:
       operationId: UsersService_update
       description: Update a user
@@ -678,6 +780,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UpdateUserRequest'
+      security:
+        - BearerAuth: []
     delete:
       operationId: UsersService_delete
       description: Delete a user
@@ -698,6 +802,8 @@ paths:
           description: 'There is no content to send for this request, but the headers may be useful. '
       tags:
         - Users
+      security:
+        - BearerAuth: []
 components:
   parameters:
     OrderSearchParams.endDate:
@@ -846,6 +952,20 @@ components:
         country:
           type: string
       description: User address
+    AuthUser:
+      type: object
+      required:
+        - id
+        - email
+        - name
+      properties:
+        id:
+          $ref: '#/components/schemas/uuid'
+        email:
+          type: string
+        name:
+          type: string
+      description: Authenticated user context
     Cart:
       type: object
       required:
@@ -1025,6 +1145,56 @@ components:
             - code
             - message
       description: Common error response
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      description: Login request
+    LoginResponse:
+      type: object
+      required:
+        - accessToken
+        - tokenType
+        - expiresIn
+        - user
+      properties:
+        accessToken:
+          type: string
+        tokenType:
+          type: string
+          enum:
+            - Bearer
+        expiresIn:
+          type: integer
+          format: int32
+        user:
+          type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/uuid'
+            email:
+              type: string
+            name:
+              type: string
+          required:
+            - id
+            - email
+            - name
+      description: Login response with access token
+    OkResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+      description: Simple OK response
     Order:
       type: object
       required:
@@ -1207,6 +1377,10 @@ components:
     uuid:
       type: string
       description: UUID type alias
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: Bearer
 servers:
   - url: http://localhost:3000
     description: Development server

@@ -8,6 +8,7 @@ package generated
 import (
 	"bytes"
 	"compress/gzip"
+	"context"
 	"encoding/base64"
 	"fmt"
 	"net/http"
@@ -18,6 +19,10 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oapi-codegen/runtime"
+)
+
+const (
+	BearerAuthScopes = "BearerAuth.Scopes"
 )
 
 // Defines values for ErrorCode.
@@ -32,6 +37,11 @@ const (
 	SERVICEUNAVAILABLE     ErrorCode = "SERVICE_UNAVAILABLE"
 	UNAUTHORIZED           ErrorCode = "UNAUTHORIZED"
 	VALIDATIONERROR        ErrorCode = "VALIDATION_ERROR"
+)
+
+// Defines values for LoginResponseTokenType.
+const (
+	Bearer LoginResponseTokenType = "Bearer"
 )
 
 // Defines values for OrderStatus.
@@ -83,6 +93,15 @@ type Address struct {
 	PostalCode string `json:"postalCode"`
 	State      string `json:"state"`
 	Street     string `json:"street"`
+}
+
+// AuthUser Authenticated user context
+type AuthUser struct {
+	Email string `json:"email"`
+
+	// Id UUID type alias
+	Id   Uuid   `json:"id"`
+	Name string `json:"name"`
 }
 
 // Cart Shopping cart
@@ -173,6 +192,34 @@ type ErrorResponse struct {
 		Details *interface{} `json:"details,omitempty"`
 		Message string       `json:"message"`
 	} `json:"error"`
+}
+
+// LoginRequest Login request
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+// LoginResponse Login response with access token
+type LoginResponse struct {
+	AccessToken string                 `json:"accessToken"`
+	ExpiresIn   int32                  `json:"expiresIn"`
+	TokenType   LoginResponseTokenType `json:"tokenType"`
+	User        struct {
+		Email string `json:"email"`
+
+		// Id UUID type alias
+		Id   Uuid   `json:"id"`
+		Name string `json:"name"`
+	} `json:"user"`
+}
+
+// LoginResponseTokenType defines model for LoginResponse.TokenType.
+type LoginResponseTokenType string
+
+// OkResponse Simple OK response
+type OkResponse struct {
+	Message string `json:"message"`
 }
 
 // Order Order model
@@ -314,6 +361,16 @@ type ProductSearchParamsOrder string
 // ProductSearchParamsSortBy defines model for ProductSearchParams.sortBy.
 type ProductSearchParamsSortBy string
 
+// AuthServiceLogoutParams defines parameters for AuthServiceLogout.
+type AuthServiceLogoutParams struct {
+	Authorization string `json:"Authorization"`
+}
+
+// AuthServiceGetCurrentUserParams defines parameters for AuthServiceGetCurrentUser.
+type AuthServiceGetCurrentUserParams struct {
+	Authorization string `json:"Authorization"`
+}
+
 // OrdersServiceListParams defines parameters for OrdersServiceList.
 type OrdersServiceListParams struct {
 	// Limit Maximum number of items to return
@@ -386,6 +443,9 @@ type UsersServiceListParams struct {
 	Offset *PaginationParamsOffset `form:"offset,omitempty" json:"offset,omitempty"`
 }
 
+// AuthServiceLoginJSONRequestBody defines body for AuthServiceLogin for application/json ContentType.
+type AuthServiceLoginJSONRequestBody = LoginRequest
+
 // CartsServiceAddItemJSONRequestBody defines body for CartsServiceAddItem for application/json ContentType.
 type CartsServiceAddItemJSONRequestBody = AddCartItemRequest
 
@@ -418,6 +478,15 @@ type UsersServiceUpdateJSONRequestBody = UpdateUserRequest
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+
+	// (POST /auth/login)
+	AuthServiceLogin(w http.ResponseWriter, r *http.Request)
+
+	// (POST /auth/logout)
+	AuthServiceLogout(w http.ResponseWriter, r *http.Request, params AuthServiceLogoutParams)
+
+	// (GET /auth/me)
+	AuthServiceGetCurrentUser(w http.ResponseWriter, r *http.Request, params AuthServiceGetCurrentUserParams)
 
 	// (GET /carts/users/{userId})
 	CartsServiceGetByUser(w http.ResponseWriter, r *http.Request, userId Uuid)
@@ -510,6 +579,120 @@ type ServerInterfaceWrapper struct {
 
 type MiddlewareFunc func(http.Handler) http.Handler
 
+// AuthServiceLogin operation middleware
+func (siw *ServerInterfaceWrapper) AuthServiceLogin(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AuthServiceLogin(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// AuthServiceLogout operation middleware
+func (siw *ServerInterfaceWrapper) AuthServiceLogout(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params AuthServiceLogoutParams
+
+	headers := r.Header
+
+	// ------------- Required header parameter "Authorization" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("Authorization")]; found {
+		var Authorization string
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "Authorization", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "Authorization", valueList[0], &Authorization, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: true})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "Authorization", Err: err})
+			return
+		}
+
+		params.Authorization = Authorization
+
+	} else {
+		err := fmt.Errorf("Header parameter Authorization is required, but not found")
+		siw.ErrorHandlerFunc(w, r, &RequiredHeaderError{ParamName: "Authorization", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AuthServiceLogout(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// AuthServiceGetCurrentUser operation middleware
+func (siw *ServerInterfaceWrapper) AuthServiceGetCurrentUser(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params AuthServiceGetCurrentUserParams
+
+	headers := r.Header
+
+	// ------------- Required header parameter "Authorization" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("Authorization")]; found {
+		var Authorization string
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "Authorization", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "Authorization", valueList[0], &Authorization, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: true})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "Authorization", Err: err})
+			return
+		}
+
+		params.Authorization = Authorization
+
+	} else {
+		err := fmt.Errorf("Header parameter Authorization is required, but not found")
+		siw.ErrorHandlerFunc(w, r, &RequiredHeaderError{ParamName: "Authorization", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AuthServiceGetCurrentUser(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // CartsServiceGetByUser operation middleware
 func (siw *ServerInterfaceWrapper) CartsServiceGetByUser(w http.ResponseWriter, r *http.Request) {
 
@@ -523,6 +706,12 @@ func (siw *ServerInterfaceWrapper) CartsServiceGetByUser(w http.ResponseWriter, 
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "userId", Err: err})
 		return
 	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.CartsServiceGetByUser(w, r, userId)
@@ -549,6 +738,12 @@ func (siw *ServerInterfaceWrapper) CartsServiceClear(w http.ResponseWriter, r *h
 		return
 	}
 
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.CartsServiceClear(w, r, userId)
 	}))
@@ -573,6 +768,12 @@ func (siw *ServerInterfaceWrapper) CartsServiceAddItem(w http.ResponseWriter, r 
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "userId", Err: err})
 		return
 	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.CartsServiceAddItem(w, r, userId)
@@ -608,6 +809,12 @@ func (siw *ServerInterfaceWrapper) CartsServiceRemoveItem(w http.ResponseWriter,
 		return
 	}
 
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.CartsServiceRemoveItem(w, r, userId, productId)
 	}))
@@ -642,6 +849,12 @@ func (siw *ServerInterfaceWrapper) CartsServiceUpdateItem(w http.ResponseWriter,
 		return
 	}
 
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.CartsServiceUpdateItem(w, r, userId, productId)
 	}))
@@ -669,6 +882,12 @@ func (siw *ServerInterfaceWrapper) CategoriesServiceList(w http.ResponseWriter, 
 
 // CategoriesServiceCreate operation middleware
 func (siw *ServerInterfaceWrapper) CategoriesServiceCreate(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.CategoriesServiceCreate(w, r)
@@ -708,6 +927,12 @@ func (siw *ServerInterfaceWrapper) CategoriesServiceDelete(w http.ResponseWriter
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "categoryId", Err: err})
 		return
 	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.CategoriesServiceDelete(w, r, categoryId)
@@ -759,6 +984,12 @@ func (siw *ServerInterfaceWrapper) CategoriesServiceUpdate(w http.ResponseWriter
 		return
 	}
 
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.CategoriesServiceUpdate(w, r, categoryId)
 	}))
@@ -774,6 +1005,12 @@ func (siw *ServerInterfaceWrapper) CategoriesServiceUpdate(w http.ResponseWriter
 func (siw *ServerInterfaceWrapper) OrdersServiceList(w http.ResponseWriter, r *http.Request) {
 
 	var err error
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params OrdersServiceListParams
@@ -851,6 +1088,12 @@ func (siw *ServerInterfaceWrapper) OrdersServiceCancel(w http.ResponseWriter, r 
 		return
 	}
 
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.OrdersServiceCancel(w, r, orderId)
 	}))
@@ -876,6 +1119,12 @@ func (siw *ServerInterfaceWrapper) OrdersServiceUpdateStatus(w http.ResponseWrit
 		return
 	}
 
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.OrdersServiceUpdateStatus(w, r, orderId)
 	}))
@@ -900,6 +1149,12 @@ func (siw *ServerInterfaceWrapper) OrdersServiceListByUser(w http.ResponseWriter
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "userId", Err: err})
 		return
 	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params OrdersServiceListByUserParams
@@ -945,6 +1200,12 @@ func (siw *ServerInterfaceWrapper) OrdersServiceCreate(w http.ResponseWriter, r 
 		return
 	}
 
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.OrdersServiceCreate(w, r, userId)
 	}))
@@ -969,6 +1230,12 @@ func (siw *ServerInterfaceWrapper) OrdersServiceGet(w http.ResponseWriter, r *ht
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "orderId", Err: err})
 		return
 	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.OrdersServiceGet(w, r, orderId)
@@ -1067,6 +1334,12 @@ func (siw *ServerInterfaceWrapper) ProductsServiceList(w http.ResponseWriter, r 
 // ProductsServiceCreate operation middleware
 func (siw *ServerInterfaceWrapper) ProductsServiceCreate(w http.ResponseWriter, r *http.Request) {
 
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.ProductsServiceCreate(w, r)
 	}))
@@ -1091,6 +1364,12 @@ func (siw *ServerInterfaceWrapper) ProductsServiceDelete(w http.ResponseWriter, 
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "productId", Err: err})
 		return
 	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.ProductsServiceDelete(w, r, productId)
@@ -1142,6 +1421,12 @@ func (siw *ServerInterfaceWrapper) ProductsServiceUpdate(w http.ResponseWriter, 
 		return
 	}
 
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.ProductsServiceUpdate(w, r, productId)
 	}))
@@ -1157,6 +1442,12 @@ func (siw *ServerInterfaceWrapper) ProductsServiceUpdate(w http.ResponseWriter, 
 func (siw *ServerInterfaceWrapper) UsersServiceList(w http.ResponseWriter, r *http.Request) {
 
 	var err error
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params UsersServiceListParams
@@ -1216,6 +1507,12 @@ func (siw *ServerInterfaceWrapper) UsersServiceDelete(w http.ResponseWriter, r *
 		return
 	}
 
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.UsersServiceDelete(w, r, userId)
 	}))
@@ -1241,6 +1538,12 @@ func (siw *ServerInterfaceWrapper) UsersServiceGet(w http.ResponseWriter, r *htt
 		return
 	}
 
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.UsersServiceGet(w, r, userId)
 	}))
@@ -1265,6 +1568,12 @@ func (siw *ServerInterfaceWrapper) UsersServiceUpdate(w http.ResponseWriter, r *
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "userId", Err: err})
 		return
 	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.UsersServiceUpdate(w, r, userId)
@@ -1397,6 +1706,9 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 		ErrorHandlerFunc:   options.ErrorHandlerFunc,
 	}
 
+	m.HandleFunc("POST "+options.BaseURL+"/auth/login", wrapper.AuthServiceLogin)
+	m.HandleFunc("POST "+options.BaseURL+"/auth/logout", wrapper.AuthServiceLogout)
+	m.HandleFunc("GET "+options.BaseURL+"/auth/me", wrapper.AuthServiceGetCurrentUser)
 	m.HandleFunc("GET "+options.BaseURL+"/carts/users/{userId}", wrapper.CartsServiceGetByUser)
 	m.HandleFunc("DELETE "+options.BaseURL+"/carts/users/{userId}/items", wrapper.CartsServiceClear)
 	m.HandleFunc("POST "+options.BaseURL+"/carts/users/{userId}/items", wrapper.CartsServiceAddItem)
@@ -1431,52 +1743,58 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"SqRqYKQ+T9WON3eb/wcAAP//3Xkk/7pcAAA=",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
