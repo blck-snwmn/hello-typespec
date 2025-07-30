@@ -27,9 +27,15 @@ enum ErrorCode {
  * Common error response
  */
 model ErrorResponse {
+  @doc("Error information")
   error: {
+    @doc("Error code identifying the type of error")
     code: ErrorCode;
+
+    @doc("Human-readable error message")
     message: string;
+
+    @doc("Additional error details")
     details?: unknown;
   };
 }
@@ -51,9 +57,16 @@ model PaginationParams {
  * Paginated response wrapper
  */
 model PaginatedResponse<T> {
+  @doc("Array of items in the current page")
   items: T[];
+
+  @doc("Total number of items")
   total: int32;
+
+  @doc("Maximum number of items per page")
   limit: int32;
+
+  @doc("Number of items skipped")
   offset: int32;
 }
 
@@ -61,7 +74,10 @@ model PaginatedResponse<T> {
  * Common timestamp fields
  */
 model Timestamps {
+  @doc("Timestamp when the resource was created")
   createdAt: utcDateTime;
+
+  @doc("Timestamp when the resource was last updated")
   updatedAt: utcDateTime;
 }
 
@@ -74,7 +90,10 @@ scalar uuid extends string;
  * Login request
  */
 model LoginRequest {
+  @doc("User's email address")
   email: string;
+
+  @doc("User's password")
   password: string;
 }
 
@@ -82,12 +101,24 @@ model LoginRequest {
  * Login response with access token
  */
 model LoginResponse {
+  @doc("JWT access token")
   accessToken: string;
+
+  @doc("Token type (always Bearer)")
   tokenType: "Bearer";
+
+  @doc("Token expiration time in seconds")
   expiresIn: int32;
+
+  @doc("Authenticated user information")
   user: {
+    @doc("User ID")
     id: uuid;
+
+    @doc("User's email address")
     email: string;
+
+    @doc("User's full name")
     name: string;
   };
 }
@@ -96,7 +127,12 @@ model LoginResponse {
  * Authenticated user context
  */
 model AuthUser {
+  @doc("User ID")
   id: uuid;
+
+  @doc("User's email address")
   email: string;
+
+  @doc("User's full name")
   name: string;
 }

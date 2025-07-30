@@ -8,13 +8,27 @@ namespace ECSite;
  * Product model
  */
 model Product {
+  @doc("Unique identifier for the product")
   id: uuid;
+
+  @doc("Name of the product")
   name: string;
+
+  @doc("Detailed description of the product")
   description: string;
+
+  @doc("Price of the product")
   price: float32;
+
+  @doc("Current stock quantity")
   stock: int32;
+
+  @doc("ID of the category this product belongs to")
   categoryId: uuid;
+
+  @doc("List of product image URLs")
   imageUrls: string[];
+
   ...Timestamps;
 }
 
@@ -22,11 +36,22 @@ model Product {
  * Product creation request
  */
 model CreateProductRequest {
+  @doc("Name of the product")
   name: string;
+
+  @doc("Detailed description of the product")
   description: string;
+
+  @doc("Price of the product")
   price: float32;
+
+  @doc("Initial stock quantity")
   stock: int32;
+
+  @doc("ID of the category this product belongs to")
   categoryId: uuid;
+
+  @doc("Optional list of product image URLs")
   imageUrls?: string[];
 }
 
@@ -34,11 +59,22 @@ model CreateProductRequest {
  * Product update request
  */
 model UpdateProductRequest {
+  @doc("Updated name of the product")
   name?: string;
+
+  @doc("Updated description of the product")
   description?: string;
+
+  @doc("Updated price of the product")
   price?: float32;
+
+  @doc("Updated stock quantity")
   stock?: int32;
+
+  @doc("Updated category ID")
   categoryId?: uuid;
+
+  @doc("Updated list of product image URLs")
   imageUrls?: string[];
 }
 

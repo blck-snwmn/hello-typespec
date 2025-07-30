@@ -328,87 +328,146 @@ export interface components {
     schemas: {
         /** @description Add item to cart request */
         AddCartItemRequest: {
+            /** @description ID of the product to add */
             productId: components["schemas"]["uuid"];
-            /** Format: int32 */
+            /**
+             * Format: int32
+             * @description Quantity to add
+             */
             quantity: number;
         };
         /** @description User address */
         Address: {
+            /** @description Street address */
             street: string;
+            /** @description City name */
             city: string;
+            /** @description State or province */
             state: string;
+            /** @description Postal or ZIP code */
             postalCode: string;
+            /** @description Country name */
             country: string;
         };
         /** @description Authenticated user context */
         AuthUser: {
+            /** @description User ID */
             id: components["schemas"]["uuid"];
+            /** @description User's email address */
             email: string;
+            /** @description User's full name */
             name: string;
         };
         /** @description Shopping cart */
         Cart: {
+            /** @description Unique identifier for the cart */
             id: components["schemas"]["uuid"];
+            /** @description ID of the user who owns this cart */
             userId: components["schemas"]["uuid"];
+            /** @description List of items in the cart */
             items: components["schemas"]["CartItem"][];
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @description Timestamp when the resource was created
+             */
             createdAt: string;
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @description Timestamp when the resource was last updated
+             */
             updatedAt: string;
         };
         /** @description Cart item */
         CartItem: {
+            /** @description ID of the product in the cart */
             productId: components["schemas"]["uuid"];
-            /** Format: int32 */
+            /**
+             * Format: int32
+             * @description Quantity of the product
+             */
             quantity: number;
+            /** @description Product details (populated when fetching cart) */
             product?: components["schemas"]["Product"];
         };
         /** @description Cart summary with calculated totals */
         CartSummary: {
-            /** Format: float */
+            /**
+             * Format: float
+             * @description Total price of all items in the cart
+             */
             totalAmount: number;
-            /** Format: int32 */
+            /**
+             * Format: int32
+             * @description Total number of items in the cart
+             */
             totalItems: number;
         } & components["schemas"]["Cart"];
         /** @description Category model */
         Category: {
+            /** @description Unique identifier for the category */
             id: components["schemas"]["uuid"];
+            /** @description Name of the category */
             name: string;
+            /** @description ID of the parent category for hierarchical structure */
             parentId?: components["schemas"]["uuid"];
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @description Timestamp when the resource was created
+             */
             createdAt: string;
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @description Timestamp when the resource was last updated
+             */
             updatedAt: string;
         };
         /** @description Category with nested children */
         CategoryTree: {
+            /** @description List of child categories */
             children: components["schemas"]["CategoryTree"][];
         } & components["schemas"]["Category"];
         /** @description Category creation request */
         CreateCategoryRequest: {
+            /** @description Name of the category */
             name: string;
+            /** @description Optional ID of the parent category */
             parentId?: components["schemas"]["uuid"];
         };
         /** @description Create order request */
         CreateOrderRequest: {
+            /** @description List of items to order */
             items: components["schemas"]["OrderItem"][];
+            /** @description Shipping address for the order */
             shippingAddress: components["schemas"]["Address"];
         };
         /** @description Product creation request */
         CreateProductRequest: {
+            /** @description Name of the product */
             name: string;
+            /** @description Detailed description of the product */
             description: string;
-            /** Format: float */
+            /**
+             * Format: float
+             * @description Price of the product
+             */
             price: number;
-            /** Format: int32 */
+            /**
+             * Format: int32
+             * @description Initial stock quantity
+             */
             stock: number;
+            /** @description ID of the category this product belongs to */
             categoryId: components["schemas"]["uuid"];
+            /** @description Optional list of product image URLs */
             imageUrls?: string[];
         };
         /** @description User creation request */
         CreateUserRequest: {
+            /** @description User's email address */
             email: string;
+            /** @description User's full name */
             name: string;
+            /** @description Optional shipping address */
             address?: components["schemas"]["Address"];
         };
         /**
@@ -418,27 +477,44 @@ export interface components {
         ErrorCode: "BAD_REQUEST" | "UNAUTHORIZED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "VALIDATION_ERROR" | "INSUFFICIENT_STOCK" | "INVALID_STATE_TRANSITION" | "INTERNAL_ERROR" | "SERVICE_UNAVAILABLE";
         /** @description Common error response */
         ErrorResponse: {
+            /** @description Error information */
             error: {
+                /** @description Error code identifying the type of error */
                 code: components["schemas"]["ErrorCode"];
+                /** @description Human-readable error message */
                 message: string;
+                /** @description Additional error details */
                 details?: unknown;
             };
         };
         /** @description Login request */
         LoginRequest: {
+            /** @description User's email address */
             email: string;
+            /** @description User's password */
             password: string;
         };
         /** @description Login response with access token */
         LoginResponse: {
+            /** @description JWT access token */
             accessToken: string;
-            /** @enum {string} */
+            /**
+             * @description Token type (always Bearer)
+             * @enum {string}
+             */
             tokenType: "Bearer";
-            /** Format: int32 */
+            /**
+             * Format: int32
+             * @description Token expiration time in seconds
+             */
             expiresIn: number;
+            /** @description Authenticated user information */
             user: {
+                /** @description User ID */
                 id: components["schemas"]["uuid"];
+                /** @description User's email address */
                 email: string;
+                /** @description User's full name */
                 name: string;
             };
         };
@@ -448,25 +524,47 @@ export interface components {
         };
         /** @description Order model */
         Order: {
+            /** @description Unique identifier for the order */
             id: components["schemas"]["uuid"];
+            /** @description ID of the user who placed the order */
             userId: components["schemas"]["uuid"];
+            /** @description List of items in the order */
             items: components["schemas"]["OrderItem"][];
-            /** Format: float */
+            /**
+             * Format: float
+             * @description Total amount of the order
+             */
             totalAmount: number;
+            /** @description Current status of the order */
             status: components["schemas"]["OrderStatus"];
+            /** @description Shipping address for the order */
             shippingAddress: components["schemas"]["Address"];
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @description Timestamp when the resource was created
+             */
             createdAt: string;
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @description Timestamp when the resource was last updated
+             */
             updatedAt: string;
         };
         /** @description Order item */
         OrderItem: {
+            /** @description ID of the ordered product */
             productId: components["schemas"]["uuid"];
-            /** Format: int32 */
+            /**
+             * Format: int32
+             * @description Quantity ordered
+             */
             quantity: number;
-            /** Format: float */
+            /**
+             * Format: float
+             * @description Price at the time of order
+             */
             price: number;
+            /** @description Name of the product at the time of order */
             productName: string;
         };
         /**
@@ -476,60 +574,106 @@ export interface components {
         OrderStatus: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
         /** @description Product model */
         Product: {
+            /** @description Unique identifier for the product */
             id: components["schemas"]["uuid"];
+            /** @description Name of the product */
             name: string;
+            /** @description Detailed description of the product */
             description: string;
-            /** Format: float */
+            /**
+             * Format: float
+             * @description Price of the product
+             */
             price: number;
-            /** Format: int32 */
+            /**
+             * Format: int32
+             * @description Current stock quantity
+             */
             stock: number;
+            /** @description ID of the category this product belongs to */
             categoryId: components["schemas"]["uuid"];
+            /** @description List of product image URLs */
             imageUrls: string[];
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @description Timestamp when the resource was created
+             */
             createdAt: string;
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @description Timestamp when the resource was last updated
+             */
             updatedAt: string;
         };
         /** @description Update cart item request */
         UpdateCartItemRequest: {
-            /** Format: int32 */
+            /**
+             * Format: int32
+             * @description New quantity for the cart item
+             */
             quantity: number;
         };
         /** @description Category update request */
         UpdateCategoryRequest: {
+            /** @description Updated name of the category */
             name?: string;
+            /** @description Updated parent category ID */
             parentId?: components["schemas"]["uuid"];
         };
         /** @description Update order status request */
         UpdateOrderStatusRequest: {
+            /** @description New status for the order */
             status: components["schemas"]["OrderStatus"];
         };
         /** @description Product update request */
         UpdateProductRequest: {
+            /** @description Updated name of the product */
             name?: string;
+            /** @description Updated description of the product */
             description?: string;
-            /** Format: float */
+            /**
+             * Format: float
+             * @description Updated price of the product
+             */
             price?: number;
-            /** Format: int32 */
+            /**
+             * Format: int32
+             * @description Updated stock quantity
+             */
             stock?: number;
+            /** @description Updated category ID */
             categoryId?: components["schemas"]["uuid"];
+            /** @description Updated list of product image URLs */
             imageUrls?: string[];
         };
         /** @description User update request */
         UpdateUserRequest: {
+            /** @description Updated email address */
             email?: string;
+            /** @description Updated user name */
             name?: string;
+            /** @description Updated shipping address */
             address?: components["schemas"]["Address"];
         };
         /** @description User model */
         User: {
+            /** @description Unique identifier for the user */
             id: components["schemas"]["uuid"];
+            /** @description User's email address */
             email: string;
+            /** @description User's full name */
             name: string;
+            /** @description User's shipping address */
             address?: components["schemas"]["Address"];
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @description Timestamp when the resource was created
+             */
             createdAt: string;
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @description Timestamp when the resource was last updated
+             */
             updatedAt: string;
         };
         /** @description UUID type alias */
@@ -933,12 +1077,22 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
+                        /** @description Array of items in the current page */
                         items: components["schemas"]["Order"][];
-                        /** Format: int32 */
+                        /**
+                         * Format: int32
+                         * @description Total number of items
+                         */
                         total: number;
-                        /** Format: int32 */
+                        /**
+                         * Format: int32
+                         * @description Maximum number of items per page
+                         */
                         limit: number;
-                        /** Format: int32 */
+                        /**
+                         * Format: int32
+                         * @description Number of items skipped
+                         */
                         offset: number;
                     } | components["schemas"]["ErrorResponse"];
                 };
@@ -1016,12 +1170,22 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
+                        /** @description Array of items in the current page */
                         items: components["schemas"]["Order"][];
-                        /** Format: int32 */
+                        /**
+                         * Format: int32
+                         * @description Total number of items
+                         */
                         total: number;
-                        /** Format: int32 */
+                        /**
+                         * Format: int32
+                         * @description Maximum number of items per page
+                         */
                         limit: number;
-                        /** Format: int32 */
+                        /**
+                         * Format: int32
+                         * @description Number of items skipped
+                         */
                         offset: number;
                     } | components["schemas"]["ErrorResponse"];
                 };
@@ -1109,12 +1273,22 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
+                        /** @description Array of items in the current page */
                         items: components["schemas"]["Product"][];
-                        /** Format: int32 */
+                        /**
+                         * Format: int32
+                         * @description Total number of items
+                         */
                         total: number;
-                        /** Format: int32 */
+                        /**
+                         * Format: int32
+                         * @description Maximum number of items per page
+                         */
                         limit: number;
-                        /** Format: int32 */
+                        /**
+                         * Format: int32
+                         * @description Number of items skipped
+                         */
                         offset: number;
                     } | components["schemas"]["ErrorResponse"];
                 };
@@ -1243,12 +1417,22 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
+                        /** @description Array of items in the current page */
                         items: components["schemas"]["User"][];
-                        /** Format: int32 */
+                        /**
+                         * Format: int32
+                         * @description Total number of items
+                         */
                         total: number;
-                        /** Format: int32 */
+                        /**
+                         * Format: int32
+                         * @description Maximum number of items per page
+                         */
                         limit: number;
-                        /** Format: int32 */
+                        /**
+                         * Format: int32
+                         * @description Number of items skipped
+                         */
                         offset: number;
                     } | components["schemas"]["ErrorResponse"];
                 };

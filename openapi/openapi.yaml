@@ -369,15 +369,19 @@ paths:
                         type: array
                         items:
                           $ref: '#/components/schemas/Order'
+                        description: Array of items in the current page
                       total:
                         type: integer
                         format: int32
+                        description: Total number of items
                       limit:
                         type: integer
                         format: int32
+                        description: Maximum number of items per page
                       offset:
                         type: integer
                         format: int32
+                        description: Number of items skipped
                     description: Paginated response wrapper
                   - $ref: '#/components/schemas/ErrorResponse'
       tags:
@@ -494,15 +498,19 @@ paths:
                         type: array
                         items:
                           $ref: '#/components/schemas/Order'
+                        description: Array of items in the current page
                       total:
                         type: integer
                         format: int32
+                        description: Total number of items
                       limit:
                         type: integer
                         format: int32
+                        description: Maximum number of items per page
                       offset:
                         type: integer
                         format: int32
+                        description: Number of items skipped
                     description: Paginated response wrapper
                   - $ref: '#/components/schemas/ErrorResponse'
       tags:
@@ -563,15 +571,19 @@ paths:
                         type: array
                         items:
                           $ref: '#/components/schemas/Product'
+                        description: Array of items in the current page
                       total:
                         type: integer
                         format: int32
+                        description: Total number of items
                       limit:
                         type: integer
                         format: int32
+                        description: Maximum number of items per page
                       offset:
                         type: integer
                         format: int32
+                        description: Number of items skipped
                     description: Paginated response wrapper
                   - $ref: '#/components/schemas/ErrorResponse'
       tags:
@@ -695,15 +707,19 @@ paths:
                         type: array
                         items:
                           $ref: '#/components/schemas/User'
+                        description: Array of items in the current page
                       total:
                         type: integer
                         format: int32
+                        description: Total number of items
                       limit:
                         type: integer
                         format: int32
+                        description: Maximum number of items per page
                       offset:
                         type: integer
                         format: int32
+                        description: Number of items skipped
                     description: Paginated response wrapper
                   - $ref: '#/components/schemas/ErrorResponse'
       tags:
@@ -927,10 +943,13 @@ components:
         - quantity
       properties:
         productId:
-          $ref: '#/components/schemas/uuid'
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          description: ID of the product to add
         quantity:
           type: integer
           format: int32
+          description: Quantity to add
       description: Add item to cart request
     Address:
       type: object
@@ -943,14 +962,19 @@ components:
       properties:
         street:
           type: string
+          description: Street address
         city:
           type: string
+          description: City name
         state:
           type: string
+          description: State or province
         postalCode:
           type: string
+          description: Postal or ZIP code
         country:
           type: string
+          description: Country name
       description: User address
     AuthUser:
       type: object
@@ -960,11 +984,15 @@ components:
         - name
       properties:
         id:
-          $ref: '#/components/schemas/uuid'
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          description: User ID
         email:
           type: string
+          description: User's email address
         name:
           type: string
+          description: User's full name
       description: Authenticated user context
     Cart:
       type: object
@@ -976,19 +1004,26 @@ components:
         - updatedAt
       properties:
         id:
-          $ref: '#/components/schemas/uuid'
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          description: Unique identifier for the cart
         userId:
-          $ref: '#/components/schemas/uuid'
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          description: ID of the user who owns this cart
         items:
           type: array
           items:
             $ref: '#/components/schemas/CartItem'
+          description: List of items in the cart
         createdAt:
           type: string
           format: date-time
+          description: Timestamp when the resource was created
         updatedAt:
           type: string
           format: date-time
+          description: Timestamp when the resource was last updated
       description: Shopping cart
     CartItem:
       type: object
@@ -997,12 +1032,17 @@ components:
         - quantity
       properties:
         productId:
-          $ref: '#/components/schemas/uuid'
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          description: ID of the product in the cart
         quantity:
           type: integer
           format: int32
+          description: Quantity of the product
         product:
-          $ref: '#/components/schemas/Product'
+          allOf:
+            - $ref: '#/components/schemas/Product'
+          description: Product details (populated when fetching cart)
       description: Cart item
     CartSummary:
       type: object
@@ -1013,9 +1053,11 @@ components:
         totalAmount:
           type: number
           format: float
+          description: Total price of all items in the cart
         totalItems:
           type: integer
           format: int32
+          description: Total number of items in the cart
       allOf:
         - $ref: '#/components/schemas/Cart'
       description: Cart summary with calculated totals
@@ -1028,17 +1070,24 @@ components:
         - updatedAt
       properties:
         id:
-          $ref: '#/components/schemas/uuid'
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          description: Unique identifier for the category
         name:
           type: string
+          description: Name of the category
         parentId:
-          $ref: '#/components/schemas/uuid'
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          description: ID of the parent category for hierarchical structure
         createdAt:
           type: string
           format: date-time
+          description: Timestamp when the resource was created
         updatedAt:
           type: string
           format: date-time
+          description: Timestamp when the resource was last updated
       description: Category model
     CategoryTree:
       type: object
@@ -1049,6 +1098,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CategoryTree'
+          description: List of child categories
       allOf:
         - $ref: '#/components/schemas/Category'
       description: Category with nested children
@@ -1059,8 +1109,11 @@ components:
       properties:
         name:
           type: string
+          description: Name of the category
         parentId:
-          $ref: '#/components/schemas/uuid'
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          description: Optional ID of the parent category
       description: Category creation request
     CreateOrderRequest:
       type: object
@@ -1072,8 +1125,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OrderItem'
+          description: List of items to order
         shippingAddress:
-          $ref: '#/components/schemas/Address'
+          allOf:
+            - $ref: '#/components/schemas/Address'
+          description: Shipping address for the order
       description: Create order request
     CreateProductRequest:
       type: object
@@ -1086,20 +1142,27 @@ components:
       properties:
         name:
           type: string
+          description: Name of the product
         description:
           type: string
+          description: Detailed description of the product
         price:
           type: number
           format: float
+          description: Price of the product
         stock:
           type: integer
           format: int32
+          description: Initial stock quantity
         categoryId:
-          $ref: '#/components/schemas/uuid'
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          description: ID of the category this product belongs to
         imageUrls:
           type: array
           items:
             type: string
+          description: Optional list of product image URLs
       description: Product creation request
     CreateUserRequest:
       type: object
@@ -1109,10 +1172,14 @@ components:
       properties:
         email:
           type: string
+          description: User's email address
         name:
           type: string
+          description: User's full name
         address:
-          $ref: '#/components/schemas/Address'
+          allOf:
+            - $ref: '#/components/schemas/Address'
+          description: Optional shipping address
       description: User creation request
     ErrorCode:
       type: string
@@ -1137,13 +1204,18 @@ components:
           type: object
           properties:
             code:
-              $ref: '#/components/schemas/ErrorCode'
+              allOf:
+                - $ref: '#/components/schemas/ErrorCode'
+              description: Error code identifying the type of error
             message:
               type: string
-            details: {}
+              description: Human-readable error message
+            details:
+              description: Additional error details
           required:
             - code
             - message
+          description: Error information
       description: Common error response
     LoginRequest:
       type: object
@@ -1153,8 +1225,10 @@ components:
       properties:
         email:
           type: string
+          description: User's email address
         password:
           type: string
+          description: User's password
       description: Login request
     LoginResponse:
       type: object
@@ -1166,26 +1240,34 @@ components:
       properties:
         accessToken:
           type: string
+          description: JWT access token
         tokenType:
           type: string
           enum:
             - Bearer
+          description: Token type (always Bearer)
         expiresIn:
           type: integer
           format: int32
+          description: Token expiration time in seconds
         user:
           type: object
           properties:
             id:
-              $ref: '#/components/schemas/uuid'
+              allOf:
+                - $ref: '#/components/schemas/uuid'
+              description: User ID
             email:
               type: string
+              description: User's email address
             name:
               type: string
+              description: User's full name
           required:
             - id
             - email
             - name
+          description: Authenticated user information
       description: Login response with access token
     OkResponse:
       type: object
@@ -1208,26 +1290,38 @@ components:
         - updatedAt
       properties:
         id:
-          $ref: '#/components/schemas/uuid'
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          description: Unique identifier for the order
         userId:
-          $ref: '#/components/schemas/uuid'
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          description: ID of the user who placed the order
         items:
           type: array
           items:
             $ref: '#/components/schemas/OrderItem'
+          description: List of items in the order
         totalAmount:
           type: number
           format: float
+          description: Total amount of the order
         status:
-          $ref: '#/components/schemas/OrderStatus'
+          allOf:
+            - $ref: '#/components/schemas/OrderStatus'
+          description: Current status of the order
         shippingAddress:
-          $ref: '#/components/schemas/Address'
+          allOf:
+            - $ref: '#/components/schemas/Address'
+          description: Shipping address for the order
         createdAt:
           type: string
           format: date-time
+          description: Timestamp when the resource was created
         updatedAt:
           type: string
           format: date-time
+          description: Timestamp when the resource was last updated
       description: Order model
     OrderItem:
       type: object
@@ -1238,15 +1332,20 @@ components:
         - productName
       properties:
         productId:
-          $ref: '#/components/schemas/uuid'
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          description: ID of the ordered product
         quantity:
           type: integer
           format: int32
+          description: Quantity ordered
         price:
           type: number
           format: float
+          description: Price at the time of order
         productName:
           type: string
+          description: Name of the product at the time of order
       description: Order item
     OrderStatus:
       type: string
@@ -1271,29 +1370,40 @@ components:
         - updatedAt
       properties:
         id:
-          $ref: '#/components/schemas/uuid'
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          description: Unique identifier for the product
         name:
           type: string
+          description: Name of the product
         description:
           type: string
+          description: Detailed description of the product
         price:
           type: number
           format: float
+          description: Price of the product
         stock:
           type: integer
           format: int32
+          description: Current stock quantity
         categoryId:
-          $ref: '#/components/schemas/uuid'
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          description: ID of the category this product belongs to
         imageUrls:
           type: array
           items:
             type: string
+          description: List of product image URLs
         createdAt:
           type: string
           format: date-time
+          description: Timestamp when the resource was created
         updatedAt:
           type: string
           format: date-time
+          description: Timestamp when the resource was last updated
       description: Product model
     UpdateCartItemRequest:
       type: object
@@ -1303,14 +1413,18 @@ components:
         quantity:
           type: integer
           format: int32
+          description: New quantity for the cart item
       description: Update cart item request
     UpdateCategoryRequest:
       type: object
       properties:
         name:
           type: string
+          description: Updated name of the category
         parentId:
-          $ref: '#/components/schemas/uuid'
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          description: Updated parent category ID
       description: Category update request
     UpdateOrderStatusRequest:
       type: object
@@ -1318,37 +1432,50 @@ components:
         - status
       properties:
         status:
-          $ref: '#/components/schemas/OrderStatus'
+          allOf:
+            - $ref: '#/components/schemas/OrderStatus'
+          description: New status for the order
       description: Update order status request
     UpdateProductRequest:
       type: object
       properties:
         name:
           type: string
+          description: Updated name of the product
         description:
           type: string
+          description: Updated description of the product
         price:
           type: number
           format: float
+          description: Updated price of the product
         stock:
           type: integer
           format: int32
+          description: Updated stock quantity
         categoryId:
-          $ref: '#/components/schemas/uuid'
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          description: Updated category ID
         imageUrls:
           type: array
           items:
             type: string
+          description: Updated list of product image URLs
       description: Product update request
     UpdateUserRequest:
       type: object
       properties:
         email:
           type: string
+          description: Updated email address
         name:
           type: string
+          description: Updated user name
         address:
-          $ref: '#/components/schemas/Address'
+          allOf:
+            - $ref: '#/components/schemas/Address'
+          description: Updated shipping address
       description: User update request
     User:
       type: object
@@ -1360,19 +1487,27 @@ components:
         - updatedAt
       properties:
         id:
-          $ref: '#/components/schemas/uuid'
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          description: Unique identifier for the user
         email:
           type: string
+          description: User's email address
         name:
           type: string
+          description: User's full name
         address:
-          $ref: '#/components/schemas/Address'
+          allOf:
+            - $ref: '#/components/schemas/Address'
+          description: User's shipping address
         createdAt:
           type: string
           format: date-time
+          description: Timestamp when the resource was created
         updatedAt:
           type: string
           format: date-time
+          description: Timestamp when the resource was last updated
       description: User model
     uuid:
       type: string

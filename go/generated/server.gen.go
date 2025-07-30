@@ -81,50 +81,71 @@ const (
 
 // AddCartItemRequest Add item to cart request
 type AddCartItemRequest struct {
-	// ProductId UUID type alias
-	ProductId Uuid  `json:"productId"`
-	Quantity  int32 `json:"quantity"`
+	// ProductId ID of the product to add
+	ProductId Uuid `json:"productId"`
+
+	// Quantity Quantity to add
+	Quantity int32 `json:"quantity"`
 }
 
 // Address User address
 type Address struct {
-	City       string `json:"city"`
-	Country    string `json:"country"`
+	// City City name
+	City string `json:"city"`
+
+	// Country Country name
+	Country string `json:"country"`
+
+	// PostalCode Postal or ZIP code
 	PostalCode string `json:"postalCode"`
-	State      string `json:"state"`
-	Street     string `json:"street"`
+
+	// State State or province
+	State string `json:"state"`
+
+	// Street Street address
+	Street string `json:"street"`
 }
 
 // AuthUser Authenticated user context
 type AuthUser struct {
+	// Email User's email address
 	Email string `json:"email"`
 
-	// Id UUID type alias
-	Id   Uuid   `json:"id"`
+	// Id User ID
+	Id Uuid `json:"id"`
+
+	// Name User's full name
 	Name string `json:"name"`
 }
 
 // Cart Shopping cart
 type Cart struct {
+	// CreatedAt Timestamp when the resource was created
 	CreatedAt time.Time `json:"createdAt"`
 
-	// Id UUID type alias
-	Id        Uuid       `json:"id"`
-	Items     []CartItem `json:"items"`
-	UpdatedAt time.Time  `json:"updatedAt"`
+	// Id Unique identifier for the cart
+	Id Uuid `json:"id"`
 
-	// UserId UUID type alias
+	// Items List of items in the cart
+	Items []CartItem `json:"items"`
+
+	// UpdatedAt Timestamp when the resource was last updated
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	// UserId ID of the user who owns this cart
 	UserId Uuid `json:"userId"`
 }
 
 // CartItem Cart item
 type CartItem struct {
-	// Product Product model
+	// Product Product details (populated when fetching cart)
 	Product *Product `json:"product,omitempty"`
 
-	// ProductId UUID type alias
-	ProductId Uuid  `json:"productId"`
-	Quantity  int32 `json:"quantity"`
+	// ProductId ID of the product in the cart
+	ProductId Uuid `json:"productId"`
+
+	// Quantity Quantity of the product
+	Quantity int32 `json:"quantity"`
 }
 
 // CartSummary Shopping cart
@@ -132,14 +153,19 @@ type CartSummary = Cart
 
 // Category Category model
 type Category struct {
+	// CreatedAt Timestamp when the resource was created
 	CreatedAt time.Time `json:"createdAt"`
 
-	// Id UUID type alias
-	Id   Uuid   `json:"id"`
+	// Id Unique identifier for the category
+	Id Uuid `json:"id"`
+
+	// Name Name of the category
 	Name string `json:"name"`
 
-	// ParentId UUID type alias
-	ParentId  *Uuid     `json:"parentId,omitempty"`
+	// ParentId ID of the parent category for hierarchical structure
+	ParentId *Uuid `json:"parentId,omitempty"`
+
+	// UpdatedAt Timestamp when the resource was last updated
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
@@ -148,37 +174,53 @@ type CategoryTree = Category
 
 // CreateCategoryRequest Category creation request
 type CreateCategoryRequest struct {
+	// Name Name of the category
 	Name string `json:"name"`
 
-	// ParentId UUID type alias
+	// ParentId Optional ID of the parent category
 	ParentId *Uuid `json:"parentId,omitempty"`
 }
 
 // CreateOrderRequest Create order request
 type CreateOrderRequest struct {
+	// Items List of items to order
 	Items []OrderItem `json:"items"`
 
-	// ShippingAddress User address
+	// ShippingAddress Shipping address for the order
 	ShippingAddress Address `json:"shippingAddress"`
 }
 
 // CreateProductRequest Product creation request
 type CreateProductRequest struct {
-	// CategoryId UUID type alias
-	CategoryId  Uuid      `json:"categoryId"`
-	Description string    `json:"description"`
-	ImageUrls   *[]string `json:"imageUrls,omitempty"`
-	Name        string    `json:"name"`
-	Price       float32   `json:"price"`
-	Stock       int32     `json:"stock"`
+	// CategoryId ID of the category this product belongs to
+	CategoryId Uuid `json:"categoryId"`
+
+	// Description Detailed description of the product
+	Description string `json:"description"`
+
+	// ImageUrls Optional list of product image URLs
+	ImageUrls *[]string `json:"imageUrls,omitempty"`
+
+	// Name Name of the product
+	Name string `json:"name"`
+
+	// Price Price of the product
+	Price float32 `json:"price"`
+
+	// Stock Initial stock quantity
+	Stock int32 `json:"stock"`
 }
 
 // CreateUserRequest User creation request
 type CreateUserRequest struct {
-	// Address User address
+	// Address Optional shipping address
 	Address *Address `json:"address,omitempty"`
-	Email   string   `json:"email"`
-	Name    string   `json:"name"`
+
+	// Email User's email address
+	Email string `json:"email"`
+
+	// Name User's full name
+	Name string `json:"name"`
 }
 
 // ErrorCode Standard error codes used throughout the API
@@ -186,35 +228,53 @@ type ErrorCode string
 
 // ErrorResponse Common error response
 type ErrorResponse struct {
+	// Error Error information
 	Error struct {
-		// Code Standard error codes used throughout the API
-		Code    ErrorCode    `json:"code"`
+		// Code Error code identifying the type of error
+		Code ErrorCode `json:"code"`
+
+		// Details Additional error details
 		Details *interface{} `json:"details,omitempty"`
-		Message string       `json:"message"`
+
+		// Message Human-readable error message
+		Message string `json:"message"`
 	} `json:"error"`
 }
 
 // LoginRequest Login request
 type LoginRequest struct {
-	Email    string `json:"email"`
+	// Email User's email address
+	Email string `json:"email"`
+
+	// Password User's password
 	Password string `json:"password"`
 }
 
 // LoginResponse Login response with access token
 type LoginResponse struct {
-	AccessToken string                 `json:"accessToken"`
-	ExpiresIn   int32                  `json:"expiresIn"`
-	TokenType   LoginResponseTokenType `json:"tokenType"`
-	User        struct {
+	// AccessToken JWT access token
+	AccessToken string `json:"accessToken"`
+
+	// ExpiresIn Token expiration time in seconds
+	ExpiresIn int32 `json:"expiresIn"`
+
+	// TokenType Token type (always Bearer)
+	TokenType LoginResponseTokenType `json:"tokenType"`
+
+	// User Authenticated user information
+	User struct {
+		// Email User's email address
 		Email string `json:"email"`
 
-		// Id UUID type alias
-		Id   Uuid   `json:"id"`
+		// Id User ID
+		Id Uuid `json:"id"`
+
+		// Name User's full name
 		Name string `json:"name"`
 	} `json:"user"`
 }
 
-// LoginResponseTokenType defines model for LoginResponse.TokenType.
+// LoginResponseTokenType Token type (always Bearer)
 type LoginResponseTokenType string
 
 // OkResponse Simple OK response
@@ -224,32 +284,44 @@ type OkResponse struct {
 
 // Order Order model
 type Order struct {
+	// CreatedAt Timestamp when the resource was created
 	CreatedAt time.Time `json:"createdAt"`
 
-	// Id UUID type alias
-	Id    Uuid        `json:"id"`
+	// Id Unique identifier for the order
+	Id Uuid `json:"id"`
+
+	// Items List of items in the order
 	Items []OrderItem `json:"items"`
 
-	// ShippingAddress User address
+	// ShippingAddress Shipping address for the order
 	ShippingAddress Address `json:"shippingAddress"`
 
-	// Status Order status enum
-	Status      OrderStatus `json:"status"`
-	TotalAmount float32     `json:"totalAmount"`
-	UpdatedAt   time.Time   `json:"updatedAt"`
+	// Status Current status of the order
+	Status OrderStatus `json:"status"`
 
-	// UserId UUID type alias
+	// TotalAmount Total amount of the order
+	TotalAmount float32 `json:"totalAmount"`
+
+	// UpdatedAt Timestamp when the resource was last updated
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	// UserId ID of the user who placed the order
 	UserId Uuid `json:"userId"`
 }
 
 // OrderItem Order item
 type OrderItem struct {
+	// Price Price at the time of order
 	Price float32 `json:"price"`
 
-	// ProductId UUID type alias
-	ProductId   Uuid   `json:"productId"`
+	// ProductId ID of the ordered product
+	ProductId Uuid `json:"productId"`
+
+	// ProductName Name of the product at the time of order
 	ProductName string `json:"productName"`
-	Quantity    int32  `json:"quantity"`
+
+	// Quantity Quantity ordered
+	Quantity int32 `json:"quantity"`
 }
 
 // OrderStatus Order status enum
@@ -257,68 +329,106 @@ type OrderStatus string
 
 // Product Product model
 type Product struct {
-	// CategoryId UUID type alias
-	CategoryId  Uuid      `json:"categoryId"`
-	CreatedAt   time.Time `json:"createdAt"`
-	Description string    `json:"description"`
+	// CategoryId ID of the category this product belongs to
+	CategoryId Uuid `json:"categoryId"`
 
-	// Id UUID type alias
-	Id        Uuid      `json:"id"`
-	ImageUrls []string  `json:"imageUrls"`
-	Name      string    `json:"name"`
-	Price     float32   `json:"price"`
-	Stock     int32     `json:"stock"`
+	// CreatedAt Timestamp when the resource was created
+	CreatedAt time.Time `json:"createdAt"`
+
+	// Description Detailed description of the product
+	Description string `json:"description"`
+
+	// Id Unique identifier for the product
+	Id Uuid `json:"id"`
+
+	// ImageUrls List of product image URLs
+	ImageUrls []string `json:"imageUrls"`
+
+	// Name Name of the product
+	Name string `json:"name"`
+
+	// Price Price of the product
+	Price float32 `json:"price"`
+
+	// Stock Current stock quantity
+	Stock int32 `json:"stock"`
+
+	// UpdatedAt Timestamp when the resource was last updated
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 // UpdateCartItemRequest Update cart item request
 type UpdateCartItemRequest struct {
+	// Quantity New quantity for the cart item
 	Quantity int32 `json:"quantity"`
 }
 
 // UpdateCategoryRequest Category update request
 type UpdateCategoryRequest struct {
+	// Name Updated name of the category
 	Name *string `json:"name,omitempty"`
 
-	// ParentId UUID type alias
+	// ParentId Updated parent category ID
 	ParentId *Uuid `json:"parentId,omitempty"`
 }
 
 // UpdateOrderStatusRequest Update order status request
 type UpdateOrderStatusRequest struct {
-	// Status Order status enum
+	// Status New status for the order
 	Status OrderStatus `json:"status"`
 }
 
 // UpdateProductRequest Product update request
 type UpdateProductRequest struct {
-	// CategoryId UUID type alias
-	CategoryId  *Uuid     `json:"categoryId,omitempty"`
-	Description *string   `json:"description,omitempty"`
-	ImageUrls   *[]string `json:"imageUrls,omitempty"`
-	Name        *string   `json:"name,omitempty"`
-	Price       *float32  `json:"price,omitempty"`
-	Stock       *int32    `json:"stock,omitempty"`
+	// CategoryId Updated category ID
+	CategoryId *Uuid `json:"categoryId,omitempty"`
+
+	// Description Updated description of the product
+	Description *string `json:"description,omitempty"`
+
+	// ImageUrls Updated list of product image URLs
+	ImageUrls *[]string `json:"imageUrls,omitempty"`
+
+	// Name Updated name of the product
+	Name *string `json:"name,omitempty"`
+
+	// Price Updated price of the product
+	Price *float32 `json:"price,omitempty"`
+
+	// Stock Updated stock quantity
+	Stock *int32 `json:"stock,omitempty"`
 }
 
 // UpdateUserRequest User update request
 type UpdateUserRequest struct {
-	// Address User address
+	// Address Updated shipping address
 	Address *Address `json:"address,omitempty"`
-	Email   *string  `json:"email,omitempty"`
-	Name    *string  `json:"name,omitempty"`
+
+	// Email Updated email address
+	Email *string `json:"email,omitempty"`
+
+	// Name Updated user name
+	Name *string `json:"name,omitempty"`
 }
 
 // User User model
 type User struct {
-	// Address User address
-	Address   *Address  `json:"address,omitempty"`
-	CreatedAt time.Time `json:"createdAt"`
-	Email     string    `json:"email"`
+	// Address User's shipping address
+	Address *Address `json:"address,omitempty"`
 
-	// Id UUID type alias
-	Id        Uuid      `json:"id"`
-	Name      string    `json:"name"`
+	// CreatedAt Timestamp when the resource was created
+	CreatedAt time.Time `json:"createdAt"`
+
+	// Email User's email address
+	Email string `json:"email"`
+
+	// Id Unique identifier for the user
+	Id Uuid `json:"id"`
+
+	// Name User's full name
+	Name string `json:"name"`
+
+	// UpdatedAt Timestamp when the resource was last updated
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
@@ -1743,58 +1853,69 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
