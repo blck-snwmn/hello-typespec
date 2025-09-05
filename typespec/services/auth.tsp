@@ -25,7 +25,7 @@ interface AuthService {
   @post
   @route("/logout")
   @useAuth(TypeSpec.Http.BearerAuth)
-  logout(@header("Authorization") token: string): OkResponse | ErrorResponse;
+  logout(): OkResponse | ErrorResponse;
 
   /**
    * Get current user information
@@ -33,7 +33,7 @@ interface AuthService {
   @get
   @route("/me")
   @useAuth(TypeSpec.Http.BearerAuth)
-  getCurrentUser(@header("Authorization") token: string): AuthUser | ErrorResponse;
+  getCurrentUser(): AuthUser | ErrorResponse;
 }
 
 /**

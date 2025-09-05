@@ -28,13 +28,13 @@ func (s *Server) AuthServiceLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 // AuthServiceLogout handles user logout
-func (s *Server) AuthServiceLogout(w http.ResponseWriter, r *http.Request, params generated.AuthServiceLogoutParams) {
-	s.authHandler.Logout(w, r)
+func (s *Server) AuthServiceLogout(w http.ResponseWriter, r *http.Request) {
+    s.authHandler.Logout(w, r)
 }
 
 // AuthServiceGetCurrentUser gets the current authenticated user
-func (s *Server) AuthServiceGetCurrentUser(w http.ResponseWriter, r *http.Request, params generated.AuthServiceGetCurrentUserParams) {
-	s.authHandler.GetCurrentUser(w, r)
+func (s *Server) AuthServiceGetCurrentUser(w http.ResponseWriter, r *http.Request) {
+    s.authHandler.GetCurrentUser(w, r)
 }
 
 // Ensure Server implements generated.ServerInterface

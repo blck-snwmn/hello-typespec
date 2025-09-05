@@ -37,12 +37,7 @@ paths:
     post:
       operationId: AuthService_logout
       description: Logout (invalidate token)
-      parameters:
-        - name: Authorization
-          in: header
-          required: true
-          schema:
-            type: string
+      parameters: []
       responses:
         '200':
           description: The request has succeeded.
@@ -58,12 +53,7 @@ paths:
     get:
       operationId: AuthService_getCurrentUser
       description: Get current user information
-      parameters:
-        - name: Authorization
-          in: header
-          required: true
-          schema:
-            type: string
+      parameters: []
       responses:
         '200':
           description: The request has succeeded.
@@ -1515,7 +1505,8 @@ components:
   securitySchemes:
     BearerAuth:
       type: http
-      scheme: Bearer
+      scheme: bearer
+      bearerFormat: JWT
 servers:
   - url: http://localhost:3000
     description: Development server
