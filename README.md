@@ -145,6 +145,30 @@ go run cmd/api/main.go
 
 デフォルトでは http://localhost:8080 で起動します。
 
+## OpenAPIドキュメント（Elements）
+
+`elements/index.html` から、Stoplight Elements を使って `openapi/openapi.yaml` をブラウザ表示できます。
+
+### 簡易サーバーで閲覧
+
+ルートディレクトリで静的サーバーを起動し、`elements/index.html` にアクセスします。
+
+```bash
+# 推奨（スクリプト）
+pnpm run docs:serve
+
+# 代替（直接実行）
+npx http-server -p 8081 -c-1
+# または
+pnpm dlx http-server -p 8081 -c-1
+```
+
+- ブラウザで http://127.0.0.1:8081/elements/ を開くと表示されます。
+- `elements/index.html` は相対パスで `../openapi/openapi.yaml` を参照するため、必ずリポジトリのルートでサーバーを起動してください。
+- `-c-1` はキャッシュ無効化（編集反映を早めるため、任意）。
+
+OpenAPI仕様を更新した場合の再生成手順は、本READMEの「ビルド手順 > 個別生成」を参照してください。
+
 ## コマンド一覧
 
 ### ルートディレクトリから実行可能なコマンド

@@ -11,7 +11,8 @@
     "generate:go": "cd go && oapi-codegen -config oapi-codegen.yaml ../openapi/openapi.yaml",
     "dev:typescript": "pnpm --filter @hello-typespec/typescript dev",
     "dev:go": "cd go && go run ./cmd/server",
-    "build:go": "cd go && go build -o server ./cmd/server"
+    "build:go": "cd go && go build -o server ./cmd/server",
+    "docs:serve": "npx http-server -p 8081 -c-1"
   },
   "keywords": ["typespec", "openapi", "api"],
   "author": "",
