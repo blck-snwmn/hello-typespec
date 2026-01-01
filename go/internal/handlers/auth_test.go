@@ -111,7 +111,7 @@ func TestAuthHandlers_Logout(t *testing.T) {
 		req.Header.Set("Authorization", "Bearer "+token)
 		w := httptest.NewRecorder()
 
-    server.AuthServiceLogout(w, req)
+		server.AuthServiceLogout(w, req)
 
 		if w.Code != http.StatusOK {
 			t.Errorf("expected status %d, got %d", http.StatusOK, w.Code)
@@ -128,7 +128,7 @@ func TestAuthHandlers_Logout(t *testing.T) {
 		req := httptest.NewRequest("POST", "/auth/logout", nil)
 		w := httptest.NewRecorder()
 
-    server.AuthServiceLogout(w, req)
+		server.AuthServiceLogout(w, req)
 
 		if w.Code != http.StatusUnauthorized {
 			t.Errorf("expected status %d, got %d", http.StatusUnauthorized, w.Code)
@@ -165,7 +165,7 @@ func TestAuthHandlers_GetCurrentUser(t *testing.T) {
 
 		w := httptest.NewRecorder()
 
-    server.AuthServiceGetCurrentUser(w, req)
+		server.AuthServiceGetCurrentUser(w, req)
 
 		if w.Code != http.StatusOK {
 			t.Errorf("expected status %d, got %d", http.StatusOK, w.Code)
@@ -198,7 +198,7 @@ func TestAuthHandlers_GetCurrentUser(t *testing.T) {
 			}
 		}()
 
-    server.AuthServiceGetCurrentUser(w, req)
+		server.AuthServiceGetCurrentUser(w, req)
 
 		if w.Code != http.StatusUnauthorized && w.Code != 0 {
 			t.Errorf("expected status %d or panic, got %d", http.StatusUnauthorized, w.Code)

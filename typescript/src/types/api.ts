@@ -739,9 +739,7 @@ export interface operations {
     AuthService_logout: {
         parameters: {
             query?: never;
-            header: {
-                Authorization: string;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
@@ -761,9 +759,7 @@ export interface operations {
     AuthService_getCurrentUser: {
         parameters: {
             query?: never;
-            header: {
-                Authorization: string;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
