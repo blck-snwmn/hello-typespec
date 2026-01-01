@@ -50,7 +50,7 @@ func errorResponse(w http.ResponseWriter, statusCode int, code generated.ErrorCo
 	response := generated.ErrorResponse{
 		Error: struct {
 			Code    generated.ErrorCode `json:"code"`
-			Details *any                `json:"details,omitempty"`
+			Details interface{}         `json:"details,omitempty"`
 			Message string              `json:"message"`
 		}{
 			Code:    code,
