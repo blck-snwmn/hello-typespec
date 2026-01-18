@@ -9,6 +9,6 @@
 #   - all
 registries:
 - type: standard
-  ref: v4.451.0 # renovate: depName=aquaproj/aqua-registry
+  ref: v4.451.1 # renovate: depName=aquaproj/aqua-registry
 packages:
 - name: oapi-codegen/oapi-codegen@v2.5.1
