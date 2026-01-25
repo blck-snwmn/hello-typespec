@@ -12,20 +12,20 @@ importers:
     dependencies:
       '@hono/node-server':
         specifier: ^1.14.3
-        version: 1.14.4(hono@4.11.4)
+        version: 1.14.4(hono@4.11.5)
       '@types/uuid':
         specifier: ^10.0.0
         version: 10.0.0
       hono:
         specifier: ^4.7.11
-        version: 4.11.4
+        version: 4.11.5
       uuid:
         specifier: ^11.1.0
         version: 11.1.0
     devDependencies:
       '@hono/vite-dev-server':
         specifier: 0.19.1
-        version: 0.19.1(hono@4.11.4)
+        version: 0.19.1(hono@4.11.5)
       '@types/node':
         specifier: 22.15.35
         version: 22.15.35
@@ -907,8 +907,8 @@ packages:
     resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
     engines: {node: '>=8'}
 
-  hono@4.11.4:
-    resolution: {integrity: sha512-U7tt8JsyrxSRKspfhtLET79pU8K+tInj5QZXs1jSugO1Vq5dFj3kmZsRldo29mTBfcjDRVRXrEZ6LS63Cog9ZA==}
+  hono@4.11.5:
+    resolution: {integrity: sha512-WemPi9/WfyMwZs+ZUXdiwcCh9Y+m7L+8vki9MzDw3jJ+W9Lc+12HGsd368Qc1vZi1xwW8BWMMsnK5efYKPdt4g==}
     engines: {node: '>=16.9.0'}
 
   html-escaper@2.0.2:
@@ -1208,6 +1208,7 @@ packages:
   tar@7.4.3:
     resolution: {integrity: sha512-5S7Va8hKfV7W5U6g3aYxXmlPoZVAwUMy9AOKyF2fVuZa2UD3qZjg578OrLRt8PcNN1PleVaL/5/yYATNL0ICUw==}
     engines: {node: '>=18'}
+    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exhorbitant rates) by contacting i@izs.me
 
   temporal-polyfill@0.3.0:
     resolution: {integrity: sha512-qNsTkX9K8hi+FHDfHmf22e/OGuXmfBm9RqNismxBrnSmZVJKegQ+HYYXT+R7Ha8F/YSm2Y34vmzD4cxMu2u95g==}
@@ -1547,14 +1548,14 @@ snapshots:
   '@esbuild/win32-x64@0.25.12':
     optional: true
 
-  '@hono/node-server@1.14.4(hono@4.11.4)':
+  '@hono/node-server@1.14.4(hono@4.11.5)':
     dependencies:
-      hono: 4.11.4
+      hono: 4.11.5
 
-  '@hono/vite-dev-server@0.19.1(hono@4.11.4)':
+  '@hono/vite-dev-server@0.19.1(hono@4.11.5)':
     dependencies:
-      '@hono/node-server': 1.14.4(hono@4.11.4)
-      hono: 4.11.4
+      '@hono/node-server': 1.14.4(hono@4.11.5)
+      hono: 4.11.5
       minimatch: 9.0.5
 
   '@inquirer/checkbox@4.1.7(@types/node@22.15.35)':
@@ -2159,7 +2160,7 @@ snapshots:
 
   has-flag@4.0.0: {}
 
-  hono@4.11.4: {}
+  hono@4.11.5: {}
 
   html-escaper@2.0.2: {}
 
