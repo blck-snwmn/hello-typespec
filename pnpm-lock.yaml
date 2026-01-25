@@ -12,7 +12,7 @@ importers:
     dependencies:
       '@hono/node-server':
         specifier: ^1.14.3
-        version: 1.14.4(hono@4.11.5)
+        version: 1.19.9(hono@4.11.5)
       '@types/uuid':
         specifier: ^10.0.0
         version: 10.0.0
@@ -266,8 +266,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@hono/node-server@1.14.4':
-    resolution: {integrity: sha512-DnxpshhYewr2q9ZN8ez/M5mmc3sucr8CT1sIgIy1bkeUXut9XWDkqHoFHRhWIQgkYnKpVRxunyhK7WzpJeJ6qQ==}
+  '@hono/node-server@1.19.9':
+    resolution: {integrity: sha512-vHL6w3ecZsky+8P5MD+eFfaGTyCeOHUIFYMGpQGbrBTSmNNoxv0if69rEZ5giu36weC5saFuznL411gRX7bJDw==}
     engines: {node: '>=18.14.1'}
     peerDependencies:
       hono: ^4
@@ -1548,13 +1548,13 @@ snapshots:
   '@esbuild/win32-x64@0.25.12':
     optional: true
 
-  '@hono/node-server@1.14.4(hono@4.11.5)':
+  '@hono/node-server@1.19.9(hono@4.11.5)':
     dependencies:
       hono: 4.11.5
 
   '@hono/vite-dev-server@0.19.1(hono@4.11.5)':
     dependencies:
-      '@hono/node-server': 1.14.4(hono@4.11.5)
+      '@hono/node-server': 1.19.9(hono@4.11.5)
       hono: 4.11.5
       minimatch: 9.0.5
 
