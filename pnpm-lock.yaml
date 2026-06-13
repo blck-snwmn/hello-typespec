@@ -14,8 +14,8 @@ importers:
         specifier: ^2.0.0
         version: 2.0.4(hono@4.12.25)
       '@types/uuid':
-        specifier: ^10.0.0
-        version: 10.0.0
+        specifier: ^11.0.0
+        version: 11.0.0
       hono:
         specifier: ^4.7.11
         version: 4.12.25
@@ -432,8 +432,9 @@ packages:
   '@types/node@24.13.1':
     resolution: {integrity: sha512-RSpUJGmvsJ1ZeBehQZFhIdpsz+bIpES0nIQXko4Ybq+N+kX6XvOq3Jo+iJ82FWLdblFq85AsMikd3m35jgezYg==}
 
-  '@types/uuid@10.0.0':
-    resolution: {integrity: sha512-7gqG38EyHgyP1S+7+xomFtL+ZNHcKv6DwNaCZmJmo1vgMugyF3TCnXVg4t1uk89mLNwnLtnY3TpOpCOyp1/xHQ==}
+  '@types/uuid@11.0.0':
+    resolution: {integrity: sha512-HVyk8nj2m+jcFRNazzqyVKiZezyhDKrGUA3jlEcg/nZ6Ms+qHwocba1Y/AaVaznJTAM9xpdFSh+ptbNrhOGvZA==}
+    deprecated: This is a stub types definition. uuid provides its own type definitions, so you do not need this installed.
 
   '@typespec/asset-emitter@0.70.1':
     resolution: {integrity: sha512-X8hRA7LLWkNIWqAkWaWoa84PzDMUvjj3qCLQKT29k5twS419nN1GGT7BQaDQnYfPTsSssEFxgRgugr0AAErEsA==}
@@ -1473,7 +1474,9 @@ snapshots:
     dependencies:
       undici-types: 7.18.2
 
-  '@types/uuid@10.0.0': {}
+  '@types/uuid@11.0.0':
+    dependencies:
+      uuid: 14.0.0
 
   '@typespec/asset-emitter@0.70.1(@typespec/compiler@1.13.0(@types/node@24.13.1))':
     dependencies:
