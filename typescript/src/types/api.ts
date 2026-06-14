@@ -844,7 +844,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description There is no content to send for this request, but the headers may be useful.  */
+            /** @description There is no content to send for this request, but the headers may be useful. */
             204: {
                 headers: {
                     [name: string]: unknown;
@@ -1009,7 +1009,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description There is no content to send for this request, but the headers may be useful.  */
+            /** @description There is no content to send for this request, but the headers may be useful. */
             204: {
                 headers: {
                     [name: string]: unknown;
@@ -1357,7 +1357,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description There is no content to send for this request, but the headers may be useful.  */
+            /** @description There is no content to send for this request, but the headers may be useful. */
             204: {
                 headers: {
                     [name: string]: unknown;
@@ -1501,7 +1501,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description There is no content to send for this request, but the headers may be useful.  */
+            /** @description There is no content to send for this request, but the headers may be useful. */
             204: {
                 headers: {
                     [name: string]: unknown;
