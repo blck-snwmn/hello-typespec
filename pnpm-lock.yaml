@@ -21,7 +21,7 @@ importers:
         version: 4.12.26
       uuid:
         specifier: ^14.0.0
-        version: 14.0.0
+        version: 14.0.1
     devDependencies:
       '@hono/vite-dev-server':
         specifier: 0.26.0
@@ -1021,8 +1021,8 @@ packages:
   uri-js-replace@1.0.1:
     resolution: {integrity: sha512-W+C9NWNLFOoBI2QWDp4UT9pv65r2w5Cx+3sTYFvtMdDBxkKt1syCqsUdSFAChbEe1uK5TfS04wt/nGwmaeIQ0g==}
 
-  uuid@14.0.0:
-    resolution: {integrity: sha512-Qo+uWgilfSmAhXCMav1uYFynlQO7fMFiMVZsQqZRMIXp0O7rR7qjkj+cPvBHLgBqi960QCoo/PH2/6ZtVqKvrg==}
+  uuid@14.0.1:
+    resolution: {integrity: sha512-6ZxzVpzDXDa3bJWaHilVayA+BH/1zmxCJoVgvmqJnid/gPoKHxUrS/aC/T6LGQtNHT+XHG9fXPJB4d+IrU30Ew==}
     hasBin: true
 
   vite@8.0.16:
@@ -1482,7 +1482,7 @@ snapshots:
 
   '@types/uuid@11.0.0':
     dependencies:
-      uuid: 14.0.0
+      uuid: 14.0.1
 
   '@typespec/asset-emitter@0.79.1(@typespec/compiler@1.13.0(@types/node@24.13.2))':
     dependencies:
@@ -1982,7 +1982,7 @@ snapshots:
 
   uri-js-replace@1.0.1: {}
 
-  uuid@14.0.0: {}
+  uuid@14.0.1: {}
 
   vite@8.0.16(@types/node@24.13.2)(yaml@2.9.0):
     dependencies:
