@@ -13,4 +13,4 @@ registries:
 packages:
   - name: oapi-codegen/oapi-codegen@v2.5.1
   - name: suzuki-shunsuke/pinact@v4.1.0
-  - name: zizmorcore/zizmor@v1.25.2
+  - name: zizmorcore/zizmor@v1.26.1
