@@ -9,8 +9,8 @@
 #   - all
 registries:
   - type: standard
-    ref: v4.520.2 # renovate: depName=aquaproj/aqua-registry
+    ref: v4.526.0 # renovate: depName=aquaproj/aqua-registry
 packages:
   - name: oapi-codegen/oapi-codegen@v2.7.1
-  - name: suzuki-shunsuke/pinact@v4.0.0
-  - name: zizmorcore/zizmor@v1.25.2
+  - name: suzuki-shunsuke/pinact@v4.1.0
+  - name: zizmorcore/zizmor@v1.26.1
