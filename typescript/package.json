@@ -19,7 +19,7 @@
   "license": "ISC",
   "packageManager": "pnpm@11.11.0",
   "devDependencies": {
-    "@hono/vite-dev-server": "0.26.0",
+    "@hono/vite-dev-server": "0.26.1",
     "@types/node": "24.13.3",
     "@vitest/coverage-v8": "4.1.10",
     "@vitest/ui": "4.1.10",
