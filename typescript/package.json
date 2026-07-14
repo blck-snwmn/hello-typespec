@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "generate:types": "openapi-typescript ../openapi/openapi.yaml -o ./src/types/api.ts",
+    "generate:types": "pnpm --workspace-root exec openapi-typescript openapi/openapi.yaml -o typescript/src/types/api.ts",
     "typecheck": "tsc --noEmit",
     "typecheck:watch": "tsc --noEmit --watch",
     "test": "vitest",
@@ -23,8 +23,7 @@
     "@types/node": "24.13.3",
     "@vitest/coverage-v8": "4.1.10",
     "@vitest/ui": "4.1.10",
-    "openapi-typescript": "7.13.0",
-    "typescript": "6.0.3",
+    "typescript": "7.0.2",
     "vite": "8.1.4",
     "vitest": "4.1.10"
   },
