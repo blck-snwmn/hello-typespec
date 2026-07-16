@@ -19,20 +19,20 @@ importers:
     dependencies:
       '@hono/node-server':
         specifier: ^2.0.0
-        version: 2.0.8(hono@4.12.29)
+        version: 2.0.8(hono@4.12.30)
       '@types/uuid':
         specifier: ^11.0.0
         version: 11.0.0
       hono:
         specifier: ^4.7.11
-        version: 4.12.29
+        version: 4.12.30
       uuid:
         specifier: ^14.0.0
         version: 14.0.1
     devDependencies:
       '@hono/vite-dev-server':
         specifier: 0.26.1
-        version: 0.26.1(hono@4.12.29)
+        version: 0.26.1(hono@4.12.30)
       '@types/node':
         specifier: 24.13.3
         version: 24.13.3
@@ -62,7 +62,7 @@ importers:
         version: 1.13.0(@typespec/compiler@1.13.0(@types/node@24.13.3))
       '@typespec/openapi3':
         specifier: ^1.0.0
-        version: 1.13.0(@typespec/compiler@1.13.0(@types/node@24.13.3))(@typespec/http@1.13.0(@typespec/compiler@1.13.0(@types/node@24.13.3)))(@typespec/openapi@1.0.0(@typespec/compiler@1.13.0(@types/node@24.13.3))(@typespec/http@1.13.0(@typespec/compiler@1.13.0(@types/node@24.13.3))))
+        version: 1.13.0(@typespec/compiler@1.13.0(@types/node@24.13.3))(@typespec/http@1.13.0(@typespec/compiler@1.13.0(@types/node@24.13.3)))(@typespec/openapi@1.14.0(@typespec/compiler@1.13.0(@types/node@24.13.3))(@typespec/http@1.13.0(@typespec/compiler@1.13.0(@types/node@24.13.3))))
       '@typespec/rest':
         specifier: ^0.83.0
         version: 0.83.0(@typespec/compiler@1.13.0(@types/node@24.13.3))(@typespec/http@1.13.0(@typespec/compiler@1.13.0(@types/node@24.13.3)))
@@ -607,12 +607,12 @@ packages:
       '@typespec/xml':
         optional: true
 
-  '@typespec/openapi@1.0.0':
-    resolution: {integrity: sha512-pONzKIdK4wHgD1vBfD9opUk66zDG55DlHbueKOldH2p1LVf5FnMiuKE4kW0pl1dokT/HBNR5OJciCzzVf44AgQ==}
-    engines: {node: '>=20.0.0'}
+  '@typespec/openapi@1.14.0':
+    resolution: {integrity: sha512-KL7kImPhCXRmxpHVt1k7TWaa4bb3NbSeUx2rxyxeq7lYZFllI6/NYRCTOI/5JOrbElWmmSxrajU9K9IAKI6PkQ==}
+    engines: {node: '>=22.0.0'}
     peerDependencies:
-      '@typespec/compiler': ^1.0.0
-      '@typespec/http': ^1.0.0
+      '@typespec/compiler': ^1.14.0
+      '@typespec/http': ^1.14.0
 
   '@typespec/rest@0.83.0':
     resolution: {integrity: sha512-WMEwEe1kdaOdZ0c+ct5BVmTSBXkrPniUYDWCz3K52T4in2dNc7J6YGP6tL8bXgQz5B0CsP0VNO12N+UysQDsLw==}
@@ -824,8 +824,8 @@ packages:
     resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
     engines: {node: '>=8'}
 
-  hono@4.12.29:
-    resolution: {integrity: sha512-1hNiRjawYrLq/4m3DQQjPGFg0VZkk4RjQJDff/excI6Dm9BiL75qxGrd7/c6YOxPdq6AscP3LiXhQ6fKFC1Waw==}
+  hono@4.12.30:
+    resolution: {integrity: sha512-emn+JoJjrN9YTpRDS5it/UI2SO9BAE37T6I3d963RxcZ81G9A4pr2SZTEiiaiKbzx+NKRg5BZ89fCL7gCJCUog==}
     engines: {node: '>=16.9.0'}
 
   html-escaper@2.0.2:
@@ -1335,18 +1335,18 @@ snapshots:
       tslib: 2.8.1
     optional: true
 
-  '@hono/node-server@1.19.14(hono@4.12.29)':
+  '@hono/node-server@1.19.14(hono@4.12.30)':
     dependencies:
-      hono: 4.12.29
+      hono: 4.12.30
 
-  '@hono/node-server@2.0.8(hono@4.12.29)':
+  '@hono/node-server@2.0.8(hono@4.12.30)':
     dependencies:
-      hono: 4.12.29
+      hono: 4.12.30
 
-  '@hono/vite-dev-server@0.26.1(hono@4.12.29)':
+  '@hono/vite-dev-server@0.26.1(hono@4.12.30)':
     dependencies:
-      '@hono/node-server': 1.19.14(hono@4.12.29)
-      hono: 4.12.29
+      '@hono/node-server': 1.19.14(hono@4.12.30)
+      hono: 4.12.30
       minimatch: 9.0.5
 
   '@inquirer/ansi@2.0.7': {}
@@ -1706,7 +1706,7 @@ snapshots:
     dependencies:
       '@typespec/compiler': 1.13.0(@types/node@24.13.3)
 
-  '@typespec/openapi3@1.13.0(@typespec/compiler@1.13.0(@types/node@24.13.3))(@typespec/http@1.13.0(@typespec/compiler@1.13.0(@types/node@24.13.3)))(@typespec/openapi@1.0.0(@typespec/compiler@1.13.0(@types/node@24.13.3))(@typespec/http@1.13.0(@typespec/compiler@1.13.0(@types/node@24.13.3))))':
+  '@typespec/openapi3@1.13.0(@typespec/compiler@1.13.0(@types/node@24.13.3))(@typespec/http@1.13.0(@typespec/compiler@1.13.0(@types/node@24.13.3)))(@typespec/openapi@1.14.0(@typespec/compiler@1.13.0(@types/node@24.13.3))(@typespec/http@1.13.0(@typespec/compiler@1.13.0(@types/node@24.13.3))))':
     dependencies:
       '@scalar/json-magic': 0.12.16
       '@scalar/openapi-parser': 0.28.7
@@ -1714,10 +1714,10 @@ snapshots:
       '@typespec/asset-emitter': 0.79.1(@typespec/compiler@1.13.0(@types/node@24.13.3))
       '@typespec/compiler': 1.13.0(@types/node@24.13.3)
       '@typespec/http': 1.13.0(@typespec/compiler@1.13.0(@types/node@24.13.3))
-      '@typespec/openapi': 1.0.0(@typespec/compiler@1.13.0(@types/node@24.13.3))(@typespec/http@1.13.0(@typespec/compiler@1.13.0(@types/node@24.13.3)))
+      '@typespec/openapi': 1.14.0(@typespec/compiler@1.13.0(@types/node@24.13.3))(@typespec/http@1.13.0(@typespec/compiler@1.13.0(@types/node@24.13.3)))
       yaml: 2.9.0
 
-  '@typespec/openapi@1.0.0(@typespec/compiler@1.13.0(@types/node@24.13.3))(@typespec/http@1.13.0(@typespec/compiler@1.13.0(@types/node@24.13.3)))':
+  '@typespec/openapi@1.14.0(@typespec/compiler@1.13.0(@types/node@24.13.3))(@typespec/http@1.13.0(@typespec/compiler@1.13.0(@types/node@24.13.3)))':
     dependencies:
       '@typespec/compiler': 1.13.0(@types/node@24.13.3)
       '@typespec/http': 1.13.0(@typespec/compiler@1.13.0(@types/node@24.13.3))
@@ -1907,7 +1907,7 @@ snapshots:
 
   has-flag@4.0.0: {}
 
-  hono@4.12.29: {}
+  hono@4.12.30: {}
 
   html-escaper@2.0.2: {}
 
