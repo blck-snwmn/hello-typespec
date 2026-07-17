@@ -64,8 +64,8 @@ importers:
         specifier: ^1.0.0
         version: 1.13.0(@typespec/compiler@1.13.0(@types/node@24.13.3))(@typespec/http@1.13.0(@typespec/compiler@1.13.0(@types/node@24.13.3)))(@typespec/openapi@1.14.0(@typespec/compiler@1.13.0(@types/node@24.13.3))(@typespec/http@1.13.0(@typespec/compiler@1.13.0(@types/node@24.13.3))))
       '@typespec/rest':
-        specifier: ^0.83.0
-        version: 0.83.0(@typespec/compiler@1.13.0(@types/node@24.13.3))(@typespec/http@1.13.0(@typespec/compiler@1.13.0(@types/node@24.13.3)))
+        specifier: ^0.84.0
+        version: 0.84.0(@typespec/compiler@1.13.0(@types/node@24.13.3))(@typespec/http@1.13.0(@typespec/compiler@1.13.0(@types/node@24.13.3)))
 
 packages:
 
@@ -614,12 +614,12 @@ packages:
       '@typespec/compiler': ^1.14.0
       '@typespec/http': ^1.14.0
 
-  '@typespec/rest@0.83.0':
-    resolution: {integrity: sha512-WMEwEe1kdaOdZ0c+ct5BVmTSBXkrPniUYDWCz3K52T4in2dNc7J6YGP6tL8bXgQz5B0CsP0VNO12N+UysQDsLw==}
+  '@typespec/rest@0.84.0':
+    resolution: {integrity: sha512-9s5dDfRoHRPdtbVvkBasUx/RnMvwWMTuXRieSQDEji4gWGgxVu4Zt4MiEEKSfQrkMr3Aw0QjRCSxBxjMCHIOmA==}
     engines: {node: '>=22.0.0'}
     peerDependencies:
-      '@typespec/compiler': ^1.13.0
-      '@typespec/http': ^1.13.0
+      '@typespec/compiler': ^1.14.0
+      '@typespec/http': ^1.14.0
 
   '@vitest/coverage-v8@4.1.10':
     resolution: {integrity: sha512-IM49HmthevbgAO4anp1hwtoT9wYe59w0LR00gr+eagHE+ZJ5lK4sLPeO0ubgoJcwLk6dehU3R24N+FbEEKDc8g==}
@@ -1722,7 +1722,7 @@ snapshots:
       '@typespec/compiler': 1.13.0(@types/node@24.13.3)
       '@typespec/http': 1.13.0(@typespec/compiler@1.13.0(@types/node@24.13.3))
 
-  '@typespec/rest@0.83.0(@typespec/compiler@1.13.0(@types/node@24.13.3))(@typespec/http@1.13.0(@typespec/compiler@1.13.0(@types/node@24.13.3)))':
+  '@typespec/rest@0.84.0(@typespec/compiler@1.13.0(@types/node@24.13.3))(@typespec/http@1.13.0(@typespec/compiler@1.13.0(@types/node@24.13.3)))':
     dependencies:
       '@typespec/compiler': 1.13.0(@types/node@24.13.3)
       '@typespec/http': 1.13.0(@typespec/compiler@1.13.0(@types/node@24.13.3))
