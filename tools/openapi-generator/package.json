@@ -1,0 +1,12 @@
+{
+  "name": "@hello-typespec/openapi-generator",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "generate:types": "openapi-typescript ../../openapi/openapi.yaml -o ../../typescript/src/types/api.ts"
+  },
+  "devDependencies": {
+    "openapi-typescript": "7.13.0",
+    "typescript": "npm:@typescript/typescript6@6.0.2"
+  }
+}
