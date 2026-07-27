@@ -24,7 +24,7 @@ importers:
         specifier: ^11.0.0
         version: 11.0.0
       hono:
-        specifier: ^4.7.11
+        specifier: ^4.12.31
         version: 4.12.31
       uuid:
         specifier: ^14.0.0
