@@ -18,8 +18,8 @@ importers:
   typescript:
     dependencies:
       '@hono/node-server':
-        specifier: ^2.0.11
-        version: 2.0.11(hono@4.12.34)
+        specifier: ^2.1.0
+        version: 2.1.0(hono@4.12.34)
       '@types/uuid':
         specifier: ^11.0.0
         version: 11.0.0
@@ -109,8 +109,8 @@ packages:
     peerDependencies:
       hono: ^4
 
-  '@hono/node-server@2.0.11':
-    resolution: {integrity: sha512-bjD221KPLoJTWUwso1J6fGKiTXEUFedG/s0visavY4zakFPkeGURMRNly+FhBHs7T8Dz4qHaZIMX9ZoJHSJtKA==}
+  '@hono/node-server@2.1.0':
+    resolution: {integrity: sha512-XovyyCCnBzW+zKu+z/zq8hwNs4KOR5rEMAOxo2f40Q5xoOI37IMm6MIg2COOUtUApo0i6850MTBKH2u4QLGIqg==}
     engines: {node: '>=20'}
     peerDependencies:
       hono: ^4
@@ -1347,7 +1347,7 @@ snapshots:
     dependencies:
       hono: 4.12.34
 
-  '@hono/node-server@2.0.11(hono@4.12.34)':
+  '@hono/node-server@2.1.0(hono@4.12.34)':
     dependencies:
       hono: 4.12.34
 
