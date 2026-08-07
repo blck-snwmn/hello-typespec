@@ -18,16 +18,16 @@ importers:
   typescript:
     dependencies:
       '@hono/node-server':
-        specifier: ^2.1.0
+        specifier: 2.1.0
         version: 2.1.0(hono@4.13.0)
       '@types/uuid':
-        specifier: ^11.0.0
+        specifier: 11.0.0
         version: 11.0.0
       hono:
-        specifier: ^4.13.0
+        specifier: 4.13.0
         version: 4.13.0
       uuid:
-        specifier: ^14.0.0
+        specifier: 14.0.1
         version: 14.0.1
     devDependencies:
       '@hono/vite-dev-server':
@@ -55,16 +55,16 @@ importers:
   typespec:
     dependencies:
       '@typespec/compiler':
-        specifier: ^1.0.0
+        specifier: 1.14.0
         version: 1.14.0(@types/node@24.13.3)
       '@typespec/http':
-        specifier: ^1.0.1
+        specifier: 1.14.0
         version: 1.14.0(@typespec/compiler@1.14.0(@types/node@24.13.3))
       '@typespec/openapi3':
-        specifier: ^1.0.0
+        specifier: 1.14.0
         version: 1.14.0(@typespec/compiler@1.14.0(@types/node@24.13.3))(@typespec/http@1.14.0(@typespec/compiler@1.14.0(@types/node@24.13.3)))(@typespec/openapi@1.14.0(@typespec/compiler@1.14.0(@types/node@24.13.3))(@typespec/http@1.14.0(@typespec/compiler@1.14.0(@types/node@24.13.3))))
       '@typespec/rest':
-        specifier: ^0.84.0
+        specifier: 0.84.0
         version: 0.84.0(@typespec/compiler@1.14.0(@types/node@24.13.3))(@typespec/http@1.14.0(@typespec/compiler@1.14.0(@types/node@24.13.3)))
 
 packages:
