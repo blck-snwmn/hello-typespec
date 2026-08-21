@@ -21,11 +21,11 @@
   "devDependencies": {
     "@hono/vite-dev-server": "0.26.1",
     "@types/node": "24.13.3",
-    "@vitest/coverage-v8": "4.1.10",
-    "@vitest/ui": "4.1.10",
+    "@vitest/coverage-v8": "4.1.11",
+    "@vitest/ui": "4.1.11",
     "typescript": "7.0.2",
     "vite": "8.2.1",
-    "vitest": "4.1.10"
+    "vitest": "4.1.11"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.0",
