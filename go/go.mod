@@ -1,6 +1,6 @@
 module github.com/blck-snwmn/hello-typespec/go
 
-go 1.26
+go 1.27.0
 
 require (
 	github.com/getkin/kin-openapi v0.146.0
