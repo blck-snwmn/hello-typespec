@@ -27,7 +27,7 @@ importers:
         specifier: ^4.13.0
         version: 4.13.0
       uuid:
-        specifier: ^14.0.0
+        specifier: ^14.0.1
         version: 14.0.1
     devDependencies:
       '@hono/vite-dev-server':
