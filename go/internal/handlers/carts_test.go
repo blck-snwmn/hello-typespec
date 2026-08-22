@@ -287,7 +287,8 @@ func TestCartsService_Integration(t *testing.T) {
 		getEmptyCart := makeAuthenticatedRequest(t, server, "GET", "/carts/users/"+userID, nil, token)
 		assertStatus(t, getEmptyCart, http.StatusOK)
 		var cart map[string]any
-		decodeJSON(getEmptyCart, &cart)
+		err := decodeJSON(getEmptyCart, &cart)
+		require.NoError(t, err)
 		items := cart["items"].([]any)
 		assert.Len(t, items, 0)
 
@@ -317,7 +318,8 @@ func TestCartsService_Integration(t *testing.T) {
 		// 5. Verify final state
 		getFinalCart := makeAuthenticatedRequest(t, server, "GET", "/carts/users/"+userID, nil, token)
 		assertStatus(t, getFinalCart, http.StatusOK)
-		decodeJSON(getFinalCart, &cart)
+		err = decodeJSON(getFinalCart, &cart)
+		require.NoError(t, err)
 		finalItems := cart["items"].([]any)
 		assert.Len(t, finalItems, 1)
 		finalItem := finalItems[0].(map[string]any)
@@ -331,7 +333,8 @@ func TestCartsService_Integration(t *testing.T) {
 		// 7. Verify empty
 		getCleared := makeAuthenticatedRequest(t, server, "GET", "/carts/users/"+userID, nil, token)
 		assertStatus(t, getCleared, http.StatusOK)
-		decodeJSON(getCleared, &cart)
+		err = decodeJSON(getCleared, &cart)
+		require.NoError(t, err)
 		clearedItems := cart["items"].([]any)
 		assert.Len(t, clearedItems, 0)
 	})

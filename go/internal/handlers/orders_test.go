@@ -233,14 +233,16 @@ func TestOrdersService_Create(t *testing.T) {
 		// Verify cart was cleared
 		cartRR := makeAuthenticatedRequest(t, server, "GET", "/carts/users/"+userID, nil, token)
 		var cart map[string]any
-		decodeJSON(cartRR, &cart)
+		err = decodeJSON(cartRR, &cart)
+		require.NoError(t, err)
 		cartItems := cart["items"].([]any)
 		assert.Len(t, cartItems, 0)
 
 		// Verify stock was reduced
 		productRR := makeRequest(t, server, "GET", "/products/"+product1, nil)
 		var product map[string]any
-		decodeJSON(productRR, &product)
+		err = decodeJSON(productRR, &product)
+		require.NoError(t, err)
 		assert.Equal(t, float64(8), product["stock"]) // 10 - 2
 	})
 
@@ -374,7 +376,8 @@ func TestOrdersService_Cancel(t *testing.T) {
 		// Verify stock was restored
 		productRR := makeRequest(t, server, "GET", "/products/"+productID, nil)
 		var product map[string]any
-		decodeJSON(productRR, &product)
+		err = decodeJSON(productRR, &product)
+		require.NoError(t, err)
 		assert.Equal(t, float64(10), product["stock"]) // Back to original
 	})
 
@@ -468,7 +471,8 @@ func TestOrdersService_Integration(t *testing.T) {
 		// Verify final state
 		getRR := makeAuthenticatedRequest(t, server, "GET", "/orders/"+orderID, nil, token)
 		assertStatus(t, getRR, http.StatusOK)
-		decodeJSON(getRR, &order)
+		err = decodeJSON(getRR, &order)
+		require.NoError(t, err)
 		assert.Equal(t, "shipped", order["status"])
 
 		// List user's orders

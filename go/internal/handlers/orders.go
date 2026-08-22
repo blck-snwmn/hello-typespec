@@ -82,7 +82,7 @@ func (s *Server) OrdersServiceList(w http.ResponseWriter, r *http.Request, param
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	_ = json.NewEncoder(w).Encode(response)
 }
 
 // OrdersServiceListByUser implements GET /orders/users/{userId}
@@ -132,7 +132,7 @@ func (s *Server) OrdersServiceListByUser(w http.ResponseWriter, r *http.Request,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	_ = json.NewEncoder(w).Encode(response)
 }
 
 // OrdersServiceGet implements GET /orders/{orderId}
@@ -144,7 +144,7 @@ func (s *Server) OrdersServiceGet(w http.ResponseWriter, r *http.Request, orderI
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(order)
+	_ = json.NewEncoder(w).Encode(order)
 }
 
 // OrdersServiceCreate implements POST /orders/users/{userId}
@@ -221,7 +221,7 @@ func (s *Server) OrdersServiceCreate(w http.ResponseWriter, r *http.Request, use
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(created)
+	_ = json.NewEncoder(w).Encode(created)
 }
 
 // OrdersServiceUpdateStatus implements PATCH /orders/{orderId}/status
@@ -269,7 +269,7 @@ func (s *Server) OrdersServiceUpdateStatus(w http.ResponseWriter, r *http.Reques
 	updated := s.store.UpdateOrder(orderId, updatedOrder)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(updated)
+	_ = json.NewEncoder(w).Encode(updated)
 }
 
 // OrdersServiceCancel implements POST /orders/{orderId}/cancel
@@ -304,5 +304,5 @@ func (s *Server) OrdersServiceCancel(w http.ResponseWriter, r *http.Request, ord
 	updated := s.store.UpdateOrder(orderId, updatedOrder)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(updated)
+	_ = json.NewEncoder(w).Encode(updated)
 }

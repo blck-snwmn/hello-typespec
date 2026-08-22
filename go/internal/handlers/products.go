@@ -111,7 +111,7 @@ func (s *Server) ProductsServiceList(w http.ResponseWriter, r *http.Request, par
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	_ = json.NewEncoder(w).Encode(response)
 }
 
 // ProductsServiceGet implements GET /products/{productId}
@@ -123,7 +123,7 @@ func (s *Server) ProductsServiceGet(w http.ResponseWriter, r *http.Request, prod
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(product)
+	_ = json.NewEncoder(w).Encode(product)
 }
 
 // ProductsServiceCreate implements POST /products
@@ -156,7 +156,7 @@ func (s *Server) ProductsServiceCreate(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(created)
+	_ = json.NewEncoder(w).Encode(created)
 }
 
 // ProductsServiceUpdate implements PATCH /products/{productId}
@@ -198,7 +198,7 @@ func (s *Server) ProductsServiceUpdate(w http.ResponseWriter, r *http.Request, p
 	updated := s.store.UpdateProduct(productId, updatedProduct)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(updated)
+	_ = json.NewEncoder(w).Encode(updated)
 }
 
 // ProductsServiceDelete implements DELETE /products/{productId}

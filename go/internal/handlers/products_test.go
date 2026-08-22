@@ -261,7 +261,8 @@ func TestProductsService_Update(t *testing.T) {
 		// Get original product
 		getRR := makeRequest(t, server, "GET", "/products/"+productID, nil)
 		var original map[string]any
-		decodeJSON(getRR, &original)
+		err := decodeJSON(getRR, &original)
+		require.NoError(t, err)
 
 		// Update only name
 		update := map[string]any{
@@ -272,7 +273,7 @@ func TestProductsService_Update(t *testing.T) {
 		assertStatus(t, rr, http.StatusOK)
 
 		var product map[string]any
-		err := decodeJSON(rr, &product)
+		err = decodeJSON(rr, &product)
 		require.NoError(t, err)
 
 		assert.Equal(t, "Name Only Updated", product["name"])

@@ -138,14 +138,9 @@ jobs:
             go/coverage.out
             go/coverage.html
 
-      - name: Check Go formatting
+      - name: Run golangci-lint
         working-directory: ./go
-        run: |
-          if [ -n "$(gofmt -l .)" ]; then
-            echo "Error: Go code is not formatted."
-            gofmt -d .
-            exit 1
-          fi
+        run: golangci-lint run ./...
 
       - name: Run go vet
         working-directory: ./go

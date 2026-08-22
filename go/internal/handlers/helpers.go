@@ -35,5 +35,5 @@ func errorResponse(w http.ResponseWriter, statusCode int, code generated.ErrorCo
 			Message: message,
 		},
 	}
-	json.NewEncoder(w).Encode(response)
+	_ = json.NewEncoder(w).Encode(response)
 }

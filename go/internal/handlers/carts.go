@@ -13,7 +13,7 @@ func (s *Server) CartsServiceGetByUser(w http.ResponseWriter, r *http.Request, u
 	cart := s.store.GetCartByUserId(userId)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(cart)
+	_ = json.NewEncoder(w).Encode(cart)
 }
 
 // CartsServiceAddItem implements POST /carts/users/{userId}/items
@@ -59,7 +59,7 @@ func (s *Server) CartsServiceAddItem(w http.ResponseWriter, r *http.Request, use
 	updated := s.store.UpdateCart(userId, cart)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(updated)
+	_ = json.NewEncoder(w).Encode(updated)
 }
 
 // CartsServiceUpdateItem implements PATCH /carts/users/{userId}/items/{productId}
@@ -102,7 +102,7 @@ func (s *Server) CartsServiceUpdateItem(w http.ResponseWriter, r *http.Request, 
 	updated := s.store.UpdateCart(userId, cart)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(updated)
+	_ = json.NewEncoder(w).Encode(updated)
 }
 
 // CartsServiceRemoveItem implements DELETE /carts/users/{userId}/items/{productId}
