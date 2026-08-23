@@ -20,7 +20,7 @@ func (s *Server) CategoriesServiceList(w http.ResponseWriter, r *http.Request) {
 	categories := s.store.GetCategories()
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(categories)
+	_ = json.NewEncoder(w).Encode(categories)
 }
 
 // CategoriesServiceTree implements GET /categories/tree
@@ -52,7 +52,7 @@ func (s *Server) CategoriesServiceTree(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(rootCategories)
+	_ = json.NewEncoder(w).Encode(rootCategories)
 }
 
 // CategoriesServiceGet implements GET /categories/{categoryId}
@@ -64,7 +64,7 @@ func (s *Server) CategoriesServiceGet(w http.ResponseWriter, r *http.Request, ca
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(category)
+	_ = json.NewEncoder(w).Encode(category)
 }
 
 // CategoriesServiceCreate implements POST /categories
@@ -98,7 +98,7 @@ func (s *Server) CategoriesServiceCreate(w http.ResponseWriter, r *http.Request)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(created)
+	_ = json.NewEncoder(w).Encode(created)
 }
 
 // CategoriesServiceUpdate implements PATCH /categories/{categoryId}
@@ -128,7 +128,7 @@ func (s *Server) CategoriesServiceUpdate(w http.ResponseWriter, r *http.Request,
 	updated := s.store.UpdateCategory(categoryId, updatedCategory)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(updated)
+	_ = json.NewEncoder(w).Encode(updated)
 }
 
 // CategoriesServiceDelete implements DELETE /categories/{categoryId}

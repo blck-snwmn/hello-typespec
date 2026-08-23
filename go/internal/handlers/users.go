@@ -52,7 +52,7 @@ func (s *Server) UsersServiceList(w http.ResponseWriter, r *http.Request, params
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	_ = json.NewEncoder(w).Encode(response)
 }
 
 // UsersServiceGet implements GET /users/{userId}
@@ -64,7 +64,7 @@ func (s *Server) UsersServiceGet(w http.ResponseWriter, r *http.Request, userId 
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(user)
+	_ = json.NewEncoder(w).Encode(user)
 }
 
 // UsersServiceCreate implements POST /users
@@ -99,7 +99,7 @@ func (s *Server) UsersServiceCreate(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(created)
+	_ = json.NewEncoder(w).Encode(created)
 }
 
 // UsersServiceUpdate implements PATCH /users/{userId}
@@ -132,7 +132,7 @@ func (s *Server) UsersServiceUpdate(w http.ResponseWriter, r *http.Request, user
 	updated := s.store.UpdateUser(userId, updatedUser)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(updated)
+	_ = json.NewEncoder(w).Encode(updated)
 }
 
 // UsersServiceDelete implements DELETE /users/{userId}

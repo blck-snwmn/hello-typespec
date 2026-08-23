@@ -57,7 +57,7 @@ func (h *AuthHandlers) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	_ = json.NewEncoder(w).Encode(response)
 }
 
 // Logout handles POST /auth/logout
@@ -68,14 +68,17 @@ func (h *AuthHandlers) Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.authStore.Logout(token)
+	if err := h.authStore.Logout(token); err != nil {
+		errorResponse(w, http.StatusInternalServerError, generated.INTERNALERROR, "Failed to log out")
+		return
+	}
 
 	response := generated.OkResponse{
 		Message: "Logged out successfully",
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	_ = json.NewEncoder(w).Encode(response)
 }
 
 // GetCurrentUser handles GET /auth/me
@@ -94,7 +97,7 @@ func (h *AuthHandlers) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	_ = json.NewEncoder(w).Encode(response)
 }
 
 // extractToken extracts the bearer token from Authorization header
