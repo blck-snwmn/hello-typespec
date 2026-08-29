@@ -19,20 +19,20 @@ importers:
     dependencies:
       '@hono/node-server':
         specifier: 2.1.1
-        version: 2.1.1(hono@4.13.4)
+        version: 2.1.1(hono@4.13.5)
       '@types/uuid':
         specifier: 11.0.0
         version: 11.0.0
       hono:
-        specifier: 4.13.4
-        version: 4.13.4
+        specifier: 4.13.5
+        version: 4.13.5
       uuid:
         specifier: 14.0.2
         version: 14.0.2
     devDependencies:
       '@hono/vite-dev-server':
         specifier: 0.26.1
-        version: 0.26.1(hono@4.13.4)
+        version: 0.26.1(hono@4.13.5)
       '@types/node':
         specifier: 24.13.3
         version: 24.13.3
@@ -807,8 +807,8 @@ packages:
     resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
     engines: {node: '>=8'}
 
-  hono@4.13.4:
-    resolution: {integrity: sha512-AGEwKIyRMHRv1t8Wjwa3LHxQ61X5CqrdFT+4BRNTpqS5aJNnpl5WLjADb7vFlJzI/8uK7T5QLVApCMQKNa3LgQ==}
+  hono@4.13.5:
+    resolution: {integrity: sha512-O6+/eCYRkzzzy0rPWwKLiGBR1nFuUPZynnwjxN1MBA62NNqbT0wQEzQyK2gSO5yDIDB336sXQleAhOHrzlYyKw==}
     engines: {node: '>=16.9.0'}
 
   html-escaper@2.0.2:
@@ -1298,18 +1298,18 @@ snapshots:
 
   '@bcoe/v8-coverage@1.0.2': {}
 
-  '@hono/node-server@1.19.14(hono@4.13.4)':
+  '@hono/node-server@1.19.14(hono@4.13.5)':
     dependencies:
-      hono: 4.13.4
+      hono: 4.13.5
 
-  '@hono/node-server@2.1.1(hono@4.13.4)':
+  '@hono/node-server@2.1.1(hono@4.13.5)':
     dependencies:
-      hono: 4.13.4
+      hono: 4.13.5
 
-  '@hono/vite-dev-server@0.26.1(hono@4.13.4)':
+  '@hono/vite-dev-server@0.26.1(hono@4.13.5)':
     dependencies:
-      '@hono/node-server': 1.19.14(hono@4.13.4)
-      hono: 4.13.4
+      '@hono/node-server': 1.19.14(hono@4.13.5)
+      hono: 4.13.5
       minimatch: 9.0.5
 
   '@inquirer/ansi@2.0.7': {}
@@ -1854,7 +1854,7 @@ snapshots:
 
   has-flag@4.0.0: {}
 
-  hono@4.13.4: {}
+  hono@4.13.5: {}
 
   html-escaper@2.0.2: {}
 
