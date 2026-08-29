@@ -30,7 +30,7 @@
   "dependencies": {
     "@hono/node-server": "2.1.1",
     "@types/uuid": "11.0.0",
-    "hono": "4.13.4",
+    "hono": "4.13.5",
     "uuid": "14.0.2"
   }
 }
