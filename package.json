@@ -17,7 +17,7 @@
   "keywords": ["typespec", "openapi", "api"],
   "author": "",
   "license": "MIT",
-  "packageManager": "pnpm@11.25.0",
+  "packageManager": "pnpm@12.3.1",
   "engines": {
     "node": "24"
   },
