@@ -20,7 +20,7 @@
   "packageManager": "pnpm@12.4.0",
   "devDependencies": {
     "@hono/vite-dev-server": "0.26.1",
-    "@types/node": "24.13.3",
+    "@types/node": "24.13.4",
     "@vitest/coverage-v8": "5.0.0",
     "@vitest/ui": "5.0.0",
     "typescript": "7.0.2",
