@@ -177,20 +177,20 @@ importers:
     dependencies:
       '@hono/node-server':
         specifier: 2.1.1
-        version: 2.1.1(hono@4.13.7)
+        version: 2.1.1(hono@4.13.8)
       '@types/uuid':
         specifier: 11.0.0
         version: 11.0.0
       hono:
-        specifier: 4.13.7
-        version: 4.13.7
+        specifier: 4.13.8
+        version: 4.13.8
       uuid:
         specifier: 14.0.2
         version: 14.0.2
     devDependencies:
       '@hono/vite-dev-server':
         specifier: 0.26.1
-        version: 0.26.1(hono@4.13.7)
+        version: 0.26.1(hono@4.13.8)
       '@types/node':
         specifier: 24.13.5
         version: 24.13.5
@@ -968,8 +968,8 @@ packages:
     resolution: {integrity: sha512-QRbvDIbx6YklUe6RxeTeleMR0yv3cYH6PsPZHcnVn7xv7zO1BHN8r0XETu8n6Ye3Q+ahtSarc3WgtNWmehIBfA==}
     engines: {node: '>=18'}
 
-  hono@4.13.7:
-    resolution: {integrity: sha512-c8/gF9ac8Y78/agExVocyLevgR+JlpNB444Py0FSX8pJoPdYUfUzRcXtYEYGwt6l19qIlVZPN5Mfsw9jFShmQQ==}
+  hono@4.13.8:
+    resolution: {integrity: sha512-/Gng7NfoykZl2pjukW5Z6+8Yxm3BPRf86GTbQnt0SbySkvax4fyL4H3HhY1cCpBGmiW9XDRFzRV+CXK2W8QudQ==}
     engines: {node: '>=16.9.0'}
 
   https-proxy-agent@7.0.6:
@@ -1446,18 +1446,18 @@ snapshots:
 
   '@bcoe/v8-coverage@1.0.2': {}
 
-  '@hono/node-server@1.19.14(hono@4.13.7)':
+  '@hono/node-server@1.19.14(hono@4.13.8)':
     dependencies:
-      hono: 4.13.7
+      hono: 4.13.8
 
-  '@hono/node-server@2.1.1(hono@4.13.7)':
+  '@hono/node-server@2.1.1(hono@4.13.8)':
     dependencies:
-      hono: 4.13.7
+      hono: 4.13.8
 
-  '@hono/vite-dev-server@0.26.1(hono@4.13.7)':
+  '@hono/vite-dev-server@0.26.1(hono@4.13.8)':
     dependencies:
-      '@hono/node-server': 1.19.14(hono@4.13.7)
-      hono: 4.13.7
+      '@hono/node-server': 1.19.14(hono@4.13.8)
+      hono: 4.13.8
       minimatch: 9.0.5
 
   '@inquirer/ansi@2.0.8': {}
@@ -1994,7 +1994,7 @@ snapshots:
 
   get-east-asian-width@1.6.0: {}
 
-  hono@4.13.7: {}
+  hono@4.13.8: {}
 
   https-proxy-agent@7.0.6(supports-color@10.2.2):
     dependencies:
