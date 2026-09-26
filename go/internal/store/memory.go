@@ -384,10 +384,3 @@ func (s *MemoryStore) UpdateOrder(id string, order generated.Order) generated.Or
 	s.orders[id] = order
 	return order
 }
-
-// Helper function to create a pointer to a string
-//
-//go:fix inline
-func stringPtr(s string) *string {
-	return new(s)
-}
