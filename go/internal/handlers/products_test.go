@@ -35,7 +35,7 @@ func TestProductsService_List(t *testing.T) {
 
 	t.Run("should support pagination", func(t *testing.T) {
 		// Create additional products
-		for i := 0; i < 5; i++ {
+		for range 5 {
 			createTestProduct(t, server, "Extra Product", 10.00, 10)
 		}
 

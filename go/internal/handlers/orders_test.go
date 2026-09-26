@@ -68,7 +68,7 @@ func TestOrdersService_List(t *testing.T) {
 		productID := createTestProduct(t, server, "Status Product", 30.00, 15)
 
 		// Create multiple orders
-		for i := 0; i < 3; i++ {
+		for i := range 3 {
 			addToCartAuth(t, server, userID, productID, 1, token)
 			orderID := createOrderAuth(t, server, userID, token)
 
@@ -110,7 +110,7 @@ func TestOrdersService_ListByUser(t *testing.T) {
 		productID := createTestProduct(t, server, "User Order Product", 40.00, 10)
 
 		// Create 2 orders
-		for i := 0; i < 2; i++ {
+		for range 2 {
 			addToCartAuth(t, server, userID, productID, 1, token)
 			createOrderAuth(t, server, userID, token)
 		}

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"slices"
 	"sort"
 	"time"
 
@@ -248,13 +249,7 @@ func (s *Server) OrdersServiceUpdateStatus(w http.ResponseWriter, r *http.Reques
 	}
 
 	validNextStatuses := validTransitions[order.Status]
-	isValidTransition := false
-	for _, validStatus := range validNextStatuses {
-		if validStatus == req.Status {
-			isValidTransition = true
-			break
-		}
-	}
+	isValidTransition := slices.Contains(validNextStatuses, req.Status)
 
 	if !isValidTransition {
 		errorResponse(w, http.StatusBadRequest, ErrorCodeInvalidStateTransition,
