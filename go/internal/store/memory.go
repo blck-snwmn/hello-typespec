@@ -45,14 +45,14 @@ func (s *MemoryStore) initializeMockData() {
 	s.categories["2"] = generated.Category{
 		Id:        "2",
 		Name:      "Laptops",
-		ParentId:  stringPtr("1"),
+		ParentId:  new("1"),
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
 	s.categories["3"] = generated.Category{
 		Id:        "3",
 		Name:      "Smartphones",
-		ParentId:  stringPtr("1"),
+		ParentId:  new("1"),
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
@@ -383,9 +383,4 @@ func (s *MemoryStore) UpdateOrder(id string, order generated.Order) generated.Or
 
 	s.orders[id] = order
 	return order
-}
-
-// Helper function to create a pointer to a string
-func stringPtr(s string) *string {
-	return &s
 }
