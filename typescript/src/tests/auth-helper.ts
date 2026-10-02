@@ -61,7 +61,10 @@ export function setupAuthenticatedTest(user: AuthUser = TEST_USERS.alice) {
 }
 
 // Mock auth middleware for tests
-export async function mockAuthMiddleware(c: Context, next: () => Promise<void>) {
+export async function mockAuthMiddleware(
+  c: Context,
+  next: () => Promise<void>
+): Promise<Response | void> {
   const authHeader = c.req.header("Authorization");
   
   if (!authHeader || !authHeader.startsWith("Bearer ")) {

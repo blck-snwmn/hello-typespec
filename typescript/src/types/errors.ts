@@ -93,14 +93,14 @@ export function sendError(
   code: ErrorCode,
   message: string,
   details?: unknown
-) {
+): Response {
   return c.json<ErrorResponse>(createErrorResponse(code, message, details), statusCode);
 }
 
 /**
  * Global error handler for Hono
  */
-export function globalErrorHandler(err: Error, c: Context) {
+export function globalErrorHandler(err: Error, c: Context): Response {
   console.error('Global error handler:', err);
 
   if (err instanceof ApiError) {
