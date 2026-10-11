@@ -222,8 +222,8 @@ importers:
         specifier: 1.16.0
         version: 1.16.0(@typespec/compiler@1.16.0(@types/node@24.19.1))(@typespec/http@1.16.0(@typespec/compiler@1.16.0(@types/node@24.19.1)))(@typespec/openapi@1.16.0(@typespec/compiler@1.16.0(@types/node@24.19.1))(@typespec/http@1.16.0(@typespec/compiler@1.16.0(@types/node@24.19.1))))
       '@typespec/rest':
-        specifier: 0.86.0
-        version: 0.86.0(@typespec/compiler@1.16.0(@types/node@24.19.1))(@typespec/http@1.16.0(@typespec/compiler@1.16.0(@types/node@24.19.1)))
+        specifier: 0.87.0
+        version: 0.87.0(@typespec/compiler@1.16.0(@types/node@24.19.1))(@typespec/http@1.16.0(@typespec/compiler@1.16.0(@types/node@24.19.1)))
 
 packages:
 
@@ -760,12 +760,12 @@ packages:
       '@typespec/compiler': ^1.16.0
       '@typespec/http': ^1.16.0
 
-  '@typespec/rest@0.86.0':
-    resolution: {integrity: sha512-Lbl4x/ZW26r4ZsxpgvS7T3F998J7pvyDs+OsHgVKDI45EvPmdDydI4TKOH++UmHJ2tH8kw8KHzMPqCehWLIa6g==}
+  '@typespec/rest@0.87.0':
+    resolution: {integrity: sha512-Oi47F6IJWyP/efMXf+OUwJTKRrfPpsXPzFZIxG5x2HpAgTwQ0xAUPkrQ6XoQ4rdmwN3XPm0nV54lw5GKljB9LQ==}
     engines: {node: '>=22.0.0'}
     peerDependencies:
-      '@typespec/compiler': ^1.16.0
-      '@typespec/http': ^1.16.0
+      '@typespec/compiler': ^1.17.0
+      '@typespec/http': ^1.17.0
 
   '@vitest/coverage-v8@5.0.3':
     resolution: {integrity: sha512-+klsyz7BvT1vCU28Zkfzms1Ia78XD0V41U3FUtRaa3S+vOr/EXvK1O6BvVD7l1RzEjm6SONR2aybOvDDf9u0mQ==}
@@ -1814,7 +1814,7 @@ snapshots:
       '@typespec/compiler': 1.16.0(@types/node@24.19.1)
       '@typespec/http': 1.16.0(@typespec/compiler@1.16.0(@types/node@24.19.1))
 
-  '@typespec/rest@0.86.0(@typespec/compiler@1.16.0(@types/node@24.19.1))(@typespec/http@1.16.0(@typespec/compiler@1.16.0(@types/node@24.19.1)))':
+  '@typespec/rest@0.87.0(@typespec/compiler@1.16.0(@types/node@24.19.1))(@typespec/http@1.16.0(@typespec/compiler@1.16.0(@types/node@24.19.1)))':
     dependencies:
       '@typespec/compiler': 1.16.0(@types/node@24.19.1)
       '@typespec/http': 1.16.0(@typespec/compiler@1.16.0(@types/node@24.19.1))
