@@ -40,7 +40,7 @@ jobs:
       - name: Setup aqua
         uses: aquaproj/aqua-installer@611554c6f0137ba41c8dd15aca8bee82504ea461 # v4.1.1
         with:
-          aqua_version: v2.64.0
+          aqua_version: v2.65.2
 
       - name: Verify oapi-codegen version
         run: oapi-codegen --version
@@ -114,7 +114,7 @@ jobs:
       - name: Setup aqua
         uses: aquaproj/aqua-installer@611554c6f0137ba41c8dd15aca8bee82504ea461 # v4.1.1
         with:
-          aqua_version: v2.64.0
+          aqua_version: v2.65.2
 
       - name: Install dependencies
         working-directory: ./go
