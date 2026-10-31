@@ -11,7 +11,7 @@ registries:
   - type: standard
     ref: v4.576.0 # renovate: depName=aquaproj/aqua-registry
 packages:
-  - name: oapi-codegen/oapi-codegen@v2.8.0
+  - name: oapi-codegen/oapi-codegen@v2.8.1
   - name: golangci/golangci-lint@v2.15.0
   - name: suzuki-shunsuke/pinact@v5.0.1
   - name: zizmorcore/zizmor@v1.31.1
