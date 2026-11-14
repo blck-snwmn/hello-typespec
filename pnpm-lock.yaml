@@ -177,20 +177,20 @@ importers:
     dependencies:
       '@hono/node-server':
         specifier: 2.1.6
-        version: 2.1.6(hono@4.13.16)
+        version: 2.1.6(hono@4.13.17)
       '@types/uuid':
         specifier: 11.0.0
         version: 11.0.0
       hono:
-        specifier: 4.13.16
-        version: 4.13.16
+        specifier: 4.13.17
+        version: 4.13.17
       uuid:
         specifier: 14.0.3
         version: 14.0.3
     devDependencies:
       '@hono/vite-dev-server':
         specifier: 0.26.1
-        version: 0.26.1(hono@4.13.16)
+        version: 0.26.1(hono@4.13.17)
       '@types/node':
         specifier: 24.19.2
         version: 24.19.2
@@ -937,8 +937,8 @@ packages:
     resolution: {integrity: sha512-QRbvDIbx6YklUe6RxeTeleMR0yv3cYH6PsPZHcnVn7xv7zO1BHN8r0XETu8n6Ye3Q+ahtSarc3WgtNWmehIBfA==}
     engines: {node: '>=18'}
 
-  hono@4.13.16:
-    resolution: {integrity: sha512-AOLOEhvrV+iH92xXCnFr/5+3KjPKcI3xP63XJtX5spAnkznPdHijlIsUTpi7/9EhWqrTCekw5c5zh1K+YsVw7A==}
+  hono@4.13.17:
+    resolution: {integrity: sha512-vZIcbkvjOR5hHRWERbGkr8fGfF0GGM1ooYkuH448iO3b2AdVEr3AXZSw4Z3Kn+1L5z0CVoVeyV29VGYmFh05kQ==}
     engines: {node: '>=16.9.0'}
 
   https-proxy-agent@7.0.6:
@@ -1436,18 +1436,18 @@ snapshots:
       tslib: 2.9.1
     optional: true
 
-  '@hono/node-server@1.19.14(hono@4.13.16)':
+  '@hono/node-server@1.19.14(hono@4.13.17)':
     dependencies:
-      hono: 4.13.16
+      hono: 4.13.17
 
-  '@hono/node-server@2.1.6(hono@4.13.16)':
+  '@hono/node-server@2.1.6(hono@4.13.17)':
     dependencies:
-      hono: 4.13.16
+      hono: 4.13.17
 
-  '@hono/vite-dev-server@0.26.1(hono@4.13.16)':
+  '@hono/vite-dev-server@0.26.1(hono@4.13.17)':
     dependencies:
-      '@hono/node-server': 1.19.14(hono@4.13.16)
-      hono: 4.13.16
+      '@hono/node-server': 1.19.14(hono@4.13.17)
+      hono: 4.13.17
       minimatch: 9.0.5
 
   '@inquirer/ansi@2.0.8': {}
@@ -1964,7 +1964,7 @@ snapshots:
 
   get-east-asian-width@1.6.0: {}
 
-  hono@4.13.16: {}
+  hono@4.13.17: {}
 
   https-proxy-agent@7.0.6(supports-color@10.2.2):
     dependencies:
